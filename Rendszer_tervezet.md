@@ -71,8 +71,7 @@ A cél egy modern, reszponzív, intuitív webalkalmazás kifejlesztése, amely l
 - **Frontend:** React + TypeScript (Next.js opcionális)
 - **Backend:** Python (FastAPI ajánlott a REST API-hoz)
 - **Adatbázis:** MySQL (pl. MariaDB alternatívaként)
-- **Hosztolás:** Saját VPS + NGINX reverse proxy + HTTPS (Let's Encrypt)
-- **Fejlesztési környezet:** Docker Compose (frontend + backend + db konténerek)
+- **Hosztolás:** Saját VPS + NGINX reverse proxy + HTTP
 
 ### 3.2 Backend szolgáltatások
 
