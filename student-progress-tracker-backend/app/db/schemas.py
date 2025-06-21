@@ -15,8 +15,16 @@ class UserBase(BaseModel):
     role: str
     created_at: datetime
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    uid: str
+    email: str
     password_hash: str
+    name: str
+    birth_date: date
+    id_card_number: str
+    address_card_number: str
+    mothers_name: str
+    major: str
 
 class UserLogin(BaseModel):
     """
