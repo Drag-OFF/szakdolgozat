@@ -15,7 +15,7 @@ class UsersService:
         """
         self.db = db
 
-    def list_users(self):
+    def list_users(self) -> list[UserModel]:
         """
         Az összes felhasználó lekérdezése.
 
@@ -47,17 +47,14 @@ class UsersService:
             UserModel: A létrehozott felhasználó példánya.
 
         Raises:
-            Exception: Ha a felhasználó már létezik.
+            Exception: Ha a felhasználó már létezik ezzel az e-mail címmel vagy NEPTUN kóddal.
         """
-        # Létezik-e már ilyen e-mail vagy NEPTUN
         if self.db.query(UserModel).filter(
             (UserModel.email == user_data.email) | (UserModel.uid == user_data.uid)
         ).first():
             raise Exception("A felhasználó már létezik ezzel az e-mail címmel vagy NEPTUN kóddal.")
 
-        # Verifikációs token generálása
         verify_token = str(uuid.uuid4())
-
         hashed_pw = hash_password(user_data.password)
         db_user = UserModel(
             **user_data.dict(exclude={"password"}),
@@ -68,8 +65,47 @@ class UsersService:
         self.db.add(db_user)
         self.db.commit()
         self.db.refresh(db_user)
-
         return db_user
+
+    def update_user(self, user_id: int, user_data: UserUpdate) -> Optional[UserModel]:
+        """
+        Felhasználó adatainak frissítése.
+
+        Args:
+            user_id (int): A frissítendő felhasználó azonosítója.
+            user_data (UserUpdate): A frissítendő adatok.
+
+        Returns:
+            UserModel vagy None: A frissített felhasználó példánya, vagy None ha nincs ilyen.
+
+        Raises:
+            Exception: Ha a felhasználó nem található.
+        """
+        user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            return None
+        for key, value in user_data.dict(exclude_unset=True).items():
+            setattr(user, key, value)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def delete_user(self, user_id: int) -> bool:
+        """
+        Felhasználó törlése azonosító alapján.
+
+        Args:
+            user_id (int): A törlendő felhasználó azonosítója.
+
+        Returns:
+            bool: True, ha sikeres volt a törlés, különben False.
+        """
+        user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
+        if not user:
+            return False
+        self.db.delete(user)
+        self.db.commit()
+        return True
 
     def login_user(self, login_data: UserLogin) -> Optional[UserModel]:
         """
@@ -82,7 +118,7 @@ class UsersService:
             UserModel: A bejelentkezett felhasználó példánya, ha sikeres a bejelentkezés.
 
         Raises:
-            Exception: Hibás felhasználónév vagy jelszó esetén.
+            Exception: Hibás felhasználónév, jelszó vagy nincs verifikálva.
         """
         user = self.db.query(UserModel).filter(
             (UserModel.email == login_data.email) | (UserModel.uid == login_data.uid)

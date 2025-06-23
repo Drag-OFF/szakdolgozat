@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from app.db import models, schemas
 from app.db.database import get_db
 from app.services.chat_service import ChatService
+from app.utils import get_current_user
 
 router = APIRouter()
 
-@router.post("/messages/", response_model=schemas.ChatMessage)
+@router.post("/messages/", response_model=schemas.ChatMessage, dependencies=[Depends(get_current_user)])
 def send_message(message: schemas.ChatMessageCreate, db: Session = Depends(get_db)):
     """
     Üzenet küldése.
@@ -27,7 +28,7 @@ def send_message(message: schemas.ChatMessageCreate, db: Session = Depends(get_d
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/messages/", response_model=list[schemas.ChatMessage])
+@router.get("/messages/", response_model=list[schemas.ChatMessage], dependencies=[Depends(get_current_user)])
 def get_messages(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Üzenetek lekérése.

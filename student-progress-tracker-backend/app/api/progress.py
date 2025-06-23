@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from app.db import models, schemas
 from app.db.database import get_db
 from app.services.progress_service import ProgressService
+from app.utils import get_current_user
 
 router = APIRouter()
 
-@router.post("/", response_model=schemas.Progress)
+@router.post("/", response_model=schemas.Progress, dependencies=[Depends(get_current_user)])
 def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_db)):
     """
     Haladás létrehozása.
@@ -27,7 +28,7 @@ def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=list[schemas.Progress])
+@router.get("/", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
 def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Haladások lekérése.

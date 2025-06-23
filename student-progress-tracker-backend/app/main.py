@@ -1,31 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import secrets
 from app.api import chat, courses, progress, users
-
-# HTTP Basic Auth security objektum
-security = HTTPBasic()
-
-def basic_auth(credentials: HTTPBasicCredentials = Depends(security)):
-    """
-    Egyszerű HTTP Basic Auth ellenőrzés.
-    Csak akkor engedélyezi a hozzáférést, ha a felhasználónév és jelszó helyes.
-
-    Args:
-        credentials (HTTPBasicCredentials): A kérésben kapott hitelesítési adatok.
-
-    Raises:
-        HTTPException: Ha a felhasználónév vagy jelszó hibás.
-    """
-    correct_username = secrets.compare_digest(credentials.username, "admin")
-    correct_password = secrets.compare_digest(credentials.password, "jelszo123")
-    if not (correct_username and correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Hibás felhasználónév vagy jelszó",
-            headers={"WWW-Authenticate": "Basic"},
-        )
 
 app = FastAPI()
 
@@ -38,15 +13,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routerek regisztrálása Basic Auth védelemmel
-app.include_router(chat.router, prefix="/api", tags=["chat"], dependencies=[Depends(basic_auth)])
-app.include_router(courses.router, prefix="/api/courses", tags=["courses"], dependencies=[Depends(basic_auth)])
-app.include_router(progress.router, prefix="/api/progress", tags=["progress"], dependencies=[Depends(basic_auth)])
-app.include_router(users.router, prefix="/api/users", tags=["users"], dependencies=[Depends(basic_auth)])
+# Routerek regisztrálása Basic Auth nélkül
+app.include_router(chat.router, prefix="/api", tags=["chat"])
+app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
+app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 
-@app.get("/", dependencies=[Depends(basic_auth)])
+@app.get("/")
 def read_root():
     """
-    Gyökér végpont, amely csak hitelesítés után érhető el.
+    Gyökér végpont, amely elérhető hitelesítés nélkül is.
     """
     return {"message": "Welcome to the Hallgatói Előrehaladás-követő Webes Alkalmazás API!"}

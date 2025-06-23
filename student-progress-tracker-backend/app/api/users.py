@@ -1,11 +1,13 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 from app.db.database import get_db
 from app.services.users_service import UsersService
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List
 from mailjet_rest import Client
+from app.utils import create_access_token, verify_access_token, get_current_user, admin_required
 import uuid
 
 router = APIRouter()
@@ -46,10 +48,19 @@ def send_verification_email(to_email: str, verify_token: str):
     result = mailjet.send.create(data=data)
     return result.status_code, result.json()
 
+
+
 @router.get("/verify")
 def verify_user(token: str, db: Session = Depends(get_db)):
     """
     Felhasználó verifikációja e-mailben kapott token alapján.
+
+    Args:
+        token (str): A verifikációs token az URL-ből.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        dict: Siker vagy hibaüzenet.
     """
     user = db.query(models.User).filter(models.User.verify_token == token).first()
     if not user:
@@ -72,7 +83,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         schemas.User: A létrehozott felhasználó.
 
     Raises:
-        HTTPException: Ha a felhasználó létrehozása nem sikerül.
+        HTTPException: Ha a felhasználó létrehozása vagy az e-mail küldés nem sikerül.
     """
     users_service = UsersService(db)
     try:
@@ -84,10 +95,10 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{user_id}", response_model=schemas.User)
+@router.get("/{user_id}", response_model=schemas.User, dependencies=[Depends(admin_required)])
 def get_user(user_id: int, db: Session = Depends(get_db)):
     """
-    Felhasználó adatainak lekérése az ID alapján.
+    Felhasználó adatainak lekérése az ID alapján. (Csak admin)
 
     Args:
         user_id (int): A lekérdezendő felhasználó azonosítója.
@@ -105,10 +116,10 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.put("/{user_id}", response_model=schemas.User)
+@router.put("/{user_id}", response_model=schemas.User, dependencies=[Depends(admin_required)])
 def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(get_db)):
     """
-    Felhasználó adatainak frissítése.
+    Felhasználó adatainak frissítése. (Csak admin)
 
     Args:
         user_id (int): A frissítendő felhasználó azonosítója.
@@ -127,10 +138,10 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="User not found")
     return updated_user
 
-@router.delete("/{user_id}", response_model=dict)
+@router.delete("/{user_id}", response_model=dict, dependencies=[Depends(admin_required)])
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     """
-    Felhasználó törlése az ID alapján.
+    Felhasználó törlése az ID alapján. (Csak admin)
 
     Args:
         user_id (int): A törlendő felhasználó azonosítója.
@@ -148,10 +159,10 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted successfully"}
 
-@router.get("/", response_model=List[schemas.User])
+@router.get("/", response_model=List[schemas.User], dependencies=[Depends(admin_required)])
 def list_users(db: Session = Depends(get_db)):
     """
-    Az összes felhasználó lekérdezése.
+    Az összes felhasználó lekérdezése. (Csak admin)
 
     Args:
         db (Session): Az adatbázis kapcsolat.
@@ -172,7 +183,7 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
         db (Session): Az adatbázis kapcsolat.
 
     Returns:
-        dict: Sikeres bejelentkezés esetén üzenet és user_id.
+        dict: Sikeres bejelentkezés esetén access_token és token_type.
 
     Raises:
         HTTPException: Hibás adatok vagy nem verifikált fiók esetén.
@@ -180,6 +191,7 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
     users_service = UsersService(db)
     try:
         user = users_service.login_user(login_data)
-        return {"detail": "Sikeres bejelentkezés!", "user_id": user.id}
+        access_token = create_access_token({"user_id": user.id, "role": user.role})
+        return {"access_token": access_token, "token_type": "bearer"}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

@@ -3,10 +3,11 @@ from sqlalchemy.orm import Session
 from app.db import models, schemas
 from app.db.database import get_db
 from app.services.courses_service import CoursesService
+from app.utils import get_current_user
 
 router = APIRouter()
 
-@router.post("/", response_model=schemas.Course)
+@router.post("/", response_model=schemas.Course, dependencies=[Depends(get_current_user)])
 def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     """
     Új kurzus létrehozása.
@@ -27,7 +28,7 @@ def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=list[schemas.Course])
+@router.get("/", response_model=list[schemas.Course], dependencies=[Depends(get_current_user)])
 def get_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Kurzusok lekérdezése.
