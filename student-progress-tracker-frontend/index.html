@@ -108,8 +108,14 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 <div id="logoutMsg"></div>
 <script>
 function logout() {
-    localStorage.clear();
-    document.getElementById('logoutMsg').innerText = "Sikeres kijelentkezés!";
+    if (!localStorage.getItem('access_token')) {
+        document.getElementById('logoutMsg').innerText = "Nincs bejelentkezve!";
+        return;
+    }
+    else {
+        localStorage.clear();
+        document.getElementById('logoutMsg').innerText = "Sikeres kijelentkezés!";
+    }
 }
 </script>
 

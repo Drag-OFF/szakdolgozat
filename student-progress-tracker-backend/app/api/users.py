@@ -7,7 +7,7 @@ from app.services.users_service import UsersService
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List
 from mailjet_rest import Client
-from app.utils import create_access_token, verify_access_token, get_current_user, admin_required
+from app.utils import create_access_token, admin_required
 import uuid
 
 router = APIRouter()
