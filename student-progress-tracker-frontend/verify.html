@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>E-mail hitelesítés</title>
+</head>
+<body>
+    <h2 id="msg">E-mail hitelesítés folyamatban...</h2>
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+        fetch('http://enaploproject.ddns.net:8000/api/users/verify?token=' + token)
+            .then(resp => resp.json())
+            .then(result => {
+                if (result.detail && result.detail.startsWith("Sikeres")) {
+                    document.getElementById('msg').innerText = "Sikeres e-mail hitelesítés! Most már bejelentkezhetsz.";
+                } else {
+                    document.getElementById('msg').innerText = result.detail || "Ismeretlen hiba történt.";
+                }
+            })
+            .catch(() => {
+                document.getElementById('msg').innerText = "Hálózati hiba!";
+            });
+    } else {
+        document.getElementById('msg').innerText = "Hiányzó token!";
+    }
+    </script>
+</body>
+</html>
