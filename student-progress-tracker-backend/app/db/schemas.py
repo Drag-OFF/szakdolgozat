@@ -1,6 +1,14 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date, datetime
+from enum import Enum
+
+class MajorEnum(str, Enum):
+    gazdasag = "Gazdaságinformatikus"
+    mernoki = "Mérnökinformatikus"
+    programtervezo = "Programtervező informatikus"
+    villamos = "Villamosmérnök"
+    uzemmernok = "Üzemmérnök-informatikus"
 
 class UserBase(BaseModel):
     """
@@ -14,7 +22,7 @@ class UserBase(BaseModel):
         id_card_number (str): Személyi igazolvány szám.
         address_card_number (str): Lakcímkártya szám.
         mothers_name (str): Anyja neve.
-        major (str): Szak.
+        major (MajorEnum): Szak.
         verified (bool): E-mail verifikáció.
         role (str): Szerepkör.
         created_at (datetime): Létrehozás ideje.
@@ -26,7 +34,7 @@ class UserBase(BaseModel):
     id_card_number: str
     address_card_number: str
     mothers_name: str
-    major: str
+    major: MajorEnum
     verified: bool
     role: str
     created_at: datetime
@@ -54,7 +62,38 @@ class UserCreate(BaseModel):
     id_card_number: str
     address_card_number: str
     mothers_name: str
-    major: str
+    major: MajorEnum
+
+class UserUpdate(BaseModel):
+    """
+    Felhasználó frissítési séma.
+
+    Attributes:
+        uid (Optional[str]): NEPTUN azonosító.
+        email (Optional[str]): E-mail cím.
+        name (Optional[str]): Név.
+        birth_date (Optional[date]): Születési dátum.
+        id_card_number (Optional[str]): Személyi igazolvány szám.
+        address_card_number (Optional[str]): Lakcímkártya szám.
+        mothers_name (Optional[str]): Anyja neve.
+        major (Optional[MajorEnum]): Szak.
+        verified (Optional[bool]): E-mail verifikáció.
+        role (Optional[str]): Szerepkör.
+        created_at (Optional[datetime]): Létrehozás ideje.
+        password_hash (Optional[str]): Jelszó hash.
+    """
+    uid: Optional[str] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    birth_date: Optional[date] = None
+    id_card_number: Optional[str] = None
+    address_card_number: Optional[str] = None
+    mothers_name: Optional[str] = None
+    major: Optional[MajorEnum] = None
+    verified: Optional[bool] = None
+    role: Optional[str] = None
+    created_at: Optional[datetime] = None
+    password_hash: Optional[str] = None
 
 class UserLogin(BaseModel):
     """
@@ -81,37 +120,6 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
-
-class UserUpdate(BaseModel):
-    """
-    Felhasználó frissítési séma.
-
-    Attributes:
-        uid (Optional[str]): NEPTUN azonosító.
-        email (Optional[str]): E-mail cím.
-        name (Optional[str]): Név.
-        birth_date (Optional[date]): Születési dátum.
-        id_card_number (Optional[str]): Személyi igazolvány szám.
-        address_card_number (Optional[str]): Lakcímkártya szám.
-        mothers_name (Optional[str]): Anyja neve.
-        major (Optional[str]): Szak.
-        verified (Optional[bool]): E-mail verifikáció.
-        role (Optional[str]): Szerepkör.
-        created_at (Optional[datetime]): Létrehozás ideje.
-        password_hash (Optional[str]): Jelszó hash.
-    """
-    uid: Optional[str] = None
-    email: Optional[str] = None
-    name: Optional[str] = None
-    birth_date: Optional[date] = None
-    id_card_number: Optional[str] = None
-    address_card_number: Optional[str] = None
-    mothers_name: Optional[str] = None
-    major: Optional[str] = None
-    verified: Optional[bool] = None
-    role: Optional[str] = None
-    created_at: Optional[datetime] = None
-    password_hash: Optional[str] = None
 
 class CourseBase(BaseModel):
     """

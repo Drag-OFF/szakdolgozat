@@ -1,8 +1,17 @@
 from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey
+from sqlalchemy import Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy.sql import func
+from sqlalchemy import JSON
 
+MAJOR_ENUM = (
+    'Gazdaságinformatikus',
+    'Mérnökinformatikus',
+    'Programtervező informatikus',
+    'Villamosmérnök',
+    'Üzemmérnök-informatikus'
+)
 
 class User(Base):
     """
@@ -18,7 +27,7 @@ class User(Base):
         id_card_number (str): Személyi igazolvány szám.
         address_card_number (str): Lakcímkártya szám.
         mothers_name (str): Anyja neve.
-        major (str): Szak.
+        major (ENUM): Szak.
         verified (bool): E-mail verifikáció státusz.
         verify_token (str): E-mail verifikációs token.
         role (str): Szerepkör (user/admin).
@@ -35,11 +44,12 @@ class User(Base):
     id_card_number = Column(String(20), nullable=False)
     address_card_number = Column(String(20), nullable=False)
     mothers_name = Column(String(100), nullable=False)
-    major = Column(String(100), nullable=False)
+    major = Column(SqlEnum(*MAJOR_ENUM, name="major_enum"), nullable=False)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
     role = Column(Enum('user', 'admin'), default='user')
     created_at = Column(DateTime, nullable=False, default=func.now())
+    
 
     progress = relationship("Progress", back_populates="user")
     chat_messages = relationship("ChatMessage", back_populates="user")
@@ -54,6 +64,8 @@ class Course(Base):
         name (str): Kurzus neve.
         credit (int): Kredit érték.
         recommended_semester (int): Ajánlott félév.
+        prerequisites (list[str]): Előfeltétel(ek) kurzuskód(ok) listája.
+        allow_parallel_prerequisite (bool): Engedélyezett-e a párhuzamos teljesítés.
     """
     __tablename__ = "courses"
 
@@ -62,6 +74,8 @@ class Course(Base):
     name = Column(String(255), nullable=False)
     credit = Column(Integer, nullable=False)
     recommended_semester = Column(Integer, nullable=False)
+    prerequisites = Column(JSON, nullable=True)
+    allow_parallel_prerequisite = Column(Boolean, default=False)
 
     progress = relationship("Progress", back_populates="course")
 
