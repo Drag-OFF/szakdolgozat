@@ -72,10 +72,11 @@ class UsersService:
         Raises:
             Exception: Hibás felhasználónév vagy jelszó esetén.
         """
-        # Felhasználó keresése e-mail vagy uid alapján
         user = self.db.query(UserModel).filter(
             (UserModel.email == login_data.email) | (UserModel.uid == login_data.uid)
         ).first()
         if not user or not verify_password(login_data.password, user.password_hash):
             raise Exception("Hibás felhasználónév vagy jelszó.")
+        if not user.verified:
+            raise Exception("A fiók még nincs verifikálva. Kérjük, erősítsd meg az e-mail címedet!")
         return user

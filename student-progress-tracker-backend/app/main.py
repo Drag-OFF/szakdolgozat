@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, chat, courses, progress, users
+from app.api import chat, courses, progress, users
 
 app = FastAPI()
 
@@ -14,7 +14,6 @@ app.add_middleware(
 )
 
 # Include API routes
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
 app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])

@@ -27,24 +27,37 @@ def send_verification_email(to_email: str, verify_token: str):
     data = {
       'Messages': [
         {
-          "From": {
-            "Email": "enaploproject@gmail.com",
-            "Name": "Enaplo Project"
-          },
-          "To": [
+        "From": {
+          "Email": "enaploproject@gmail.com",
+          "Name": "Enaplo Project"
+        },
+        "To": [
             {
-              "Email": to_email,
-              "Name": to_email
+                "Email": to_email,
+                "Name": to_email
             }
-          ],
-          "Subject": "E-mail verifikáció",
-          "TextPart": f"Kérjük, erősítsd meg a regisztrációdat: https://enaploproject.ddns.net/verify?token={verify_token}",
-          "HTMLPart": f"<h3>Kérjük, erősítsd meg a regisztrációdat:</h3><a href='https://enaploproject.ddns.net/verify?token={verify_token}'>Kattints ide a megerősítéshez</a>"
+        ],
+        "Subject": "E-mail verifikáció",
+        "TextPart": f"Kérjük, erősítsd meg a regisztrációdat: http://enaploproject.ddns.net/verify.html?token={verify_token}",
+        "HTMLPart": f"<h3>Kérjük, erősítsd meg a regisztrációdat:</h3><a href='http://enaploproject.ddns.net/verify.html?token={verify_token}'>Kattints ide a megerősítéshez</a>"
         }
       ]
     }
     result = mailjet.send.create(data=data)
     return result.status_code, result.json()
+
+@router.get("/verify")
+def verify_user(token: str, db: Session = Depends(get_db)):
+    """
+    Felhasználó verifikációja e-mailben kapott token alapján.
+    """
+    user = db.query(models.User).filter(models.User.verify_token == token).first()
+    if not user:
+        return {"detail": "Érvénytelen vagy lejárt token!"}
+    user.verified = True
+    user.verify_token = None
+    db.commit()
+    return {"detail": "Sikeres e-mail hitelesítés! Most már bejelentkezhetsz az oldalra."}
 
 @router.post("/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -148,3 +161,25 @@ def list_users(db: Session = Depends(get_db)):
     """
     users_service = UsersService(db)
     return users_service.list_users()
+
+@router.post("/login")
+def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
+    """
+    Felhasználó bejelentkeztetése e-mail vagy NEPTUN kód és jelszó alapján.
+
+    Args:
+        login_data (schemas.UserLogin): A bejelentkezési adatok.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        dict: Sikeres bejelentkezés esetén üzenet és user_id.
+
+    Raises:
+        HTTPException: Hibás adatok vagy nem verifikált fiók esetén.
+    """
+    users_service = UsersService(db)
+    try:
+        user = users_service.login_user(login_data)
+        return {"detail": "Sikeres bejelentkezés!", "user_id": user.id}
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=str(e))
