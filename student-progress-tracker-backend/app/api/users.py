@@ -63,22 +63,10 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     """
     users_service = UsersService(db)
     try:
-        if db.query(models.User).filter(
-            (models.User.email == user.email) | (models.User.uid == user.uid)
-        ).first():
-            raise Exception("A felhasználó már létezik ezzel az e-mail címmel vagy NEPTUN kóddal.")
-
-        verify_token = str(uuid.uuid4())
-
-        db_user = models.User(**user.dict(), verify_token=verify_token, verified=False)
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-
-        status, resp = send_verification_email(db_user.email, verify_token)
+        db_user = users_service.create_user(user)
+        status, resp = send_verification_email(db_user.email, db_user.verify_token)
         if status != 200:
             raise Exception(f"E-mail küldési hiba: {resp}")
-
         return db_user
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -46,12 +46,9 @@ class UsersService:
         # Verifikációs token generálása
         verify_token = str(uuid.uuid4())
 
-        # Jelszó hash-elése
-        hashed_pw = hash_password(user_data.password_hash)
-
-        # Új user példány létrehozása
+        hashed_pw = hash_password(user_data.password)
         db_user = UserModel(
-            **user_data.dict(exclude={"password_hash"}),
+            **user_data.dict(exclude={"password"}),
             password_hash=hashed_pw,
             verify_token=verify_token,
             verified=False

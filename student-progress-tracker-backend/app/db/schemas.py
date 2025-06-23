@@ -46,24 +46,24 @@ class UserCreate(BaseModel):
     Attributes:
         uid (str): NEPTUN kód.
         email (str): E-mail cím.
-        password_hash (str): Jelszó hash.
+        password (str): Jelszó.
         name (str): Név.
         birth_date (date): Születési dátum.
         id_card_number (str): Személyi igazolvány szám.
         address_card_number (str): Lakcímkártya szám.
         mothers_name (str): Anyja neve.
-        major (str): Szak.
+        major (MajorEnum): Szak.
     """
     uid: str
     email: str
-    password_hash: str
+    password: str
     name: str
     birth_date: date
     id_card_number: str
     address_card_number: str
     mothers_name: str
     major: MajorEnum
-
+    
 class UserUpdate(BaseModel):
     """
     Felhasználó frissítési séma.
