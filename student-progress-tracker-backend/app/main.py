@@ -1,30 +1,52 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.middleware.cors import CORSMiddleware
+import secrets
 from app.api import chat, courses, progress, users
+
+# HTTP Basic Auth security objektum
+security = HTTPBasic()
+
+def basic_auth(credentials: HTTPBasicCredentials = Depends(security)):
+    """
+    Egyszerű HTTP Basic Auth ellenőrzés.
+    Csak akkor engedélyezi a hozzáférést, ha a felhasználónév és jelszó helyes.
+
+    Args:
+        credentials (HTTPBasicCredentials): A kérésben kapott hitelesítési adatok.
+
+    Raises:
+        HTTPException: Ha a felhasználónév vagy jelszó hibás.
+    """
+    correct_username = secrets.compare_digest(credentials.username, "admin")
+    correct_password = secrets.compare_digest(credentials.password, "jelszo123")
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Hibás felhasználónév vagy jelszó",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
 app = FastAPI()
 
-# CORS configuration
+# CORS konfiguráció
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this as needed for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API routes
-app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
-app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
-app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
-app.include_router(users.router, prefix="/api/users", tags=["users"])
+# Routerek regisztrálása Basic Auth védelemmel
+app.include_router(chat.router, prefix="/api/chat", tags=["chat"], dependencies=[Depends(basic_auth)])
+app.include_router(courses.router, prefix="/api/courses", tags=["courses"], dependencies=[Depends(basic_auth)])
+app.include_router(progress.router, prefix="/api/progress", tags=["progress"], dependencies=[Depends(basic_auth)])
+app.include_router(users.router, prefix="/api/users", tags=["users"], dependencies=[Depends(basic_auth)])
 
-@app.get("/")
+@app.get("/", dependencies=[Depends(basic_auth)])
 def read_root():
     """
-    Gyökér útvonal, amely visszaadja az alkalmazás állapotát.
-
-    Returns:
-        dict: Az alkalmazás állapotát jelző üzenet.
+    Gyökér végpont, amely csak hitelesítés után érhető el.
     """
     return {"message": "Welcome to the Hallgatói Előrehaladás-követő Webes Alkalmazás API!"}
