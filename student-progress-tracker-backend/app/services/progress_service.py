@@ -35,7 +35,7 @@ class ProgressService:
         self.db.refresh(progress)
         return progress
 
-    def get_progress_by_user(self, user_id: int) -> list[Progress]:
+    def get_user_progress(self, user_id: int) -> list[ProgressModel]:
         """
         Haladás lekérdezése felhasználó szerint.
 
@@ -43,9 +43,9 @@ class ProgressService:
             user_id (int): A felhasználó azonosítója.
 
         Returns:
-            list[Progress]: A felhasználóhoz tartozó haladások listája.
+            list[ProgressModel]: A felhasználóhoz tartozó haladások listája.
         """
-        return self.db.query(Progress).filter(Progress.user_id == user_id).all()
+        return self.db.query(ProgressModel).filter(ProgressModel.user_id == user_id).all()
 
     def update_progress(self, progress_id: int, progress_data: ProgressUpdate) -> Progress:
         """

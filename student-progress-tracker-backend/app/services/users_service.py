@@ -24,6 +24,18 @@ class UsersService:
         """
         return self.db.query(UserModel).all()
     
+    def get_user(self, user_id: int) -> Optional[UserModel]:
+        """
+        Egy felhasználó lekérdezése azonosító alapján.
+
+        Args:
+            user_id (int): A felhasználó azonosítója.
+
+        Returns:
+            UserModel vagy None: A megtalált felhasználó példánya, vagy None ha nincs ilyen.
+        """
+        return self.db.query(UserModel).filter(UserModel.id == user_id).first()
+    
     def create_user(self, user_data: UserCreate) -> UserModel:
         """
         Új felhasználó létrehozása, jelszó hash-eléssel és verifikációs token generálással.
