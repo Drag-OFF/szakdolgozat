@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Jún 20. 12:10
+-- Létrehozás ideje: 2025. Jún 23. 20:34
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -60,17 +60,19 @@ CREATE TABLE `courses` (
   `course_code` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
   `credit` int(11) NOT NULL,
-  `recommended_semester` int(11) NOT NULL
+  `recommended_semester` int(11) NOT NULL,
+  `prerequisites` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`prerequisites`)),
+  `allow_parallel_prerequisite` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `courses`
 --
 
-INSERT INTO `courses` (`id`, `course_code`, `name`, `credit`, `recommended_semester`) VALUES
-(1, 'INF101', 'Bevezetés a programozásba', 5, 1),
-(2, 'INF102', 'Adatbázisok alapjai', 5, 2),
-(3, 'FIZ101', 'Klasszikus mechanika', 4, 1);
+INSERT INTO `courses` (`id`, `course_code`, `name`, `credit`, `recommended_semester`, `prerequisites`, `allow_parallel_prerequisite`) VALUES
+(1, 'INF101', 'Bevezetés a programozásba', 5, 1, NULL, 0),
+(2, 'INF102', 'Adatbázisok alapjai', 5, 2, NULL, 0),
+(3, 'FIZ101', 'Klasszikus mechanika', 4, 1, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -115,20 +117,24 @@ CREATE TABLE `users` (
   `id_card_number` varchar(20) NOT NULL,
   `address_card_number` varchar(20) NOT NULL,
   `mothers_name` varchar(100) NOT NULL,
-  `major` varchar(100) NOT NULL,
+  `major` enum('Gazdaságinformatikus','Mérnökinformatikus','Programtervező informatikus','Villamosmérnök','Üzemmérnök-informatikus') NOT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT 0,
   `role` enum('user','admin') NOT NULL DEFAULT 'user',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `verify_token` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `users`
 --
 
-INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`, `id_card_number`, `address_card_number`, `mothers_name`, `major`, `verified`, `role`, `created_at`) VALUES
-(1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező Informatikus', 1, 'user', '2024-06-01 10:00:00'),
-(2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Fizikus', 1, 'user', '2024-06-02 11:00:00'),
-(3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező Informatikus', 1, 'admin', '2024-06-03 12:00:00');
+INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`, `id_card_number`, `address_card_number`, `mothers_name`, `major`, `verified`, `role`, `created_at`, `verify_token`) VALUES
+(1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL),
+(2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL),
+(3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL),
+(5, 'gsg15d', 'cintanyer@gmail.com', 'kular1234', 'Lakatos Rómeó', '1886-06-11', '158763ER', '565357AS', 'Lakatos Kleopátra', 'Gazdaságinformatikus', 0, 'user', '2025-06-20 16:42:55', '96972355-d0e3-4488-a6e7-c26b207d153d'),
+(6, 'Asdasd', 'betty.channel44@gmail.com', 'asdasd', 'Betty', '2025-06-17', '555555ne', '666666ne', 'Betti anyu', 'Gazdaságinformatikus', 0, 'user', '2025-06-20 22:49:29', 'a3a2c4aa-e03e-4b9b-a437-768f35dbad99'),
+(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$D89SEuP582pRUAUipyy/f.K1OZmqhJPq7BaeGF9tioApP3yUbYpOC', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL);
 
 --
 -- Indexek a kiírt táblákhoz
@@ -189,7 +195,7 @@ ALTER TABLE `progress`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Megkötések a kiírt táblákhoz
