@@ -6,6 +6,19 @@ class ProgressService:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_progress(self, skip: int = 0, limit: int = 100) -> list[ProgressModel]:
+        """
+        Az összes haladás lekérdezése.
+
+        Args:
+            skip (int): Kihagyandó rekordok száma.
+            limit (int): Visszaadandó rekordok száma.
+
+        Returns:
+            list[ProgressModel]: Haladások listája.
+        """
+        return self.db.query(ProgressModel).offset(skip).limit(limit).all()
+
     def create_progress(self, progress_data: ProgressCreate) -> Progress:
         """
         Haladás létrehozása.

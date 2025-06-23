@@ -39,7 +39,7 @@ app.add_middleware(
 )
 
 # Routerek regisztrálása Basic Auth védelemmel
-app.include_router(chat.router, prefix="/api/chat", tags=["chat"], dependencies=[Depends(basic_auth)])
+app.include_router(chat.router, prefix="/api", tags=["chat"], dependencies=[Depends(basic_auth)])
 app.include_router(courses.router, prefix="/api/courses", tags=["courses"], dependencies=[Depends(basic_auth)])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"], dependencies=[Depends(basic_auth)])
 app.include_router(users.router, prefix="/api/users", tags=["users"], dependencies=[Depends(basic_auth)])
