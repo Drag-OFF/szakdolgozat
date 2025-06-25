@@ -1,98 +1,13 @@
-<!-- register.html -->
-<!DOCTYPE html>
-<html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <title>Regisztráció teszt</title>
-</head>
-<body>
-    <h1>Regisztráció</h1>
-    <form id="regForm">
-        <input type="text" name="uid" placeholder="Neptun kód" required><br>
-        <input type="email" name="email" placeholder="E-mail" required><br>
-		<input type="password" name="password" placeholder="Jelszó" required><br>
-        <input type="text" name="name" placeholder="Név" required><br>
-        <input type="date" name="birth_date" placeholder="Születési dátum" required><br>
-        <input type="text" name="id_card_number" placeholder="Személyi igazolvány szám" required><br>
-        <input type="text" name="address_card_number" placeholder="Lakcímkártya szám" required><br>
-        <input type="text" name="mothers_name" placeholder="Anyja neve" required><br>
-        <select name="major" required>
-		  <option value="Gazdaságinformatikus">Gazdaságinformatikus</option>
-		  <option value="Mérnökinformatikus">Mérnökinformatikus</option>
-		  <option value="Programtervező informatikus">Programtervező informatikus</option>
-		  <option value="Villamosmérnök">Villamosmérnök</option>
-		  <option value="Üzemmérnök-informatikus">Üzemmérnök-informatikus</option>
-		</select><br>
-        <button type="submit">Regisztráció</button>
-    </form>
-    <div id="msg"></div>
-    <script>
-    document.getElementById('regForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const form = e.target;
-        const data = {
-            uid: form.uid.value,
-            email: form.email.value,
-            password: form.password.value,
-            name: form.name.value,
-            birth_date: form.birth_date.value,
-            id_card_number: form.id_card_number.value,
-            address_card_number: form.address_card_number.value,
-            mothers_name: form.mothers_name.value,
-            major: form.major.value
-        };
-        try {
-            const resp = await fetch('http://enaploproject.ddns.net:8000/api/users/', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(data)
-            });
-            const result = await resp.json();
-            if (resp.ok) {
-                document.getElementById('msg').innerText = "Sikeres regisztráció! Nézd meg az e-mail fiókodat a megerősítő levélért.";
-            } else {
-                document.getElementById('msg').innerText = "Hiba: " + (result.detail || "Ismeretlen hiba");
-				console.log(result);
-            }
-        } catch (err) {
-            document.getElementById('msg').innerText = "Hálózati hiba: " + err;
-        }
-    });
-    </script>
-	
-	<h1>Bejelentkezés</h1>
-<form id="loginForm">
-    <input type="text" name="uid" placeholder="Neptun kód vagy e-mail" required><br>
-    <input type="password" name="password" placeholder="Jelszó" required><br>
-    <button type="submit">Bejelentkezés</button>
-</form>
-<div id="loginMsg"></div>
-
-<script>
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const form = e.target;
-    // Ha e-mail címet vagy Neptun kódot is elfogadsz:
-    const data = form.uid.value.includes('@')
-        ? { email: form.uid.value, password: form.password.value }
-        : { uid: form.uid.value, password: form.password.value };
-
-    try {
-        const resp = await fetch('http://enaploproject.ddns.net:8000/api/users/login', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
-        });
-        const result = await resp.json();
-        if (resp.ok) {
-            document.getElementById('loginMsg').innerText = "Sikeres bejelentkezés!";
-        } else {
-            document.getElementById('loginMsg').innerText = (result.detail || result);
-        }
-    } catch (err) {
-        document.getElementById('loginMsg').innerText = "Hálózati hiba: " + err;
-    }
-});
-</script>
-</body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
