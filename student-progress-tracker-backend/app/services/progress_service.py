@@ -6,6 +6,19 @@ class ProgressService:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_progress(self, skip: int = 0, limit: int = 100) -> list[ProgressModel]:
+        """
+        Az összes haladás lekérdezése.
+
+        Args:
+            skip (int): Kihagyandó rekordok száma.
+            limit (int): Visszaadandó rekordok száma.
+
+        Returns:
+            list[ProgressModel]: Haladások listája.
+        """
+        return self.db.query(ProgressModel).offset(skip).limit(limit).all()
+
     def create_progress(self, progress_data: ProgressCreate) -> Progress:
         """
         Haladás létrehozása.
@@ -22,7 +35,7 @@ class ProgressService:
         self.db.refresh(progress)
         return progress
 
-    def get_progress_by_user(self, user_id: int) -> list[Progress]:
+    def get_user_progress(self, user_id: int) -> list[ProgressModel]:
         """
         Haladás lekérdezése felhasználó szerint.
 
@@ -30,9 +43,9 @@ class ProgressService:
             user_id (int): A felhasználó azonosítója.
 
         Returns:
-            list[Progress]: A felhasználóhoz tartozó haladások listája.
+            list[ProgressModel]: A felhasználóhoz tartozó haladások listája.
         """
-        return self.db.query(Progress).filter(Progress.user_id == user_id).all()
+        return self.db.query(ProgressModel).filter(ProgressModel.user_id == user_id).all()
 
     def update_progress(self, progress_id: int, progress_data: ProgressUpdate) -> Progress:
         """

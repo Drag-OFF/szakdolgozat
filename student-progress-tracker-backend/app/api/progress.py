@@ -1,12 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.db import models, schemas
+from app.db import schemas
 from app.db.database import get_db
 from app.services.progress_service import ProgressService
+from app.utils import get_current_user
 
 router = APIRouter()
 
-@router.post("/progress/", response_model=schemas.Progress)
+@router.post("/", response_model=schemas.Progress, dependencies=[Depends(get_current_user)])
 def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_db)):
     """
     Haladás létrehozása.
@@ -27,7 +28,7 @@ def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/progress/", response_model=list[schemas.Progress])
+@router.get("/", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
 def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Haladások lekérése.
@@ -43,7 +44,7 @@ def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     progress_service = ProgressService(db)
     return progress_service.get_progress(skip=skip, limit=limit)
 
-@router.get("/progress/{user_id}", response_model=list[schemas.Progress])
+@router.get("/{user_id}", response_model=list[schemas.Progress])
 def get_user_progress(user_id: int, db: Session = Depends(get_db)):
     """
     Egy adott felhasználó haladásának lekérése.
@@ -64,7 +65,7 @@ def get_user_progress(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User progress not found")
     return user_progress
 
-@router.put("/progress/{progress_id}", response_model=schemas.Progress)
+@router.put("/{progress_id}", response_model=schemas.Progress)
 def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Session = Depends(get_db)):
     """
     Haladás frissítése.
@@ -86,7 +87,7 @@ def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Sess
         raise HTTPException(status_code=404, detail="Progress not found")
     return updated_progress
 
-@router.delete("/progress/{progress_id}", response_model=dict)
+@router.delete("/{progress_id}", response_model=dict)
 def delete_progress(progress_id: int, db: Session = Depends(get_db)):
     """
     Haladás törlése.
