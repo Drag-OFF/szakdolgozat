@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator, EmailStr
+import re
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
@@ -63,6 +64,38 @@ class UserCreate(BaseModel):
     address_card_number: str
     mothers_name: str
     major: MajorEnum
+
+    @validator('uid')
+    def validate_uid(cls, v):
+        v = v.upper()
+        if not re.fullmatch(r'[A-Z0-9]{1,6}', v):
+            raise ValueError('A NEPTUN kód maximum 6 karakter, csak betű és szám lehet!')
+        return v
+
+    @validator('name')
+    def validate_name(cls, v):
+        if ' ' not in v.strip():
+            raise ValueError('Kérjük, adja meg a teljes nevét (vezetéknév és keresztnév)!')
+        return v
+
+    @validator('birth_date')
+    def validate_birth_date(cls, v):
+        if v > date.today():
+            raise ValueError('A születési dátum nem lehet a jövőben!')
+        return v
+
+    @validator('id_card_number', 'address_card_number')
+    def validate_card_number(cls, v):
+        v = v.upper()
+        if not re.fullmatch(r'\d{6}[A-Z]{2}', v):
+            raise ValueError('A szám formátuma: 6 számjegy, majd 2 nagybetű (pl. 123456AB)')
+        return v
+
+    @validator('mothers_name')
+    def validate_mothers_name(cls, v):
+        if ' ' not in v.strip():
+            raise ValueError('Kérjük, adja meg az anyja teljes nevét (vezetéknév és keresztnév)!')
+        return v
     
 class UserUpdate(BaseModel):
     """
