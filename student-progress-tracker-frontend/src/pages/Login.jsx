@@ -1,13 +1,31 @@
+/**
+ * Bejelentkezési oldal komponens.
+ * Lehetővé teszi a felhasználók számára, hogy e-mail vagy Neptun kód és jelszó megadásával bejelentkezzenek.
+ * Sikeres bejelentkezéskor JWT tokent tárol a localStorage-ben, és átirányít a főoldalra.
+ */
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
 
+/**
+ * Login komponens.
+ * @returns {JSX.Element} A bejelentkezési űrlap és kapcsolódó UI elemek.
+ */
 export default function Login() {
   const [uid, setUid] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const navigate = useNavigate();
 
+  /**
+   * Kezeli a bejelentkezési űrlap elküldését.
+   * Ellenőrzi a felhasználó adatokat, elküldi a backendnek, és kezeli a választ.
+   * Sikeres bejelentkezéskor JWT tokent ment a localStorage-be, majd átirányít a főoldalra.
+   * @param {React.FormEvent} e Az űrlap elküldésének eseménye.
+   */
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
@@ -22,6 +40,9 @@ export default function Login() {
       if (resp.ok && result.access_token) {
         localStorage.setItem("access_token", result.access_token);
         setMsg("Sikeres bejelentkezés!");
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
       } else {
         setMsg(result.detail || "Hiba");
       }
