@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Jún 23. 20:34
+-- Létrehozás ideje: 2025. Jún 26. 20:14
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -121,20 +121,21 @@ CREATE TABLE `users` (
   `verified` tinyint(1) NOT NULL DEFAULT 0,
   `role` enum('user','admin') NOT NULL DEFAULT 'user',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `verify_token` varchar(255) DEFAULT NULL
+  `verify_token` varchar(255) DEFAULT NULL,
+  `reset_token` varchar(255) DEFAULT NULL,
+  `reset_token_expires` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `users`
 --
 
-INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`, `id_card_number`, `address_card_number`, `mothers_name`, `major`, `verified`, `role`, `created_at`, `verify_token`) VALUES
-(1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL),
-(2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL),
-(3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL),
-(5, 'gsg15d', 'cintanyer@gmail.com', 'kular1234', 'Lakatos Rómeó', '1886-06-11', '158763ER', '565357AS', 'Lakatos Kleopátra', 'Gazdaságinformatikus', 0, 'user', '2025-06-20 16:42:55', '96972355-d0e3-4488-a6e7-c26b207d153d'),
-(6, 'Asdasd', 'betty.channel44@gmail.com', 'asdasd', 'Betty', '2025-06-17', '555555ne', '666666ne', 'Betti anyu', 'Gazdaságinformatikus', 0, 'user', '2025-06-20 22:49:29', 'a3a2c4aa-e03e-4b9b-a437-768f35dbad99'),
-(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$D89SEuP582pRUAUipyy/f.K1OZmqhJPq7BaeGF9tioApP3yUbYpOC', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL);
+INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`, `id_card_number`, `address_card_number`, `mothers_name`, `major`, `verified`, `role`, `created_at`, `verify_token`, `reset_token`, `reset_token_expires`) VALUES
+(1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL, NULL, NULL),
+(2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL, NULL, NULL),
+(3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL, NULL, NULL),
+(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$D89SEuP582pRUAUipyy/f.K1OZmqhJPq7BaeGF9tioApP3yUbYpOC', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, '777a214d-f24b-42d0-b3c0-ab470a9bc5b8', '2025-06-26 19:10:25'),
+(26, 'GBG15D', 'buskristof415@gmail.com', '$2b$12$LB44D11dm2AS9vviNAeJRuDi7OOFPIU8F2RJmmMOLU/z8RA1oZo8u', 'Bús Kristóf', '2010-06-11', '666666AD', '666666AD', 'Lakatos Máriané', 'Mérnökinformatikus', 1, 'user', '2025-06-24 22:42:08', NULL, 'c3222117-8329-4995-b740-114181a6545b', '2025-06-26 19:06:28');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -195,7 +196,7 @@ ALTER TABLE `progress`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- Megkötések a kiírt táblákhoz

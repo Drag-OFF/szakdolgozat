@@ -141,6 +141,21 @@ class UserLogin(BaseModel):
     uid: Optional[str] = None
     password: str
 
+class ForgotPasswordRequest(BaseModel):
+    """
+    Elfelejtett jelszó kérés séma.
+    A felhasználó e-mail címét várja, amelyre a jelszó-visszaállító linket küldjük.
+    """
+    email: EmailStr
+
+class ForgotPasswordResponse(BaseModel):
+    """
+    Elfelejtett jelszó válasz séma.
+    Visszajelzést ad arról, hogy sikeres volt-e a kérés, illetve egy üzenetet is tartalmaz.
+    """
+    success: bool
+    message: str
+
 class User(UserBase):
     """
     Felhasználó séma (adatbázisból visszaadott).

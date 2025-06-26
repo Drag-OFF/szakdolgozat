@@ -4,6 +4,7 @@ from app.db.schemas import User, UserCreate, UserUpdate, UserLogin
 from app.utils import hash_password, verify_password
 import uuid
 from typing import Optional
+from datetime import datetime, timedelta
 
 class UsersService:
     def __init__(self, db: Session):
@@ -128,3 +129,34 @@ class UsersService:
         if not user.verified:
             raise Exception("A fiók még nincs verifikálva. Kérjük, erősítsd meg az e-mail címedet!")
         return user
+    
+class ForgotPasswordService:
+    """
+    Elfelejtett jelszó logika: token generálás, e-mail küldés.
+    """
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def process_forgot_password(self, email: str) -> (bool, str):
+        """
+        Ha létezik a felhasználó, generál token-t, elmenti, és elküldi e-mailben.
+        Ha nincs ilyen e-mail, hibát ad vissza.
+
+        Returns:
+            (success: bool, message: str)
+        """
+        user = self.db.query(User).filter(User.email == email).first()
+        if not user:
+            return False, "Nincs ilyen e-mail cím regisztrálva."
+
+        # Token generálás és mentés
+        reset_token = str(uuid.uuid4())
+        user.reset_token = reset_token
+        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)  # 1 óra érvényesség
+        self.db.commit()
+
+        # Itt e-mail küldés (szimulált)
+        print(f"[DEBUG] Jelszó-visszaállító link: http://enaploproject.ddns.net/reset-password?token={reset_token}")
+
+        return True, "Elküldtük a jelszó-visszaállító e-mailt."
