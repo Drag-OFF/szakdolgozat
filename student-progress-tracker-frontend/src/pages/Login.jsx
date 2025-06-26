@@ -59,12 +59,31 @@ export default function Login() {
       </div>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h3>Hallgatói bejelentkezés</h3>
-        <input type="text" placeholder="Azonosító (Neptun vagy e-mail)" value={uid} onChange={e => setUid(e.target.value)} required />
-        <input type="password" placeholder="Jelszó" value={password} onChange={e => setPassword(e.target.value)} required />
+        <label htmlFor="login-uid">Azonosító (Neptun vagy e-mail)</label>
+        <input
+          id="login-uid"
+          type="text"
+          placeholder="Azonosító (Neptun vagy e-mail)"
+          value={uid}
+          onChange={e => setUid(e.target.value)}
+          required
+        />
+        <label htmlFor="login-password">Jelszó</label>
+        <input
+          id="login-password"
+          type="password"
+          placeholder="Jelszó"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Bejelentkezés</button>
         <div className="auth-msg">{msg}</div>
         <div className="auth-link">
           Nincs fiókod? <Link to="/register">Regisztráció</Link>
+        </div>
+        <div className="auth-link">
+          <Link to="/forgot-password">Elfelejtett jelszó?</Link>
         </div>
       </form>
     </div>
