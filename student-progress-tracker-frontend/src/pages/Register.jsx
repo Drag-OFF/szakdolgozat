@@ -162,6 +162,11 @@ export default function Register() {
         <div className="auth-link">
           Van már fiókod? <Link to="/login">Jelentkezz be!</Link>
         </div>
+
+      <div className="auth-link">
+        Már regisztráltál, de nem kaptál megerősítő e-mailt?{" "}
+        <Link to="/resend-verify">Újra küldés</Link>
+      </div>
       </form>
     </div>
   );

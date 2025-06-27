@@ -13,13 +13,13 @@ export default function ResendVerify() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/resend-verify", {
+      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
       const result = await resp.json();
-      setMsg(result.message || "Ismeretlen hiba történt.");
+      setMsg(result.detail || result.message || "Ismeretlen hiba történt.");
       setSent(result.success);
     } catch (err) {
       setMsg("Hiba történt a kérés során.");
