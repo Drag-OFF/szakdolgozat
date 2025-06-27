@@ -1,21 +1,24 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-/**
- * Jelszó visszaállítás oldal (csak frontend).
- * A felhasználó kétszer adja meg az új jelszavát, és a gomb csak akkor aktív, ha egyeznek.
- */
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
   const [msg, setMsg] = useState("");
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  // Token kinyerése az URL-ből
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
 
   function handleChange(e) {
     if (e.target.name === "password") setPassword(e.target.value);
     else setPassword2(e.target.value);
-    setMsg(""); // minden változtatásnál törli az üzenetet
+    setMsg("");
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (password.length < 8) {
       setMsg("A jelszónak legalább 8 karakter hosszúnak kell lennie.");
@@ -25,8 +28,25 @@ export default function ResetPassword() {
       setMsg("A két jelszó nem egyezik!");
       return;
     }
-    setMsg("Sikeres jelszóváltoztatás (szimulált)!");
-    // Itt majd backend hívás lesz
+    if (!token) {
+      setMsg("Hiányzó vagy érvénytelen token.");
+      return;
+    }
+    try {
+      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
+      const result = await resp.json();
+      setMsg(result.message || "Ismeretlen hiba történt.");
+      setSuccess(result.success);
+      if (result.success) {
+        setTimeout(() => navigate("/login"), 3000); 
+      }
+    } catch (err) {
+      setMsg("Hiba történt a kérés során.");
+    }
   }
 
   const errorStyle = password && password2 && password !== password2
@@ -66,7 +86,13 @@ export default function ResetPassword() {
         />
         <button
           type="submit"
-          disabled={!password || !password2 || password !== password2 || password.length < 8}
+          disabled={
+            !password ||
+            !password2 ||
+            password !== password2 ||
+            password.length < 8 ||
+            success
+          }
         >
           Jelszó beállítása
         </button>

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "rimraf C:/xampp/htdocs && copyfiles -u 1 dist/**/* C:/xampp/htdocs",
+    "postbuild": "rimraf C:/xampp/htdocs && copyfiles -u 1 dist/**/* C:/xampp/htdocs && powershell Copy-Item -Path dist/.htaccess -Destination C:/xampp/htdocs/.htaccess -Force",
     "lint": "eslint .",
     "preview": "vite preview"
   },
