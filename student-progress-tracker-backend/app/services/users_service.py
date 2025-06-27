@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.db.models import User as UserModel
 from app.db.schemas import User, UserCreate, UserUpdate, UserLogin
+from passlib.context import CryptContext
 from app.utils import hash_password, verify_password
 import uuid
 from typing import Optional
@@ -129,34 +130,19 @@ class UsersService:
         if not user.verified:
             raise Exception("A fiók még nincs verifikálva. Kérjük, erősítsd meg az e-mail címedet!")
         return user
-    
-class ForgotPasswordService:
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def reset_password(db: Session, token: str, new_password: str):
     """
-    Elfelejtett jelszó logika: token generálás, e-mail küldés.
+    Megkeresi a felhasználót a reset_token alapján, ellenőrzi a lejáratot,
+    majd beállítja az új hash-elt jelszót, törli a reset_token-t.
     """
-
-    def __init__(self, db: Session):
-        self.db = db
-
-    def process_forgot_password(self, email: str) -> (bool, str):
-        """
-        Ha létezik a felhasználó, generál token-t, elmenti, és elküldi e-mailben.
-        Ha nincs ilyen e-mail, hibát ad vissza.
-
-        Returns:
-            (success: bool, message: str)
-        """
-        user = self.db.query(User).filter(User.email == email).first()
-        if not user:
-            return False, "Nincs ilyen e-mail cím regisztrálva."
-
-        # Token generálás és mentés
-        reset_token = str(uuid.uuid4())
-        user.reset_token = reset_token
-        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)  # 1 óra érvényesség
-        self.db.commit()
-
-        # Itt e-mail küldés (szimulált)
-        print(f"[DEBUG] Jelszó-visszaállító link: http://enaploproject.ddns.net/reset-password?token={reset_token}")
-
-        return True, "Elküldtük a jelszó-visszaállító e-mailt."
+    user = db.query(UserModel).filter(UserModel.reset_token == token).first()
+    if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
+        return False, "Érvénytelen vagy lejárt token."
+    user.password_hash = pwd_context.hash(new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+    return True, "Sikeres jelszóváltoztatás."

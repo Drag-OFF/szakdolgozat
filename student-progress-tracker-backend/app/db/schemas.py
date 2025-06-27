@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, validator, EmailStr, Field
 import re
 from typing import Optional, List
 from datetime import date, datetime
@@ -155,6 +155,10 @@ class ForgotPasswordResponse(BaseModel):
     """
     success: bool
     message: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str = Field(..., min_length=8)  # vagy: 
 
 class User(UserBase):
     """

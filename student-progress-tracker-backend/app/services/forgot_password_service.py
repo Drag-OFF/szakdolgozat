@@ -20,7 +20,7 @@ class ForgotPasswordService:
         api_key = os.getenv("MAILJET_API_KEY", "8500664c47d6156ee0ba18594fdd88c6")
         api_secret = os.getenv("MAILJET_API_SECRET", "c9327b1703b7e2eb1ab59ebea33cad27")
         mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-        reset_link = f"http://enaploproject.ddns.net/reset-password.html?token={reset_token}"
+        reset_link = f"http://enaploproject.ddns.net/reset-password?token={reset_token}"
         data = {
             'Messages': [
                 {
