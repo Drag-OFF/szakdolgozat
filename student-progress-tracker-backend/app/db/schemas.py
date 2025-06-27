@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, EmailStr
+from pydantic import BaseModel, validator, EmailStr, Field
 import re
 from typing import Optional, List
 from datetime import date, datetime
@@ -140,6 +140,29 @@ class UserLogin(BaseModel):
     email: Optional[str] = None
     uid: Optional[str] = None
     password: str
+
+class ForgotPasswordRequest(BaseModel):
+    """
+    Elfelejtett jelszó kérés séma.
+    A felhasználó e-mail címét várja, amelyre a jelszó-visszaállító linket küldjük.
+    """
+    email: EmailStr
+
+class ForgotPasswordResponse(BaseModel):
+    """
+    Elfelejtett jelszó válasz séma.
+    Visszajelzést ad arról, hogy sikeres volt-e a kérés, illetve egy üzenetet is tartalmaz.
+    """
+    success: bool
+    message: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str = Field(..., min_length=8)
+
+
+class EmailRequest(BaseModel):
+    email: str
 
 class User(UserBase):
     """

@@ -1,10 +1,10 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 from app.db.database import get_db
+from app.db.schemas import EmailRequest
 from app.services.users_service import UsersService
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import List
 from mailjet_rest import Client
 from app.utils import create_access_token, admin_required
@@ -41,14 +41,27 @@ def send_verification_email(to_email: str, verify_token: str):
         ],
         "Subject": "E-mail verifikáció",
         "TextPart": f"Kérjük, erősítsd meg a regisztrációdat: http://enaploproject.ddns.net/verify.html?token={verify_token}",
-        "HTMLPart": f"<h3>Kérjük, erősítsd meg a regisztrációdat:</h3><a href='http://enaploproject.ddns.net/verify.html?token={verify_token}'>Kattints ide a megerősítéshez</a>"
+        "HTMLPart": f"<h3>Kérjük, erősítsd meg a regisztrációdat:</h3><a href='http://enaploproject.ddns.net/verify.html?token={verify_token}'>Kattints ide a megerősítéshez a weboldalra.</a>"
         }
       ]
     }
     result = mailjet.send.create(data=data)
     return result.status_code, result.json()
 
-
+@router.post("/resend-verification")
+def resend_verification(data: EmailRequest, db: Session = Depends(get_db)):
+    """
+    Új verifikációs e-mail küldése, ha a felhasználó még nincs verifikálva és van verify_token-je.
+    """
+    user = db.query(models.User).filter(models.User.email == data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Nincs ilyen felhasználó.")
+    if user.verified:
+        raise HTTPException(status_code=400, detail="A fiók már verifikálva van.")
+    if not user.verify_token:
+        raise HTTPException(status_code=400, detail="Ehhez a fiókhoz már nem lehet újra verifikációs e-mailt küldeni.")
+    send_verification_email(user.email, user.verify_token)
+    return {"detail": "A verifikációs e-mailt újra elküldtük."}
 
 @router.get("/verify")
 def verify_user(token: str, db: Session = Depends(get_db)):

@@ -30,6 +30,8 @@ class User(Base):
         major (ENUM): Szak.
         verified (bool): E-mail verifikáció státusz.
         verify_token (str): E-mail verifikációs token.
+        reset_token (str): Jelszó-visszaállító token.
+        reset_token_expires (datetime): Jelszó-visszaállító token lejárati ideje.
         role (str): Szerepkör (user/admin).
         created_at (datetime): Létrehozás ideje.
     """
@@ -47,9 +49,10 @@ class User(Base):
     major = Column(SqlEnum(*MAJOR_ENUM, name="major_enum"), nullable=False)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
+    reset_token = Column(String(255), nullable=True)  # ÚJ
+    reset_token_expires = Column(DateTime, nullable=True)  # ÚJ
     role = Column(Enum('user', 'admin'), default='user')
     created_at = Column(DateTime, nullable=False, default=func.now())
-    
 
     progress = relationship("Progress", back_populates="user")
     chat_messages = relationship("ChatMessage", back_populates="user")
