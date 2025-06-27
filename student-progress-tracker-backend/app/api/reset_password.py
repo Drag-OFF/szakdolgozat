@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.schemas import ResetPasswordRequest
-from app.services.users_service import reset_password
+from app.services.reset_password_service import reset_password
 
 router = APIRouter()
 

@@ -158,7 +158,11 @@ class ForgotPasswordResponse(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    password: str = Field(..., min_length=8)  # vagy: 
+    password: str = Field(..., min_length=8)
+
+
+class EmailRequest(BaseModel):
+    email: str
 
 class User(UserBase):
     """
