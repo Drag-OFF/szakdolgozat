@@ -1,6 +1,18 @@
+<<<<<<< HEAD
 import "../styles/Home.css";
 import "../styles/GlobalBackground.css";
 
+=======
+/**
+ * Főoldal komponens.
+ * Üdvözlő szöveget és egy képet jelenít meg a felhasználónak.
+ */
+
+/**
+ * Home komponens.
+ * @returns {JSX.Element} A főoldal tartalma.
+ */
+>>>>>>> origin/frontend
 export default function Home() {
   return (
     <div className="home-container">
