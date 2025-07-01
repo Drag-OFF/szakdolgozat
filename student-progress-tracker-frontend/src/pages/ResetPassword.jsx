@@ -1,4 +1,10 @@
-import { useState } from "react";
+/**
+ * Jelszó-visszaállítás oldal.
+ * Ha a token hiányzik vagy érvénytelen, azonnal átirányít verify.html-re.
+ * Sikeres jelszóváltás után 5 másodperces visszaszámlálás, majd főoldalra irányítás.
+ */
+
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function ResetPassword() {
@@ -6,11 +12,20 @@ export default function ResetPassword() {
   const [password2, setPassword2] = useState("");
   const [msg, setMsg] = useState("");
   const [success, setSuccess] = useState(false);
+  const [countdown, setCountdown] = useState(5);
   const navigate = useNavigate();
+  const timerRef = useRef(null);
 
   // Token kinyerése az URL-ből
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
+
+  // Token ellenőrzés már betöltéskor
+  useEffect(() => {
+    if (!token || token.length < 16) {
+      window.location.href = `/verify.html?msg=${encodeURIComponent("Hiányzó vagy érvénytelen token.")}`;
+    }
+  }, [token]);
 
   function handleChange(e) {
     if (e.target.name === "password") setPassword(e.target.value);
@@ -28,10 +43,6 @@ export default function ResetPassword() {
       setMsg("A két jelszó nem egyezik!");
       return;
     }
-    if (!token) {
-      setMsg("Hiányzó vagy érvénytelen token.");
-      return;
-    }
     try {
       const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
         method: "POST",
@@ -39,10 +50,27 @@ export default function ResetPassword() {
         body: JSON.stringify({ token, password }),
       });
       const result = await resp.json();
+      if (
+        result.detail === "Hiányzó vagy érvénytelen token." ||
+        result.detail === "Érvénytelen vagy lejárt token."
+      ) {
+        window.location.href = `/verify.html?msg=${encodeURIComponent(result.detail)}`;
+        return;
+      }
       setMsg(result.message || "Ismeretlen hiba történt.");
       setSuccess(result.success);
       if (result.success) {
-        setTimeout(() => navigate("/login"), 3000); 
+        setCountdown(5);
+        timerRef.current = setInterval(() => {
+          setCountdown((c) => {
+            if (c <= 1) {
+              clearInterval(timerRef.current);
+              navigate("/");
+              return 0;
+            }
+            return c - 1;
+          });
+        }, 1000);
       }
     } catch (err) {
       setMsg("Hiba történt a kérés során.");
@@ -52,6 +80,9 @@ export default function ResetPassword() {
   const errorStyle = password && password2 && password !== password2
     ? { border: "2px solid #e53935", background: "#fff6f6" }
     : {};
+
+  // Ha nincs token, ne jelenjen meg semmi (mert az useEffect már átirányít)
+  if (!token || token.length < 16) return null;
 
   return (
     <div className="auth-container">
@@ -100,6 +131,11 @@ export default function ResetPassword() {
           {password && password2 && password !== password2
             ? "A két jelszó nem egyezik!"
             : msg}
+          {success && (
+            <div style={{ color: "#1976d2", marginTop: "1em" }}>
+              Sikeres jelszóváltás! {countdown} másodperc múlva átirányítunk a főoldalra...
+            </div>
+          )}
         </div>
       </form>
     </div>
