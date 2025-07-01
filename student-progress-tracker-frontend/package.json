@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "postbuild": "rimraf C:/xampp/htdocs && copyfiles -u 1 dist/**/* C:/xampp/htdocs && powershell Copy-Item -Path dist/.htaccess -Destination C:/xampp/htdocs/.htaccess -Force",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -19,10 +20,12 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
+    "copyfiles": "^2.4.1",
     "eslint": "^9.29.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.2.0",
+    "rimraf": "^6.0.1",
     "vite": "^7.0.0"
   }
 }
