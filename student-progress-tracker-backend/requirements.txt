@@ -1,0 +1,12 @@
+FastAPI
+SQLAlchemy
+pydantic
+bcrypt
+python-jose
+uvicorn
+pandas
+openpyxl
+websockets
+alembic
+pytest
+httpx
