@@ -8,6 +8,9 @@
  * Footer komponens.
  * @returns {JSX.Element} A lábléc tartalma.
  */
+
+import "../styles/Footer.css";
+
 export default function Footer() {
   return (
     <footer className="footer">
