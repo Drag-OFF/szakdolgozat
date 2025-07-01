@@ -18,7 +18,7 @@ import ResendVerify from "./pages/ResendVerify";
  * App komponens.
  * @returns {JSX.Element} Az alkalmazás teljes szerkezete.
  */
-export default function App() {
+function App() {
   return (
     <div className="app-wrapper">
       <Navbar />
@@ -36,3 +36,4 @@ export default function App() {
     </div>
   );
 }
+export default App;

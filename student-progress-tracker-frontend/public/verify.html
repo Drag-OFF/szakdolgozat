@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>Verifikáció</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="verify.css">
   <script>
+    let countdown = 10;
     async function verify() {
       const params = new URLSearchParams(window.location.search);
       const token = params.get("token");
       const msgDiv = document.getElementById("msg");
+      const countdownDiv = document.getElementById("countdown");
       if (!token) {
         msgDiv.innerText = "Hiányzó vagy érvénytelen token!";
         return;
@@ -16,20 +20,42 @@
         const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/verify?token=" + encodeURIComponent(token));
         const result = await resp.json();
         msgDiv.innerText = result.detail || "Ismeretlen hiba történt.";
-        setTimeout(() => window.location.href = "/", 4000);
       } catch {
         msgDiv.innerText = "Hiba történt a verifikáció során.";
       }
+      // Visszaszámláló
+      countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+        } else {
+          countdownDiv.innerText = "Átirányítás...";
+          clearInterval(interval);
+          window.location.href = "/";
+        }
+      }, 1000);
     }
     window.onload = verify;
   </script>
-  <style>
-    body { font-family: Arial, sans-serif; background: #222; color: #fff; text-align: center; padding-top: 10vh; }
-    #msg { font-size: 1.3em; margin-top: 2em; }
-  </style>
 </head>
 <body>
-  <h2>Felhasználó verifikáció</h2>
-  <div id="msg">Ellenőrzés folyamatban...</div>
+  <nav class="navbar">
+    <span class="navbar-logo">
+      <img src="https://u-szeged.hu/site/upload/2020/12/felveteli_weboldal_nyito_1520x864_0000s_0000_ttik2.jpg" alt="SZTE" />
+      <span>Hallgatói előrehaladás-követő</span>
+    </span>
+    <span class="navbar-links">
+      <a href="/">Főoldal</a>
+    </span>
+  </nav>
+  <div class="verify-centerbox">
+    <div class="verify-title">Felhasználó verifikáció</div>
+    <div id="msg">Ellenőrzés folyamatban...</div>
+    <div id="countdown"></div>
+  </div>
+  <footer class="footer">
+    &copy; 2025 Hallgatói előrehaladás-követő | Készítette: <b>Harkai Dominik</b>
+  </footer>
 </body>
 </html>
