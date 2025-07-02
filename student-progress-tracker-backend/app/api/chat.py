@@ -63,6 +63,7 @@ def get_messages(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
                 anonymous=msg.anonymous,
                 display_name=display_name,
                 display_neptun=display_neptun,
+                reply_to_id=msg.reply_to_id,
                 reactions=[schemas.ChatReactionOut.from_orm(r) for r in chat_service.get_reactions_for_message(msg.id)]
             )
         )

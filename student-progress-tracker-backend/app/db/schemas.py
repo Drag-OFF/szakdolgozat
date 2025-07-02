@@ -322,14 +322,17 @@ class ChatMessageBase(BaseModel):
         message (str): Üzenet.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: str
     user_id: Optional[int]
     message: str
     timestamp: datetime
     anonymous: bool
+    reply_to_id: Optional[int] = None
 
 class ChatUser(BaseModel):
+    id: int
     name: str
     neptun: str
     role: str
@@ -344,12 +347,14 @@ class ChatMessageCreate(ChatMessageBase):
         message (str): Üzenet.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: str
     user_id: Optional[int]
     message: str
     timestamp: datetime
     anonymous: bool
+    reply_to_id: Optional[int] = None
 
 class ChatMessageUpdate(BaseModel):
     """
@@ -361,12 +366,14 @@ class ChatMessageUpdate(BaseModel):
         message (Optional[str]): Üzenet.
         timestamp (Optional[datetime]): Időbélyeg.
         anonymous (Optional[bool]): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: Optional[str] = None
     user_id: Optional[int] = None
     message: Optional[str] = None
     timestamp: Optional[datetime] = None
     anonymous: Optional[bool] = None
+    reply_to_id: Optional[int] = None
 
 class ChatMessage(ChatMessageBase):
     """
@@ -378,6 +385,20 @@ class ChatMessage(ChatMessageBase):
     """
     id: int
 
+    class Config:
+        from_attributes = True
+
+class ChatReactionBase(BaseModel):
+    emoji: str
+
+class ChatReactionCreate(ChatReactionBase):
+    message_id: int
+
+class ChatReactionOut(ChatReactionBase):
+    id: int
+    message_id: int
+    user_id: int
+    created_at: datetime
     class Config:
         from_attributes = True
 
@@ -394,6 +415,8 @@ class ChatMessageOut(BaseModel):
         anonymous (bool): Névtelen-e.
         display_name (str): Megjelenítendő név (név vagy anonymous_name).
         display_neptun (Optional[str]): Megjelenítendő neptun kód (ha nem anonim).
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
+        reactions (List[ChatReactionOut]): Reakciók.
     """
     id: int
     major: str
@@ -403,21 +426,9 @@ class ChatMessageOut(BaseModel):
     anonymous: bool
     display_name: str
     display_neptun: Optional[str]
+    reply_to_id: Optional[int] = None
+    reactions: List[ChatReactionOut] = []
 
-    class Config:
-        from_attributes = True
-
-class ChatReactionBase(BaseModel):
-    emoji: str
-
-class ChatReactionCreate(ChatReactionBase):
-    message_id: int
-
-class ChatReactionOut(ChatReactionBase):
-    id: int
-    message_id: int
-    user_id: int
-    created_at: datetime
     class Config:
         from_attributes = True
 

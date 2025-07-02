@@ -50,8 +50,8 @@ class User(Base):
     major = Column(SqlEnum(*MAJOR_ENUM, name="major_enum"), nullable=False)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
-    reset_token = Column(String(255), nullable=True)  # ÚJ
-    reset_token_expires = Column(DateTime, nullable=True)  # ÚJ
+    reset_token = Column(String(255), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     role = Column(Enum('user', 'admin'), default='user')
     created_at = Column(DateTime, nullable=False, default=func.now())
 
@@ -118,6 +118,11 @@ class ChatMessage(Base):
         message (str): Üzenet szövege.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e az üzenet.
+        anonymous_name (str): Névtelen üzenetnél megjelenő név.
+        reply_to_id (int): Az azonosítója annak az üzenetnek, amire válaszol (ha van).
+        reply_to (ChatMessage): Az üzenet, amire válaszol (ha van).
+        user (User): Az üzenet szerzője.
+        reactions (List[ChatReaction]): Az üzenethez tartozó reakciók.
     """
     __tablename__ = "chat_messages"
 
@@ -128,13 +133,21 @@ class ChatMessage(Base):
     timestamp = Column(DateTime)
     anonymous = Column(Boolean, default=False)
     anonymous_name = Column(String(32), nullable=True)
-
+    reply_to_id = Column(Integer, ForeignKey("chat_messages.id"), nullable=True)
+    reply_to = relationship("ChatMessage", remote_side=[id], uselist=False)
     user = relationship("User", back_populates="chat_messages")
     reactions = relationship("ChatReaction", back_populates="message", cascade="all, delete-orphan")
 
 class ChatReaction(Base):
     """
     Egy reakció egy üzenethez. Egy felhasználó csak egy reakciót adhat egy üzenetre.
+
+    Attributes:
+        id (int): Reakció azonosító.
+        message_id (int): Az üzenet azonosítója, amelyhez a reakció tartozik.
+        user_id (int): A reakciót adó felhasználó azonosítója.
+        emoji (str): Az emoji karakter.
+        created_at (datetime): A reakció létrehozásának ideje.
     """
     __tablename__ = "chat_reaction"
     id = Column(Integer, primary_key=True, index=True)

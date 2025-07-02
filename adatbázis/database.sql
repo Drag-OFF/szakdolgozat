@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Júl 02. 12:23
+-- Létrehozás ideje: 2025. Júl 02. 21:26
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -37,16 +37,26 @@ CREATE TABLE `chat_messages` (
   `message` text NOT NULL,
   `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
   `anonymous` tinyint(1) NOT NULL DEFAULT 0,
-  `anonymous_name` varchar(64) DEFAULT NULL
+  `anonymous_name` varchar(64) DEFAULT NULL,
+  `reply_to_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `chat_messages`
 --
 
-INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `anonymous`, `anonymous_name`) VALUES
-(1, 'Gazdaságinformatikus', 17, 'Sziasztok Hallgatók!', '2025-07-02 11:23:01', 0, NULL),
-(2, 'Gazdaságinformatikus', 51, 'Szia!', '2025-07-02 11:25:59', 0, NULL);
+INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `anonymous`, `anonymous_name`, `reply_to_id`) VALUES
+(1, 'Gazdaságinformatikus', 17, 'Sziasztok Hallgatók!', '2025-07-02 11:23:01', 0, NULL, NULL),
+(2, 'Gazdaságinformatikus', 51, 'Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! Szia! ', '2025-07-02 11:25:59', 0, NULL, NULL),
+(4, 'Gazdaságinformatikus', 17, 'Igen', '2025-07-02 13:00:39', 0, NULL, NULL),
+(5, 'Gazdaságinformatikus', 17, 'Szaisztok!', '2025-07-02 13:02:09', 0, NULL, NULL),
+(9, 'Gazdaságinformatikus', 17, 'asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd', '2025-07-02 17:17:38', 0, NULL, NULL),
+(10, 'Gazdaságinformatikus', 17, 'asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd', '2025-07-02 17:17:40', 0, NULL, NULL),
+(11, 'Gazdaságinformatikus', 17, 'asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd', '2025-07-02 17:17:41', 0, NULL, NULL),
+(12, 'Gazdaságinformatikus', 17, 'asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd', '2025-07-02 17:17:43', 0, NULL, NULL),
+(13, 'Gazdaságinformatikus', 17, 'Szerinted működik a válasz funkció?', '2025-07-02 19:18:58', 0, NULL, 2),
+(14, 'Gazdaságinformatikus', 17, 'Nézzük tudunk-e emojit beszúrni 🥰', '2025-07-02 19:23:23', 0, NULL, NULL),
+(15, 'Gazdaságinformatikus', 17, 'Igeeen! 🫠', '2025-07-02 19:23:40', 0, NULL, 13);
 
 -- --------------------------------------------------------
 
@@ -147,7 +157,8 @@ INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`
 --
 ALTER TABLE `chat_messages`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `fk_reply_to_message` (`reply_to_id`);
 
 --
 -- A tábla indexei `courses`
@@ -179,7 +190,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT a táblához `courses`
@@ -207,7 +218,8 @@ ALTER TABLE `users`
 -- Megkötések a táblához `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+  ADD CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `fk_reply_to_message` FOREIGN KEY (`reply_to_id`) REFERENCES `chat_messages` (`id`) ON DELETE SET NULL;
 
 --
 -- Megkötések a táblához `progress`

@@ -117,6 +117,7 @@ def get_chat_users(db: Session = Depends(get_db), user=Depends(get_current_user)
     users = db.query(models.User).all()
     return [
         schemas.ChatUser(
+            id=u.id,
             name=u.name,
             neptun=u.uid,
             role=u.role
