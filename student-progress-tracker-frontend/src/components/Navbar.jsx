@@ -9,6 +9,20 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 
 /**
+ * Segédfüggvény: JWT dekódolása (payload kinyerése)
+ */
+function getRoleFromToken() {
+  const token = localStorage.getItem("access_token");
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Navbar komponens.
  * @returns {JSX.Element} A navigációs sáv elemei.
  */
@@ -16,14 +30,21 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [isAdmin, setIsAdmin] = useState(false);
 
   /**
    * Ellenőrzi, hogy van-e JWT token a localStorage-ben, és frissíti a bejelentkezési állapotot.
    * Figyeli a storage eseményt is, hogy több tab esetén is frissüljön.
    */
   useEffect(() => {
-    setLoggedIn(!!localStorage.getItem("access_token"));
-    const handler = () => setLoggedIn(!!localStorage.getItem("access_token"));
+    const token = localStorage.getItem("access_token");
+    setLoggedIn(!!token);
+    setIsAdmin(getRoleFromToken() === "admin");
+    const handler = () => {
+      const token = localStorage.getItem("access_token");
+      setLoggedIn(!!token);
+      setIsAdmin(getRoleFromToken() === "admin");
+    };
     window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }, []);
@@ -34,6 +55,7 @@ export default function Navbar() {
   function handleLogout() {
     localStorage.removeItem("access_token");
     setLoggedIn(false);
+    setIsAdmin(false);
     setOpen(false);
     navigate("/login");
   }
@@ -55,6 +77,7 @@ export default function Navbar() {
       </button>
       <div className={`navbar-links${open ? " open" : ""}`}>
         <Link to="/" onClick={() => setOpen(false)}>Főoldal</Link>
+        {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
         {!loggedIn && (
           <>
             <Link to="/login" onClick={() => setOpen(false)}>Bejelentkezés</Link>
