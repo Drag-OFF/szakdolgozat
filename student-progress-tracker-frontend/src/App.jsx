@@ -13,6 +13,8 @@ import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ResendVerify from "./pages/ResendVerify";
+import Chat from "./pages/Chat";
+import Admin from "./pages/Admin";
 
 /**
  * App komponens.
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/resend-verify" element={<ResendVerify />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
       <Footer />

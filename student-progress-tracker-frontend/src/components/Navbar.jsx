@@ -78,6 +78,9 @@ export default function Navbar() {
       <div className={`navbar-links${open ? " open" : ""}`}>
         <Link to="/" onClick={() => setOpen(false)}>Főoldal</Link>
         {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
+        {loggedIn && (
+          <Link to="/chat" onClick={() => setOpen(false)}>Chat</Link>
+        )}
         {!loggedIn && (
           <>
             <Link to="/login" onClick={() => setOpen(false)}>Bejelentkezés</Link>

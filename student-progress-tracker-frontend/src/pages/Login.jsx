@@ -39,6 +39,7 @@ export default function Login() {
       const result = await resp.json();
       if (resp.ok && result.access_token) {
         localStorage.setItem("access_token", result.access_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
         setMsg("Sikeres bejelentkezés!");
         setTimeout(() => {
           window.location.href = "/";
