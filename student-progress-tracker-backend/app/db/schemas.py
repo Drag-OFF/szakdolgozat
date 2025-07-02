@@ -328,6 +328,11 @@ class ChatMessageBase(BaseModel):
     timestamp: datetime
     anonymous: bool
 
+class ChatUser(BaseModel):
+    name: str
+    neptun: str
+    role: str
+
 class ChatMessageCreate(ChatMessageBase):
     """
     Chat üzenet létrehozási séma.
@@ -374,6 +379,32 @@ class ChatMessage(ChatMessageBase):
 
     class Config:
         from_attributes = True
+
+class ChatMessageOut(BaseModel):
+    """
+    Chat üzenet válasz séma (megjelenítéshez).
+
+    Attributes:
+        id (int): Üzenet azonosító.
+        major (str): Szak.
+        user_id (Optional[int]): Felhasználó ID.
+        message (str): Üzenet.
+        timestamp (datetime): Időbélyeg.
+        anonymous (bool): Névtelen-e.
+        display_name (str): Megjelenítendő név (név vagy anonymous_name).
+        display_neptun (Optional[str]): Megjelenítendő neptun kód (ha nem anonim).
+    """
+    id: int
+    major: str
+    user_id: Optional[int]
+    message: str
+    timestamp: datetime
+    anonymous: bool
+    display_name: str
+    display_neptun: Optional[str]
+
+    class Config:
+        orm_mode = True
 
 class Token(BaseModel):
     """

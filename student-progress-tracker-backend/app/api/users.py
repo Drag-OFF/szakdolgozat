@@ -7,7 +7,7 @@ from app.db.schemas import EmailRequest
 from app.services.users_service import UsersService
 from typing import List
 from mailjet_rest import Client
-from app.utils import create_access_token, admin_required
+from app.utils import create_access_token, admin_required, get_current_user
 import uuid
 
 router = APIRouter()
@@ -107,6 +107,21 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         return db_user
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@router.get("/chat-users", response_model=List[schemas.ChatUser])
+def get_chat_users(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    """
+    Chathez szükséges felhasználói adatok (név, neptun, role) listázása.
+    Csak bejelentkezett felhasználók számára!
+    """
+    users = db.query(models.User).all()
+    return [
+        schemas.ChatUser(
+            name=u.name,
+            neptun=u.uid,
+            role=u.role
+        ) for u in users
+    ]
 
 @router.get("/{user_id}", response_model=schemas.User, dependencies=[Depends(admin_required)])
 def get_user(user_id: int, db: Session = Depends(get_db)):
@@ -205,6 +220,13 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
     try:
         user = users_service.login_user(login_data)
         access_token = create_access_token({"user_id": user.id, "role": user.role})
-        return {"access_token": access_token, "token_type": "bearer"}
+        user_profile = {
+            "id": user.id,
+            "name": user.name,
+            "neptun": user.uid,
+            "role": user.role,
+            "major": user.major
+        }
+        return {"access_token": access_token, "token_type": "bearer", "user": user_profile}
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

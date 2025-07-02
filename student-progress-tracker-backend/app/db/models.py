@@ -126,5 +126,6 @@ class ChatMessage(Base):
     message = Column(Text, nullable=False)
     timestamp = Column(DateTime)
     anonymous = Column(Boolean, default=False)
+    anonymous_name = Column(String(32), nullable=True)
 
     user = relationship("User", back_populates="chat_messages")

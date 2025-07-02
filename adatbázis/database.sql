@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Jún 26. 20:14
+-- Létrehozás ideje: 2025. Júl 02. 12:23
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -36,17 +36,17 @@ CREATE TABLE `chat_messages` (
   `user_id` int(11) DEFAULT NULL,
   `message` text NOT NULL,
   `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
-  `anonymous` tinyint(1) NOT NULL DEFAULT 0
+  `anonymous` tinyint(1) NOT NULL DEFAULT 0,
+  `anonymous_name` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `chat_messages`
 --
 
-INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `anonymous`) VALUES
-(1, 'Programtervező Informatikus', 1, 'Sziasztok! Valaki tud segíteni az adatbázis háziban?', '2024-06-10 14:00:00', 0),
-(2, 'Fizikus', 2, 'Üdv mindenkinek!', '2024-06-10 14:05:00', 1),
-(3, 'Programtervező Informatikus', 3, 'Kedves hallgatók, ne felejtsétek el a beadandót!', '2024-06-10 15:00:00', 0);
+INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `anonymous`, `anonymous_name`) VALUES
+(1, 'Gazdaságinformatikus', 17, 'Sziasztok Hallgatók!', '2025-07-02 11:23:01', 0, NULL),
+(2, 'Gazdaságinformatikus', 51, 'Szia!', '2025-07-02 11:25:59', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -134,8 +134,9 @@ INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`
 (1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL, NULL, NULL),
 (2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL, NULL, NULL),
 (3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL, NULL, NULL),
-(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$D89SEuP582pRUAUipyy/f.K1OZmqhJPq7BaeGF9tioApP3yUbYpOC', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, '777a214d-f24b-42d0-b3c0-ab470a9bc5b8', '2025-06-26 19:10:25'),
-(26, 'GBG15D', 'buskristof415@gmail.com', '$2b$12$LB44D11dm2AS9vviNAeJRuDi7OOFPIU8F2RJmmMOLU/z8RA1oZo8u', 'Bús Kristóf', '2010-06-11', '666666AD', '666666AD', 'Lakatos Máriané', 'Mérnökinformatikus', 1, 'user', '2025-06-24 22:42:08', NULL, 'c3222117-8329-4995-b740-114181a6545b', '2025-06-26 19:06:28');
+(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$9mrHAsD7an5.LNBOxcJ8T.uGXX7GCtd5sX0fNTCBDmFx0vsQtMxPS', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, NULL, NULL),
+(26, 'GBG15D', 'buskristof415@gmail.com', '$2b$12$LB44D11dm2AS9vviNAeJRuDi7OOFPIU8F2RJmmMOLU/z8RA1oZo8u', 'Bús Kristóf', '2010-06-11', '666666AD', '666666AD', 'Lakatos Máriané', 'Mérnökinformatikus', 1, 'user', '2025-06-24 22:42:08', NULL, 'c3222117-8329-4995-b740-114181a6545b', '2025-06-26 19:06:28'),
+(51, 'HEZUGN', 'kiss.evelin2007@gmail.com', '$2b$12$X/Wz53SVyRwruJkvOqaVAOSWS7b0arOYozOCOmLpq8s3FVBxD.XzC', 'Harkai Dominik', '2001-11-01', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'user', '2025-07-01 15:43:15', NULL, '96e48bfa-532d-4e1f-856d-70a15cc4d29b', '2025-07-01 16:18:57');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -196,7 +197,7 @@ ALTER TABLE `progress`
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- Megkötések a kiírt táblákhoz
