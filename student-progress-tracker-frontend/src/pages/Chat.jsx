@@ -2,11 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Picker from "emoji-picker-react";
 import "../styles/Chat.css";
 
-/**
- * Chat oldal komponens.
- */
 export default function Chat() {
-  // Állapotok
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [input, setInput] = useState("");
@@ -16,10 +12,8 @@ export default function Chat() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Bejelentkezett felhasználó adatai
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
-  // Üzenetek és felhasználók betöltése
   useEffect(() => {
     fetchMessages();
     fetchUsers();
@@ -39,7 +33,7 @@ export default function Chat() {
 
   async function fetchUsers() {
     try {
-      const res = await fetch("/api/users/chat-users", {
+      const res = await fetch("http://enaploproject.ddns.net:8000/api/users/chat-users", {
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
       });
       if (res.ok) {
@@ -53,7 +47,6 @@ export default function Chat() {
     }
   }
 
-  // Görgetés az utolsó üzenethez
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -61,7 +54,7 @@ export default function Chat() {
   async function sendMessage() {
     if (!input.trim()) return;
     try {
-      const res = await fetch("/api/messages/", {
+      const res = await fetch("http://enaploproject.ddns.net:8000/api/messages/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +63,9 @@ export default function Chat() {
         body: JSON.stringify({
           message: input,
           major: currentUser.major,
-          anonymous: isAnonymous
+          anonymous: isAnonymous,
+          timestamp: new Date().toISOString(),
+          user_id: currentUser.id
         })
       });
       if (res.ok) {
@@ -85,28 +80,18 @@ export default function Chat() {
     setInput(input + emojiObject.emoji);
   }
 
-  // Egy felhasználó csak egy reakciót adhat egy üzenetre, cserélheti is
-  function addReaction(msgId, emoji) {
-    setMessages(msgs =>
-      msgs.map(m => {
-        if (m.id !== msgId) return m;
-        const userReactions = { ...(m.userReactions || {}) };
-        const prevEmoji = userReactions[currentUser.id];
-        if (prevEmoji && prevEmoji !== emoji) {
-          m.reactions[prevEmoji] = (m.reactions[prevEmoji] || 1) - 1;
-          if (m.reactions[prevEmoji] <= 0) delete m.reactions[prevEmoji];
-        }
-        userReactions[currentUser.id] = emoji;
-        return {
-          ...m,
-          reactions: {
-            ...m.reactions,
-            [emoji]: Object.values(userReactions).filter(e => e === emoji).length,
-          },
-          userReactions,
-        };
-      })
-    );
+  async function addReaction(msgId, emoji) {
+    try {
+      await fetch("http://enaploproject.ddns.net:8000/api/messages/" + msgId + "/reactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify({ emoji })
+      });
+      await fetchMessages();
+    } catch (e) {}
     setReactingTo(null);
   }
 
@@ -128,9 +113,19 @@ export default function Chat() {
     return user ? user.name : "Ismeretlen";
   }
 
+  function groupReactions(msg) {
+    const groups = {};
+    if (!msg.reactions) return groups;
+    msg.reactions.forEach(r => {
+      if (!groups[r.emoji]) groups[r.emoji] = [];
+      groups[r.emoji].push(r.user_id);
+    });
+    return groups;
+  }
+
   return (
     <div className="chat-container">
-      {/* Felhasználók oldalsáv */}
+      {/* Oldalsáv */}
       <div className="chat-users">
         <div className="chat-users-section">
           <div className="chat-users-title">Adminok</div>
@@ -156,108 +151,103 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Chat közép */}
+      {/* Chat fő rész */}
       <div className="chat-main">
-        <div className="chat-messages">
-          {messages.length === 0 && (
-            <div className="chat-no-messages">Nincs még üzenet.</div>
-          )}
+        <div className="chat-messages-list">
           {messages.map(msg => {
-            const isOwn = Number(msg.user_id) === Number(currentUser.id);
-            const isAdmin = currentUser.role === "admin";
+            const reactionsGrouped = groupReactions(msg);
+            const isOwn = String(msg.user_id) === String(currentUser.id);
             return (
               <div
                 key={msg.id}
-                className={`chat-message-row ${isOwn ? "own" : "other"}`}
-                style={{ position: "relative" }}
+                className={`chat-message${isOwn ? " own" : ""}`}
               >
-                {/* Más üzenete: név, neptun */}
-                {!isOwn && (
-                  <div className="chat-message-meta">
-                    <span className="chat-message-sender">
-                      {msg.display_name}
-                      {msg.display_neptun && <> ({msg.display_neptun})</>}
-                    </span>
-                  </div>
-                )}
-                <div className={`chat-message-bubble ${isOwn ? "own" : "other"}`}>
-                  <span>{msg.message}</span>
-                </div>
-                {/* Reakciók az üzenet alatt, mindig bal oldalon */}
-                <div
-                  className={`chat-message-reactions-row`}
-                  style={{
-                    display: "flex",
-                    gap: "4px",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    marginTop: "2px",
-                    marginBottom: "2px"
-                  }}
-                >
-                  {msg.reactions &&
-                    Object.entries(msg.reactions).map(([emoji, count]) => (
-                      <span
-                        key={emoji}
-                        className="chat-reaction"
-                        onMouseEnter={() => setHoveredReaction({ msgId: msg.id, emoji })}
-                        onMouseLeave={() => setHoveredReaction(null)}
-                        style={{ position: "relative", cursor: "pointer" }}
-                      >
-                        {emoji} {count}
-                        {/* Buborék a nevekkel */}
-                        {hoveredReaction &&
-                          hoveredReaction.msgId === msg.id &&
-                          hoveredReaction.emoji === emoji &&
-                          msg.userReactions && (
-                            <div className="chat-reaction-tooltip">
-                              {Object.entries(msg.userReactions)
-                                .filter(([_, e]) => e === emoji)
-                                .map(([uid]) => (
-                                  <div key={uid}>{getUserName(uid)}</div>
-                                ))}
-                            </div>
-                          )}
-                      </span>
-                    ))}
-                </div>
-                {/* Dátum minden üzenetnél bal oldalon */}
-                <div className="chat-message-date">
-                  {formatDate(msg.timestamp)}
-                </div>
-                {/* Akció ikonok csak hoverre */}
-                <div className="chat-message-actions">
-                  {/* Emoji reakció */}
-                  <button
-                    className="chat-action-btn"
-                    title="Reakció"
-                    onClick={() => setReactingTo(msg.id)}
-                    style={{ background: "none", border: "none", cursor: "pointer" }}
-                  >
-                    <span role="img" aria-label="emoji">😊</span>
-                  </button>
-                  {/* Válasz ikon */}
-                  <button
-                    className="chat-action-btn"
-                    title="Válasz"
-                    onClick={() => {/* válasz logika */}}
-                    style={{ background: "none", border: "none", cursor: "pointer" }}
-                  >
-                    <img src="https://fonts.gstatic.com/s/i/materialicons/reply/v6/24px.svg" alt="Válasz" />
-                  </button>
-                  {/* Admin 3 pötty */}
-                  {isAdmin && (
-                    <button
-                      className="chat-action-btn"
-                      title="Admin műveletek"
-                      onClick={() => {/* admin menü logika */}}
-                      style={{ background: "none", border: "none", cursor: "pointer" }}
-                    >
-                      <img src="https://fonts.gstatic.com/s/i/materialicons/more_vert/v6/24px.svg" alt="Továbbiak" />
-                    </button>
+                <div className="chat-message-header">
+                  {msg.display_name}
+                  {msg.display_neptun && (
+                    <span className="chat-message-neptun"> ({msg.display_neptun})</span>
                   )}
                 </div>
-                {/* Emoji picker csak ha aktív */}
+                <div
+                  className="chat-message-row"
+                  style={{ justifyContent: isOwn ? "flex-end" : "flex-start" }}
+                >
+                  <div className="chat-bubble-actions-wrapper">
+                    <div className="chat-message-bubble">
+                      <span className="chat-message-text">{msg.message}</span>
+                    </div>
+                    <div className={`chat-message-actions${isOwn ? " left" : " right"}`}>
+                      <button
+                        className="chat-action-btn"
+                        title="Reakció"
+                        onClick={() => setReactingTo(msg.id)}
+                      >
+                        <span role="img" aria-label="emoji">😊</span>
+                      </button>
+                      <button
+                        className="chat-action-btn"
+                        title="Válasz"
+                        onClick={() => {/* válasz logika */}}
+                      >
+                        <img src="https://fonts.gstatic.com/s/i/materialicons/reply/v6/24px.svg" alt="Válasz" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {/* Dátum + reakciók */}
+                <div className={`chat-message-footer${isOwn ? " own" : ""}`}>
+                  {isOwn ? (
+                    <>
+                      <div className="chat-message-reactions-row own">
+                        {Object.entries(reactionsGrouped).map(([emoji, userIds]) => (
+                          <span
+                            key={emoji}
+                            className="chat-reaction"
+                            onMouseEnter={() => setHoveredReaction({ msgId: msg.id, emoji })}
+                            onMouseLeave={() => setHoveredReaction(null)}
+                          >
+                            {emoji} <span className="chat-reaction-count">{userIds.length}</span>
+                            {hoveredReaction &&
+                              hoveredReaction.msgId === msg.id &&
+                              hoveredReaction.emoji === emoji && (
+                                <div className="chat-reaction-tooltip">
+                                  {userIds.map(uid => (
+                                    <div key={uid}>{getUserName(uid)}</div>
+                                  ))}
+                                </div>
+                              )}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="chat-message-date" style={{marginLeft: "auto"}}>{formatDate(msg.timestamp)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="chat-message-date">{formatDate(msg.timestamp)}</span>
+                      <div className="chat-message-reactions-row">
+                        {Object.entries(reactionsGrouped).map(([emoji, userIds]) => (
+                          <span
+                            key={emoji}
+                            className="chat-reaction"
+                            onMouseEnter={() => setHoveredReaction({ msgId: msg.id, emoji })}
+                            onMouseLeave={() => setHoveredReaction(null)}
+                          >
+                            {emoji} <span className="chat-reaction-count">{userIds.length}</span>
+                            {hoveredReaction &&
+                              hoveredReaction.msgId === msg.id &&
+                              hoveredReaction.emoji === emoji && (
+                                <div className="chat-reaction-tooltip">
+                                  {userIds.map(uid => (
+                                    <div key={uid}>{getUserName(uid)}</div>
+                                  ))}
+                                </div>
+                              )}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
                 {reactingTo === msg.id && (
                   <div className="chat-reaction-picker">
                     <Picker
@@ -294,7 +284,7 @@ export default function Chat() {
             onKeyDown={e => e.key === "Enter" && sendMessage()}
             placeholder="Írj üzenetet..."
           />
-          <label style={{ marginLeft: 8, marginRight: 8 }}>
+          <label className="chat-anon-label">
             <input
               type="checkbox"
               checked={isAnonymous}
