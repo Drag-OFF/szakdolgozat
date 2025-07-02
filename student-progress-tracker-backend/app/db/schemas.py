@@ -1,5 +1,6 @@
 from pydantic import BaseModel, validator, EmailStr, Field
 import re
+from datetime import datetime
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
@@ -404,7 +405,21 @@ class ChatMessageOut(BaseModel):
     display_neptun: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+class ChatReactionBase(BaseModel):
+    emoji: str
+
+class ChatReactionCreate(ChatReactionBase):
+    message_id: int
+
+class ChatReactionOut(ChatReactionBase):
+    id: int
+    message_id: int
+    user_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
 
 class Token(BaseModel):
     """

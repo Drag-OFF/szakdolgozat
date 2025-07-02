@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.db.models import ChatMessage, User
+from app.db.models import ChatMessage, ChatReaction
 from app.db.schemas import ChatMessageCreate
 from fastapi import HTTPException
 import random
@@ -74,3 +74,45 @@ class ChatService:
         if message is None:
             raise HTTPException(status_code=404, detail="Message not found")
         return message
+    
+    def add_or_update_reaction(self, message_id: int, user_id: int, emoji: str) -> ChatReaction:
+        """
+        Egy reakció hozzáadása vagy frissítése egy üzenethez.
+
+        Ha a felhasználó már reagált erre az üzenetre, a reakció emoji frissül.
+        Ha még nem reagált, új reakció jön létre.
+
+        Args:
+            message_id (int): Az üzenet azonosítója.
+            user_id (int): A felhasználó azonosítója.
+            emoji (str): Az emoji karakter.
+
+        Returns:
+            ChatReaction: A létrehozott vagy frissített reakció.
+        """
+        print(f"add_or_update_reaction: message_id={message_id}, user_id={user_id}, emoji={emoji}")
+        reaction = (
+            self.db.query(ChatReaction)
+            .filter_by(message_id=message_id, user_id=user_id)
+            .first()
+        )
+        if reaction:
+            reaction.emoji = emoji
+        else:
+            reaction = ChatReaction(message_id=message_id, user_id=user_id, emoji=emoji)
+            self.db.add(reaction)
+        self.db.commit()
+        self.db.refresh(reaction)
+        return reaction
+
+    def get_reactions_for_message(self, message_id: int) -> list[ChatReaction]:
+        """
+        Egy üzenethez tartozó összes reakció lekérése.
+
+        Args:
+            message_id (int): Az üzenet azonosítója.
+
+        Returns:
+            list[ChatReaction]: A reakciók listája.
+        """
+        return self.db.query(ChatReaction).filter_by(message_id=message_id).all()

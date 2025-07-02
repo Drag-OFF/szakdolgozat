@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
+from datetime import datetime
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy.sql import func
@@ -129,3 +130,18 @@ class ChatMessage(Base):
     anonymous_name = Column(String(32), nullable=True)
 
     user = relationship("User", back_populates="chat_messages")
+    reactions = relationship("ChatReaction", back_populates="message", cascade="all, delete-orphan")
+
+class ChatReaction(Base):
+    """
+    Egy reakció egy üzenethez. Egy felhasználó csak egy reakciót adhat egy üzenetre.
+    """
+    __tablename__ = "chat_reaction"
+    id = Column(Integer, primary_key=True, index=True)
+    message_id = Column(Integer, ForeignKey("chat_messages.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    emoji = Column(String(32), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    __table_args__ = (UniqueConstraint("message_id", "user_id", name="unique_reaction_per_user_per_message"),)
+
+    message = relationship("ChatMessage", back_populates="reactions")

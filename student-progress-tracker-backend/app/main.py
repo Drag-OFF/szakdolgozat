@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, courses, progress, users, forgot_password, reset_password
 
 app = FastAPI()
-
+print("### FASTAPI ELINDULT ###")
 # CORS konfiguráció
 app.add_middleware(
     CORSMiddleware,
