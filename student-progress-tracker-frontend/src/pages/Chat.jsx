@@ -10,6 +10,7 @@ export default function Chat() {
   const [reactingTo, setReactingTo] = useState(null);
   const [hoveredReaction, setHoveredReaction] = useState(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [replyTo, setReplyTo] = useState(null); // <-- ÚJ
   const chatEndRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
@@ -65,19 +66,21 @@ export default function Chat() {
           major: currentUser.major,
           anonymous: isAnonymous,
           timestamp: new Date().toISOString(),
-          user_id: currentUser.id
+          user_id: currentUser.id,
+          reply_to_id: replyTo ? replyTo.id : null // <-- ÚJ
         })
       });
       if (res.ok) {
         setInput("");
         setShowEmoji(false);
+        setReplyTo(null); // <-- ÚJ
         fetchMessages();
       }
     } catch (e) {}
   }
 
-  function onEmojiClick(event, emojiObject) {
-    setInput(input + emojiObject.emoji);
+  function onEmojiClick(emojiObject) {
+    setInput(prev => prev + emojiObject.emoji);
   }
 
   async function addReaction(msgId, emoji) {
@@ -115,7 +118,7 @@ export default function Chat() {
 
   function groupReactions(msg) {
     const groups = {};
-    if (!msg.reactions) return groups;
+    if (!msg.reactions || !Array.isArray(msg.reactions)) return groups;
     msg.reactions.forEach(r => {
       if (!groups[r.emoji]) groups[r.emoji] = [];
       groups[r.emoji].push(r.user_id);
@@ -123,30 +126,45 @@ export default function Chat() {
     return groups;
   }
 
+  // Segédfüggvény: egy üzenet rövidített szövege (max 60 karakter)
+  function shortMsg(msg) {
+    if (!msg) return "";
+    let txt = msg.message.replace(/\s+/g, " ").trim();
+    if (txt.length > 60) txt = txt.slice(0, 57) + "...";
+    return txt;
+  }
+
+  // Segédfüggvény: válaszolt üzenet keresése id alapján
+  function findMessageById(id) {
+    return messages.find(m => String(m.id) === String(id));
+  }
+
   return (
     <div className="chat-container">
       {/* Oldalsáv */}
       <div className="chat-users">
-        <div className="chat-users-section">
-          <div className="chat-users-title">Adminok</div>
-          <div className="chat-users-list scrollable">
-            {admins.length === 0 && <div className="chat-user">Nincs admin</div>}
-            {admins.map(u => (
-              <div key={u.neptun} className="chat-user">
-                {u.name} <span className="chat-user-neptun">({u.neptun})</span>
-              </div>
-            ))}
+        <div className="chat-users-scroll">
+          <div className="chat-users-section">
+            <div className="chat-users-title">Adminok</div>
+            <div className="chat-users-list">
+              {admins.length === 0 && <div className="chat-user">Nincs admin</div>}
+              {admins.map(u => (
+                <div key={u.neptun} className="chat-user">
+                  {u.name} <span className="chat-user-neptun">({u.neptun})</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="chat-users-section">
-          <div className="chat-users-title">Felhasználók</div>
-          <div className="chat-users-list scrollable">
-            {normalUsers.length === 0 && <div className="chat-user">Nincs felhasználó</div>}
-            {normalUsers.map(u => (
-              <div key={u.neptun} className="chat-user">
-                {u.name} <span className="chat-user-neptun">({u.neptun})</span>
-              </div>
-            ))}
+          <div className="chat-users-section">
+            <div className="chat-users-title">Felhasználók</div>
+            <div className="chat-users-list">
+              {normalUsers.length === 0 && <div className="chat-user">Nincs felhasználó</div>}
+              {normalUsers.map(u => (
+                <div key={u.neptun} className="chat-user">
+                  {u.name} <span className="chat-user-neptun">({u.neptun})</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -157,11 +175,27 @@ export default function Chat() {
           {messages.map(msg => {
             const reactionsGrouped = groupReactions(msg);
             const isOwn = String(msg.user_id) === String(currentUser.id);
+            // Válaszolt üzenet, ha van
+            const repliedMsg = msg.reply_to_id ? findMessageById(msg.reply_to_id) : null;
             return (
               <div
                 key={msg.id}
                 className={`chat-message${isOwn ? " own" : ""}`}
               >
+                {/* Válaszolt üzenet megjelenítése */}
+                {repliedMsg && (
+                  <div className="chat-reply-preview">
+                    <span className="chat-reply-author">
+                      {repliedMsg.anonymous
+                        ? (repliedMsg.anonymous_name || "Anonim")
+                        : getUserName(repliedMsg.user_id)
+                      }
+                    </span>
+                    <span className="chat-reply-text">
+                      {shortMsg(repliedMsg)}
+                    </span>
+                  </div>
+                )}
                 <div className="chat-message-header">
                   {msg.display_name}
                   {msg.display_neptun && (
@@ -187,7 +221,7 @@ export default function Chat() {
                       <button
                         className="chat-action-btn"
                         title="Válasz"
-                        onClick={() => {/* válasz logika */}}
+                        onClick={() => setReplyTo(msg)}
                       >
                         <img src="https://fonts.gstatic.com/s/i/materialicons/reply/v6/24px.svg" alt="Válasz" />
                       </button>
@@ -215,11 +249,12 @@ export default function Chat() {
                                     <div key={uid}>{getUserName(uid)}</div>
                                   ))}
                                 </div>
-                              )}
+                              )
+                            }
                           </span>
                         ))}
                       </div>
-                      <span className="chat-message-date" style={{marginLeft: "auto"}}>{formatDate(msg.timestamp)}</span>
+                      <span className="chat-message-date">{formatDate(msg.timestamp)}</span>
                     </>
                   ) : (
                     <>
@@ -241,7 +276,8 @@ export default function Chat() {
                                     <div key={uid}>{getUserName(uid)}</div>
                                   ))}
                                 </div>
-                              )}
+                              )
+                            }
                           </span>
                         ))}
                       </div>
@@ -264,6 +300,20 @@ export default function Chat() {
           })}
           <div ref={chatEndRef} />
         </div>
+        {/* Válaszolt üzenet előnézet az input felett */}
+        {replyTo && (
+          <div className="chat-reply-bar">
+            <span className="chat-reply-bar-label">Válasz:</span>
+            <span className="chat-reply-bar-author">
+              {replyTo.anonymous
+                ? (replyTo.anonymous_name || "Anonim")
+                : getUserName(replyTo.user_id)
+              }
+            </span>
+            <span className="chat-reply-bar-text">{shortMsg(replyTo)}</span>
+            <button className="chat-reply-bar-close" onClick={() => setReplyTo(null)} title="Válasz törlése">×</button>
+          </div>
+        )}
         <div className="chat-input-row">
           <button
             className="chat-emoji-btn"
