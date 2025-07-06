@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
+import { isValidEmail, isValidNeptun } from "../utils";
+import AuthInput from "../components/AuthInput";
 
 /**
  * Login komponens.
@@ -29,6 +31,15 @@ export default function Login() {
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
+    // Validáció: legyen e-mail vagy neptun
+    if (!isValidEmail(uid) && !isValidNeptun(uid)) {
+      setMsg("Adj meg érvényes e-mail címet vagy Neptun kódot!");
+      return;
+    }
+    if (!password) {
+      setMsg("A jelszó nem lehet üres!");
+      return;
+    }
     const data = uid.includes("@") ? { email: uid, password } : { uid, password };
     try {
       const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/login", {
@@ -60,24 +71,21 @@ export default function Login() {
       </div>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h3>Hallgatói bejelentkezés</h3>
-        <label htmlFor="login-uid">Azonosító (Neptun vagy e-mail)</label>
-        <input
+
+        <AuthInput
+          label="E-mail vagy Neptun kód"
           id="login-uid"
-          type="text"
-          placeholder="Azonosító (Neptun vagy e-mail)"
           value={uid}
           onChange={e => setUid(e.target.value)}
-          required
         />
-        <label htmlFor="login-password">Jelszó</label>
-        <input
+        <AuthInput
+          label="Jelszó"
           id="login-password"
           type="password"
-          placeholder="Jelszó"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          required
         />
+
         <button type="submit">Bejelentkezés</button>
         <div className="auth-msg">{msg}</div>
         <div className="auth-link">

@@ -1,10 +1,21 @@
+body, html, #root {
+  font-family: 'Montserrat', 'Roboto', 'Segoe UI', Arial, sans-serif;
+  font-size: 17px;
+  background: none;
+  min-height: 100vh;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
 .auth-container {
   display: flex;
-  min-height: 70vh;
   justify-content: center;
   align-items: flex-start;
   margin-top: 3rem;
   gap: 2rem;
+  flex: 1 1 auto;
 }
 .auth-image {
   text-align: center;
@@ -19,7 +30,7 @@
   width: 680px;
   height: 440px;
   object-fit: cover;
-  border-radius: 40px 10px 40px 10px; /* hullámos lekerekítés */
+  border-radius: 40px 10px 40px 10px;
   box-shadow: 0 8px 32px #00336633, 0 1.5px 8px #1976d244;
   border: 3px solid #1976d2;
   margin-bottom: 1.2rem;

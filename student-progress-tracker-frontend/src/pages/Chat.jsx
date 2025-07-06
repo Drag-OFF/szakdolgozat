@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Picker from "emoji-picker-react";
 import "../styles/Chat.css";
+import { formatDate, shortMsg, groupReactions, getUserName, findMessageById } from "../utils";
 
+/**
+ * Chat oldal fő komponense.
+ * Üzenetek, felhasználók, reakciók, válasz, emoji, anonim üzenet, stb.
+ * @returns {JSX.Element} A chat felület.
+ */
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -10,16 +16,31 @@ export default function Chat() {
   const [reactingTo, setReactingTo] = useState(null);
   const [hoveredReaction, setHoveredReaction] = useState(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [replyTo, setReplyTo] = useState(null); // <-- ÚJ
+  const [replyTo, setReplyTo] = useState(null);
   const chatEndRef = useRef(null);
 
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
 
+  /**
+   * Üzenetek és felhasználók lekérése oldal betöltésekor.
+   */
   useEffect(() => {
     fetchMessages();
     fetchUsers();
   }, []);
 
+  /**
+   * Automatikus görgetés a chat aljára, ha van új üzenet.
+   */
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  /**
+   * Lekéri az összes üzenetet a backendről, és beállítja a messages state-et.
+   * @async
+   * @returns {Promise<void>}
+   */
   async function fetchMessages() {
     try {
       const res = await fetch("http://enaploproject.ddns.net:8000/api/messages/", {
@@ -32,6 +53,11 @@ export default function Chat() {
     } catch (e) {}
   }
 
+  /**
+   * Lekéri a chat felhasználókat a backendről, és beállítja a users state-et.
+   * @async
+   * @returns {Promise<void>}
+   */
   async function fetchUsers() {
     try {
       const res = await fetch("http://enaploproject.ddns.net:8000/api/users/chat-users", {
@@ -48,10 +74,12 @@ export default function Chat() {
     }
   }
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
+  /**
+   * Új üzenet elküldése a backendnek.
+   * Siker esetén üríti az inputot, bezárja az emoji pickert, törli a reply-t, és frissíti az üzeneteket.
+   * @async
+   * @returns {Promise<void>}
+   */
   async function sendMessage() {
     if (!input.trim()) return;
     try {
@@ -67,22 +95,33 @@ export default function Chat() {
           anonymous: isAnonymous,
           timestamp: new Date().toISOString(),
           user_id: currentUser.id,
-          reply_to_id: replyTo ? replyTo.id : null // <-- ÚJ
+          reply_to_id: replyTo ? replyTo.id : null
         })
       });
       if (res.ok) {
         setInput("");
         setShowEmoji(false);
-        setReplyTo(null); // <-- ÚJ
+        setReplyTo(null);
         fetchMessages();
       }
     } catch (e) {}
   }
 
+  /**
+   * Emoji picker kiválasztott emoji hozzáadása az inputhoz.
+   * @param {Object} emojiObject - Az emoji-picker objektuma (emoji property-vel).
+   */
   function onEmojiClick(emojiObject) {
     setInput(prev => prev + emojiObject.emoji);
   }
 
+  /**
+   * Reakció (emoji) hozzáadása egy üzenethez.
+   * @param {number|string} msgId - Az üzenet azonosítója.
+   * @param {string} emoji - Az emoji karakter.
+   * @async
+   * @returns {Promise<void>}
+   */
   async function addReaction(msgId, emoji) {
     try {
       await fetch("http://enaploproject.ddns.net:8000/api/messages/" + msgId + "/reactions", {
@@ -98,46 +137,9 @@ export default function Chat() {
     setReactingTo(null);
   }
 
-  function formatDate(date) {
-    const now = new Date();
-    const d = new Date(date);
-    const isToday = now.toDateString() === d.toDateString();
-    if (isToday) {
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
-    return d.toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-  }
-
+  // Admin és normál felhasználók szétválogatása
   const admins = users.filter(u => u.role === "admin");
   const normalUsers = users.filter(u => u.role !== "admin");
-
-  function getUserName(userId) {
-    const user = users.find(u => String(u.id) === String(userId));
-    return user ? user.name : "Ismeretlen";
-  }
-
-  function groupReactions(msg) {
-    const groups = {};
-    if (!msg.reactions || !Array.isArray(msg.reactions)) return groups;
-    msg.reactions.forEach(r => {
-      if (!groups[r.emoji]) groups[r.emoji] = [];
-      groups[r.emoji].push(r.user_id);
-    });
-    return groups;
-  }
-
-  // Segédfüggvény: egy üzenet rövidített szövege (max 60 karakter)
-  function shortMsg(msg) {
-    if (!msg) return "";
-    let txt = msg.message.replace(/\s+/g, " ").trim();
-    if (txt.length > 60) txt = txt.slice(0, 57) + "...";
-    return txt;
-  }
-
-  // Segédfüggvény: válaszolt üzenet keresése id alapján
-  function findMessageById(id) {
-    return messages.find(m => String(m.id) === String(id));
-  }
 
   return (
     <div className="chat-container">
@@ -175,8 +177,7 @@ export default function Chat() {
           {messages.map(msg => {
             const reactionsGrouped = groupReactions(msg);
             const isOwn = String(msg.user_id) === String(currentUser.id);
-            // Válaszolt üzenet, ha van
-            const repliedMsg = msg.reply_to_id ? findMessageById(msg.reply_to_id) : null;
+            const repliedMsg = msg.reply_to_id ? findMessageById(messages, msg.reply_to_id) : null;
             return (
               <div
                 key={msg.id}
@@ -188,7 +189,7 @@ export default function Chat() {
                     <span className="chat-reply-author">
                       {repliedMsg.anonymous
                         ? (repliedMsg.anonymous_name || "Anonim")
-                        : getUserName(repliedMsg.user_id)
+                        : getUserName(users, repliedMsg.user_id)
                       }
                     </span>
                     <span className="chat-reply-text">
@@ -246,7 +247,7 @@ export default function Chat() {
                               hoveredReaction.emoji === emoji && (
                                 <div className="chat-reaction-tooltip">
                                   {userIds.map(uid => (
-                                    <div key={uid}>{getUserName(uid)}</div>
+                                    <div key={uid}>{getUserName(users, uid)}</div>
                                   ))}
                                 </div>
                               )
@@ -273,7 +274,7 @@ export default function Chat() {
                               hoveredReaction.emoji === emoji && (
                                 <div className="chat-reaction-tooltip">
                                   {userIds.map(uid => (
-                                    <div key={uid}>{getUserName(uid)}</div>
+                                    <div key={uid}>{getUserName(users, uid)}</div>
                                   ))}
                                 </div>
                               )
@@ -307,7 +308,7 @@ export default function Chat() {
             <span className="chat-reply-bar-author">
               {replyTo.anonymous
                 ? (replyTo.anonymous_name || "Anonim")
-                : getUserName(replyTo.user_id)
+                : getUserName(users, replyTo.user_id)
               }
             </span>
             <span className="chat-reply-bar-text">{shortMsg(replyTo)}</span>

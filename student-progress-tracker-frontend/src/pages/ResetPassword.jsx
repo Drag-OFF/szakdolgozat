@@ -1,88 +1,37 @@
+import { useState } from "react";
+import { isValidEmail } from "../utils";
+import AuthInput from "../components/AuthInput";
+
 /**
- * Jelszó-visszaállítás oldal.
- * Ha a token hiányzik vagy érvénytelen, azonnal átirányít verify.html-re.
- * Sikeres jelszóváltás után 5 másodperces visszaszámlálás, majd főoldalra irányítás.
+ * ResendVerify komponens.
+ * E-mail cím bekérése, validálása, majd újraküldési kérés a backendnek.
+ * @returns {JSX.Element} Az oldal tartalma.
  */
-
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
-export default function ResetPassword() {
-  const [password, setPassword] = useState("");
-  const [password2, setPassword2] = useState("");
+export default function ResendVerify() {
+  const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [countdown, setCountdown] = useState(5);
-  const navigate = useNavigate();
-  const timerRef = useRef(null);
-
-  // Token kinyerése az URL-ből
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-
-  // Token ellenőrzés már betöltéskor
-  useEffect(() => {
-    if (!token || token.length < 16) {
-      window.location.href = `/verify.html?msg=${encodeURIComponent("Hiányzó vagy érvénytelen token.")}`;
-    }
-  }, [token]);
-
-  function handleChange(e) {
-    if (e.target.name === "password") setPassword(e.target.value);
-    else setPassword2(e.target.value);
-    setMsg("");
-  }
+  const [sent, setSent] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (password.length < 8) {
-      setMsg("A jelszónak legalább 8 karakter hosszúnak kell lennie.");
-      return;
-    }
-    if (password !== password2) {
-      setMsg("A két jelszó nem egyezik!");
+    setMsg("");
+    if (!isValidEmail(email)) {
+      setMsg("Érvényes e-mail címet adj meg!");
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
+      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ email }),
       });
       const result = await resp.json();
-      if (
-        result.detail === "Hiányzó vagy érvénytelen token." ||
-        result.detail === "Érvénytelen vagy lejárt token."
-      ) {
-        window.location.href = `/verify.html?msg=${encodeURIComponent(result.detail)}`;
-        return;
-      }
-      setMsg(result.message || "Ismeretlen hiba történt.");
-      setSuccess(result.success);
-      if (result.success) {
-        setCountdown(5);
-        timerRef.current = setInterval(() => {
-          setCountdown((c) => {
-            if (c <= 1) {
-              clearInterval(timerRef.current);
-              navigate("/");
-              return 0;
-            }
-            return c - 1;
-          });
-        }, 1000);
-      }
+      setMsg(result.detail || result.message || "Ismeretlen hiba történt.");
+      setSent(result.success);
     } catch (err) {
       setMsg("Hiba történt a kérés során.");
     }
   }
-
-  const errorStyle = password && password2 && password !== password2
-    ? { border: "2px solid #e53935", background: "#fff6f6" }
-    : {};
-
-  // Ha nincs token, ne jelenjen meg semmi (mert az useEffect már átirányít)
-  if (!token || token.length < 16) return null;
 
   return (
     <div className="auth-container">
@@ -91,52 +40,18 @@ export default function ResetPassword() {
         <h2>Szegedi Tudományegyetem</h2>
       </div>
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h3>Új jelszó megadása</h3>
-        <label htmlFor="reset-password">Új jelszó</label>
-        <input
-          id="reset-password"
-          name="password"
-          type="password"
-          placeholder="Új jelszó"
-          value={password}
-          onChange={handleChange}
+        <h3>Megerősítő e-mail újraküldése</h3>
+        <AuthInput
+          label="E-mail cím"
+          id="resend-email"
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          error={msg && !isValidEmail(email) ? "Érvényes e-mail címet adj meg!" : ""}
           required
-          minLength={8}
         />
-        <label htmlFor="reset-password2">Új jelszó ismét</label>
-        <input
-          id="reset-password2"
-          name="password2"
-          type="password"
-          placeholder="Új jelszó ismét"
-          value={password2}
-          onChange={handleChange}
-          required
-          minLength={8}
-          style={errorStyle}
-        />
-        <button
-          type="submit"
-          disabled={
-            !password ||
-            !password2 ||
-            password !== password2 ||
-            password.length < 8 ||
-            success
-          }
-        >
-          Jelszó beállítása
-        </button>
-        <div className="auth-msg" style={{ color: password !== password2 ? "#e53935" : undefined }}>
-          {password && password2 && password !== password2
-            ? "A két jelszó nem egyezik!"
-            : msg}
-          {success && (
-            <div style={{ color: "#1976d2", marginTop: "1em" }}>
-              Sikeres jelszóváltás! {countdown} másodperc múlva átirányítunk a főoldalra...
-            </div>
-          )}
-        </div>
+        <button type="submit" disabled={sent}>Küldés</button>
+        <div className="auth-msg">{msg}</div>
       </form>
     </div>
   );

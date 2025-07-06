@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
+      {location.pathname !== "/chat" && <Footer />}
     </div>
   );
 }

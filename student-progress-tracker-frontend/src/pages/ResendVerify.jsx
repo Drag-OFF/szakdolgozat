@@ -1,14 +1,30 @@
-import { useState } from "react";
+/**
+ * Megerősítő e-mail újraküldése oldal.
+ * Lehetővé teszi a felhasználónak, hogy újra elküldje a regisztrációs megerősítő e-mailt.
+ */
 
+import { useState } from "react";
+import { isValidEmail } from "../utils";
+
+/**
+ * ResendVerify komponens.
+ * E-mail cím bekérése, validálása, majd újraküldési kérés a backendnek.
+ * @returns {JSX.Element} Az oldal tartalma.
+ */
 export default function ResendVerify() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
   const [sent, setSent] = useState(false);
 
+  /**
+   * Beküldi az e-mail címet a backendnek, ha az formailag helyes.
+   * Siker esetén visszajelzést ad a felhasználónak.
+   * @param {React.FormEvent} e - Az űrlap elküldésének eseménye.
+   */
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
-    if (!email.includes("@")) {
+    if (!isValidEmail(email)) {
       setMsg("Érvényes e-mail címet adj meg!");
       return;
     }
@@ -42,7 +58,7 @@ export default function ResendVerify() {
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          style={msg && !email.includes("@") ? { border: "2px solid #e53935", background: "#fff6f6" } : {}}
+          style={msg && !isValidEmail(email) ? { border: "2px solid #e53935", background: "#fff6f6" } : {}}
         />
         <button type="submit" disabled={sent}>Küldés</button>
         <div className="auth-msg">{msg}</div>

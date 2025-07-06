@@ -7,6 +7,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
+import Button from "../components/Button";
 
 /**
  * Segédfüggvény: JWT dekódolása (payload kinyerése)
@@ -88,22 +89,12 @@ export default function Navbar() {
           </>
         )}
         {loggedIn && (
-          <button
-            style={{
-              background: "#1976d2",
-              color: "#fff",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 1.1rem",
-              fontWeight: 500,
-              fontSize: "1.08rem",
-              cursor: "pointer",
-              marginLeft: "1rem"
-            }}
+          <Button
+            style={{ marginLeft: "1rem" }}
             onClick={handleLogout}
           >
             Kijelentkezés
-          </button>
+          </Button>
         )}
       </div>
     </nav>

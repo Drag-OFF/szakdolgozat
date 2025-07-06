@@ -5,7 +5,14 @@
  */
 
 import { useState } from "react";
+import { isValidEmail } from "../utils";
+import AuthInput from "../components/AuthInput";
 
+/**
+ * ForgotPassword komponens.
+ * Lehetővé teszi a felhasználónak, hogy jelszó-visszaállító e-mailt kérjen.
+ * @returns {JSX.Element} Az elfelejtett jelszó oldal tartalma.
+ */
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
@@ -14,7 +21,7 @@ export default function ForgotPassword() {
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
-    if (!email.includes("@")) {
+    if (!isValidEmail(email)) {
       setMsg("Az e-mail címnek tartalmaznia kell @ jelet!");
       return;
     }
@@ -40,19 +47,18 @@ export default function ForgotPassword() {
       </div>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h3>Elfelejtett jelszó</h3>
-        <label htmlFor="forgot-email">E-mail cím</label>
-        <input
+        <AuthInput
+          label="E-mail cím"
           id="forgot-email"
           type="email"
-          placeholder="E-mail cím"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          error={msg && !isValidEmail(email) ? "Az e-mail címnek tartalmaznia kell @ jelet!" : ""}
           required
-          style={msg && !email.includes("@") ? { border: "2px solid #e53935", background: "#fff6f6" } : {}}
         />
         <button type="submit" disabled={sent}>Küldés</button>
         <div className="auth-msg">{msg}</div>
       </form>
-      </div>
+    </div>
   );
 }

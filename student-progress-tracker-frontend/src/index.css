@@ -1,6 +1,7 @@
 html, body, #root, .app-wrapper {
   min-height: 100vh;
   height: 100%;
+  max-width: 100%;
   margin: 0;
   padding: 0;
   display: flex;
