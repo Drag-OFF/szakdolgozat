@@ -81,6 +81,15 @@ export default function Navbar() {
         {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
         {loggedIn && (
           <Link to="/chat" onClick={() => setOpen(false)}>Chat</Link>
+        )}{loggedIn && (
+          <Link
+            to="/profile"
+            style={{ marginLeft: "1rem", textDecoration: "none" }}
+            onClick={() => setOpen(false)}
+            className="navbar-profile-link"
+          >
+            Profil
+          </Link>
         )}
         {!loggedIn && (
           <>

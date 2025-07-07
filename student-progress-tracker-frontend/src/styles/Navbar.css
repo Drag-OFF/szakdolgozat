@@ -1,7 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+
 .navbar {
   background: #fff;
-  border-bottom: 2px solid #1976d2;
-  box-shadow: 0 2px 12px #00336611;
+  box-shadow: 0 4px 20px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -9,7 +10,21 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  height: 52px;
 }
+
+.navbar-logo-text {
+  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #003366;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 
 .navbar-logo {
   display: flex;
@@ -22,16 +37,23 @@
   width: 70px;
   object-fit: cover;
   border-radius: 12px 32px 12px 32px;
-  box-shadow: 0 2px 8px #1976d233;
+  box-shadow: 0px 0px 5px 1px black;
   background: #e3f0ff;
 }
 
 .navbar-logo span {
+  max-width: 380px;
+  display: flex;
+  padding: 0.5rem 1.4rem;
+  font-size: 1.1rem;
+  line-height: 1.25rem;
   font-weight: 700;
-  font-size: 1.25rem;
+  text-align: center;
+  text-transform: uppercase;
+  vertical-align: middle;
+  align-items: center;
+  gap: 0.75rem;
   color: #003366;
-  letter-spacing: 1px;
-  text-shadow: 0 1px 8px #e3f0ff;
 }
 
 .navbar-links {
@@ -43,16 +65,17 @@
 
 .navbar-links a {
   text-decoration: none;
-  color: #003366;
+  background-color: #003366;
+  color: #fff;
   font-weight: 500;
   font-size: 1.08rem;
   padding: 0.4rem 1.1rem;
   border-radius: 6px;
-  transition: background 0.18s, color 0.18s;
+  transition: background 0.3s, color 0.3s;
 }
 
 .navbar-links a:hover {
-  background: #1976d2;
+  background: #1976D2;
   color: #fff;
   box-shadow: 0 2px 8px #1976d244;
 }
@@ -66,8 +89,6 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
-  margin-left: 1rem;
 }
 .navbar-burger span {
   display: block;
@@ -81,15 +102,15 @@
 /* Mobil nézet */
 @media (max-width: 700px) {
   .navbar {
-    padding: 0.7rem 1rem;
+    padding: 0.7rem;
   }
   .navbar-links {
     position: fixed;
-    top: 64px;
-    right: -100vw;
+    top: 76px;
+    right: -92vw;
     flex-direction: column;
     background: #fff;
-    box-shadow: -2px 0 16px #00336622;
+    box-shadow: -2px 0 16px #f2f6fa22;
     width: 70vw;
     max-width: 260px;
     height: calc(100vh - 64px);
@@ -100,15 +121,58 @@
   }
   .navbar-links.open {
     right: 0;
+    gap: 1.5rem;
   }
   .navbar-links a {
-    padding: 1rem 2rem;
     font-size: 1.15rem;
     border-radius: 0;
     border-bottom: 1px solid #e0e0e0;
-    width: 100%;
+    width: 75%;
     text-align: left;
   }
+  .navbar-burger {
+    display: flex;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    padding: 0.7rem;
+  }
+  .navbar-links {
+    position: fixed;
+    top: 76px;
+    right: -92vw;
+    flex-direction: column;
+    background: #fff;
+    box-shadow: -2px 0 16px #f2f6fa22;
+    width: 70vw;
+    max-width: 260px;
+    height: calc(100vh - 64px);
+    gap: 0;
+    padding: 1.5rem 0 0 0;
+    z-index: 200;
+    transition: right 0.25s;
+  }
+  .navbar-links.open {
+    right: 0;
+    gap: 1.5rem;
+  }
+  .navbar-links a {
+    font-size: 1.15rem;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    width: 75%;
+    text-align: left;
+  }
+  .navbar-links a:hover {
+    background-color: #dbdbdb;
+    color: black;
+  }
+
+
   .navbar-burger {
     display: flex;
   }

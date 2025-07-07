@@ -65,10 +65,6 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <div className="auth-image">
-        <img src="https://u-szeged.hu/site/upload/2020/12/felveteli_weboldal_nyito_1520x864_0000s_0000_ttik2.jpg" alt="SZTE" />
-        <h2>Szegedi Tudományegyetem</h2>
-      </div>
       <form className="auth-form" onSubmit={handleSubmit}>
         <h3>Hallgatói bejelentkezés</h3>
 

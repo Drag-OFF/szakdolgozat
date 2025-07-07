@@ -1,8 +1,22 @@
-.footer {
+.footer{
   background: #003366;
   color: #fff;
   text-align: center;
   padding: 1rem 0;
-  width: 100vw;
+  width: 100%;
   box-shadow: 0 -2px 12px #00336622;
+  margin-top: 40px;
+}
+
+/* Mobil nézet */
+@media (max-width: 1400px) {
+  .footer {
+    width: 100%;
+  }
+}
+
+@media (max-width: 399px) {
+  .footer {
+    width: 100vw;
+  }
 }
