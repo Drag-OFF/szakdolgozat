@@ -28,6 +28,7 @@ class UserBase(BaseModel):
         verified (bool): E-mail verifikáció.
         role (str): Szerepkör.
         created_at (datetime): Létrehozás ideje.
+        anonymous_name (Optional[str]): Anonim név, ha van.
     """
     uid: str
     email: str
@@ -40,6 +41,7 @@ class UserBase(BaseModel):
     verified: bool
     role: str
     created_at: datetime
+    anonymous_name: Optional[str] = None
 
 class UserCreate(BaseModel):
     """
@@ -115,6 +117,7 @@ class UserUpdate(BaseModel):
         role (Optional[str]): Szerepkör.
         created_at (Optional[datetime]): Létrehozás ideje.
         password_hash (Optional[str]): Jelszó hash.
+        anonymous_name (Optional[str]): Anonim név, ha van.
     """
     uid: Optional[str] = None
     email: Optional[str] = None
@@ -128,6 +131,7 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     created_at: Optional[datetime] = None
     password_hash: Optional[str] = None
+    anonymous_name: Optional[str] = None
 
 class UserLogin(BaseModel):
     """

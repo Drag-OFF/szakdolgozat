@@ -35,6 +35,7 @@ class User(Base):
         reset_token_expires (datetime): Jelszó-visszaállító token lejárati ideje.
         role (str): Szerepkör (user/admin).
         created_at (datetime): Létrehozás ideje.
+        anonymous_name (str): Névtelen üzenetekhez használt név.
     """
     __tablename__ = "users"
 
@@ -54,6 +55,7 @@ class User(Base):
     reset_token_expires = Column(DateTime, nullable=True)
     role = Column(Enum('user', 'admin'), default='user')
     created_at = Column(DateTime, nullable=False, default=func.now())
+    anonymous_name = Column(String(32), unique=True, nullable=True)
 
     progress = relationship("Progress", back_populates="user")
     chat_messages = relationship("ChatMessage", back_populates="user")

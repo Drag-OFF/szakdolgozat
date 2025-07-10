@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.db.models import ChatMessage, ChatReaction
+from app.db.models import ChatMessage, ChatReaction, User
 from app.db.schemas import ChatMessageCreate
 from fastapi import HTTPException
 import random
@@ -22,20 +22,37 @@ class ChatService:
 
     def create_message(self, message: ChatMessageCreate) -> ChatMessage:
         """
-        Üzenet létrehozása.
+        Új chat üzenet létrehozása.
+
+        Ha az üzenet anonim, a felhasználóhoz tartozó anonim nevet használja.
+        Ha a felhasználónak még nincs anonim neve, generál egyet, elmenti a users táblába,
+        és azt használja minden további anonim üzenethez.
 
         Args:
-            message (ChatMessageCreate): Az üzenet, amelyet létre kell hozni.
+            message (ChatMessageCreate): Az üzenet adatai (szöveg, user_id, anonim flag stb.).
 
         Returns:
-            ChatMessage: A létrehozott üzenet.
+            ChatMessage: A létrehozott üzenet adatbázis objektuma.
 
         Raises:
-            HTTPException: Ha az üzenet nem hozható létre.
+            HTTPException: Ha a felhasználó nem található.
         """
         data = message.dict()
         if data.get("anonymous"):
-            data["anonymous_name"] = self.generate_anon_name(data.get("user_id") or 0)
+            # 1. Keresd meg a usert
+            user = self.db.query(User).filter(User.id == data.get("user_id")).first()
+            if user is None:
+                raise HTTPException(status_code=404, detail="User not found")
+            # 2. Ha nincs még anonymous_name, generálj és ments el
+            if not user.anonymous_name:
+                while True:
+                    new_name = self.generate_anon_name(user.id)
+                    # Ellenőrizd, hogy unique legyen
+                    if not self.db.query(User).filter(User.anonymous_name == new_name).first():
+                        break
+                user.anonymous_name = new_name
+                self.db.commit()
+            data["anonymous_name"] = user.anonymous_name
         else:
             data["anonymous_name"] = None
         db_message = ChatMessage(**data)
