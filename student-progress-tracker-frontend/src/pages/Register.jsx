@@ -1,22 +1,19 @@
-/**
- * Regisztrációs oldal komponens.
- * Lehetővé teszi a felhasználók számára, hogy új fiókot hozzanak létre.
- * Minden mezőt validál, hibás mezőket pirossal keretez, és csak helyes adatok esetén küldi el a regisztrációs kérést a backendnek.
- */
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
-import { validateRegisterForm } from "../utils";
+import { authFetch, validateRegisterForm } from "../utils";
 import AuthInput from "../components/AuthInput";
 import AuthSelect from "../components/AuthSelect";
 
 /**
- * Register komponens.
- * Felhasználói regisztrációs űrlapot jelenít meg, validálja a mezőket, és elküldi az adatokat a backendnek.
+ * Regisztrációs oldal komponens.
+ * Lehetővé teszi a felhasználók számára, hogy új fiókot hozzanak létre.
+ * Minden mezőt validál, hibás mezőket pirossal keretez, és csak helyes adatok esetén küldi el a regisztrációs kérést a backendnek.
+ *
  * @returns {JSX.Element} A regisztrációs oldal tartalma.
  */
+
 export default function Register() {
   const [form, setForm] = useState({
     uid: "", email: "", password: "", name: "", birth_date: "",
@@ -49,11 +46,12 @@ export default function Register() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      if (!resp) return;
       const result = await resp.json();
       if (resp.ok) {
         setMsg("Sikeres regisztráció! Nézd meg az e-mail fiókodat a megerősítő levélért.");

@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 
 .navbar {
-  background: #fff;
+  background: var(--nav);
   box-shadow: 0 4px 20px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
@@ -11,6 +11,7 @@
   top: 0;
   z-index: 100;
   height: 52px;
+  transition: background 0.3s;
 }
 
 .navbar-logo-text {
@@ -53,7 +54,7 @@
   vertical-align: middle;
   align-items: center;
   gap: 0.75rem;
-  color: #003366;
+  color: var(--primary);
 }
 
 .navbar-links {
@@ -65,7 +66,7 @@
 
 .navbar-links a {
   text-decoration: none;
-  background-color: #003366;
+  background-color: var(--primary);
   color: #fff;
   font-weight: 500;
   font-size: 1.08rem;
@@ -75,7 +76,7 @@
 }
 
 .navbar-links a:hover {
-  background: #1976D2;
+  background: var(--primary-dark);
   color: #fff;
   box-shadow: 0 2px 8px #1976d244;
 }
@@ -100,7 +101,7 @@
 }
 
 /* Mobil nézet */
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
   .navbar {
     padding: 0.7rem;
   }
@@ -154,6 +155,7 @@
     z-index: 200;
     transition: right 0.25s;
   }
+
   .navbar-links.open {
     right: 0;
     gap: 1.5rem;

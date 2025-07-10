@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { isValidEmail } from "../utils";
+import { authFetch, isValidEmail } from "../utils";
 import AuthInput from "../components/AuthInput";
 
 /**
@@ -20,11 +20,12 @@ export default function ResendVerify() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      if (!resp) return;
       const result = await resp.json();
       setMsg(result.detail || result.message || "Ismeretlen hiba történt.");
       setSent(result.success);

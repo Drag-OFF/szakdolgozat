@@ -1,5 +1,11 @@
 import React from "react";
 
+/**
+ * Profil oldal komponens.
+ * Megjeleníti a bejelentkezett felhasználó adatait.
+ *
+ * @returns {JSX.Element} A profil oldal tartalma.
+ */
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user")) || {};
   if (!user.id) {

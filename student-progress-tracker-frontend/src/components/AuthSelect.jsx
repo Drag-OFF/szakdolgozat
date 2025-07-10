@@ -1,3 +1,17 @@
+/**
+ * Egyedi select (legördülő) komponens hitelesítési űrlapokhoz.
+ * Megjeleníti a labelt, a selectet, és opcionálisan hibát.
+ *
+ * @param {Object} props
+ * @param {string} props.label - A mező felirata.
+ * @param {string} props.id - A select egyedi azonosítója.
+ * @param {string} props.name - A select neve.
+ * @param {string} props.value - A kiválasztott érték.
+ * @param {function} props.onChange - Változáskezelő függvény.
+ * @param {string[]} props.options - A választható opciók tömbje.
+ * @param {string} [props.error] - Hibaszöveg, ha van.
+ * @returns {JSX.Element}
+ */
 export default function AuthSelect({
   label,
   id,

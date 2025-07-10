@@ -1,3 +1,23 @@
+/**
+ * Egyetlen chat üzenet megjelenítéséért felelős komponens.
+ * Kezeli a válasz (reply), reakció (emoji), saját üzenet kiemelését, és a reakció picker pozícionálását.
+ *
+ * @param {Object} props
+ * @param {Object} props.msg - Az üzenet objektum.
+ * @param {Array} props.users - Felhasználók tömbje.
+ * @param {Object} props.currentUser - A jelenlegi felhasználó.
+ * @param {Array} props.messages - Az összes üzenet tömbje.
+ * @param {any} props.reactingTo - Melyik üzenetre van éppen nyitva a reakció picker.
+ * @param {function} props.setReactingTo - Picker állapotkezelő.
+ * @param {any} props.hoveredReaction - Fölé vitt reakció.
+ * @param {function} props.setHoveredReaction - Hover állapotkezelő.
+ * @param {any} props.replyTo - Melyik üzenetre válaszolunk.
+ * @param {function} props.setReplyTo - Válasz picker állapotkezelő.
+ * @param {function} props.addReaction - Reakció hozzáadása.
+ * @param {string} props.userName - Az üzenet szerzőjének neve.
+ * @returns {JSX.Element}
+ */
+
 import { shortMsg, getUserName, findMessageById, groupReactions, formatDate } from "../utils";
 import Picker from "emoji-picker-react";
 import React, { useState, useEffect } from "react";
@@ -13,7 +33,8 @@ export default function ChatMessage({
   setHoveredReaction,
   replyTo,
   setReplyTo,
-  addReaction
+  addReaction,
+  userName
 }) {
   const reactionsGrouped = groupReactions(msg);
   const isOwn = String(msg.user_id) === String(currentUser.id);
@@ -27,7 +48,12 @@ export default function ChatMessage({
       ? "dark"
       : "light";
 
-  // Toggle reaction picker
+  /**
+   * Reakció picker megjelenítése és pozícionálása.
+   * A gomb kattintásának helyétől függően jobbra vagy balra tolja a pickert,
+   * és nem engedi, hogy kilógjon a képernyőről.
+   * @param {MouseEvent} e
+   */
   function handleReactionBtn(e) {
     const pickerWidth = 350;
     const pickerHeight = 400;
@@ -79,8 +105,8 @@ export default function ChatMessage({
         <div className="chat-reply-preview">
           <span className="chat-reply-author">
             {repliedMsg.anonymous
-              ? (repliedMsg.anonymous_name || "Anonim")
-              : getUserName(users, repliedMsg.user_id)
+              ? (repliedMsg.anonymous_name || "Anonim: ")
+              : getUserName(users, repliedMsg.user_id)+ ": "
             }
           </span>
           <span className="chat-reply-text">
@@ -88,6 +114,15 @@ export default function ChatMessage({
           </span>
         </div>
       )}
+      {/* FELHASZNÁLÓ NÉV KIÍRÁSA */}
+      <div className="chat-message-header">
+        {msg.display_name}
+        {msg.display_neptun && !msg.anonymous && (
+          <span style={{ marginLeft: 6, color: "#888", fontSize: "0.95em" }}>
+            ({msg.display_neptun})
+          </span>
+        )}
+      </div>
       <div
         className="chat-message-row"
         onMouseEnter={() => setHovered(true)}

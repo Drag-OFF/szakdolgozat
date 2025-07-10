@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * JWT tokenből visszaadja a felhasználó szerepkörét.
+ * @returns {string|null} A szerepkör vagy null.
+ */
 function getRoleFromToken() {
   const token = localStorage.getItem("access_token");
   if (!token) return null;
@@ -12,6 +16,13 @@ function getRoleFromToken() {
   }
 }
 
+/**
+ * Admin oldal komponens.
+ * Csak admin jogosultságú felhasználók érhetik el.
+ * Ha nem admin a felhasználó, átirányítja a főoldalra.
+ *
+ * @returns {JSX.Element} Az admin oldal tartalma.
+ */
 export default function Admin() {
   const navigate = useNavigate();
 

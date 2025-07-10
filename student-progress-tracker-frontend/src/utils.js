@@ -146,3 +146,30 @@ export function isValidPassword(pw) {
 export function passwordsMatch(pw1, pw2) {
   return pw1 === pw2;
 }
+
+/**
+ * API hívás wrapper, amely automatikusan kezeli a lejárt vagy érvénytelen tokeneket.
+ *
+ * Ha a szerver 401-es (Unauthorized) választ ad, törli a localStorage tartalmát,
+ * majd átirányítja a felhasználót a főoldalra ("/").
+ * Egyébként ugyanúgy viselkedik, mint a fetch: visszaadja a Response objektumot.
+ *
+ * @param {string} url - Az API végpont URL-je.
+ * @param {Object} [options={}] - A fetch opciói (headers, method, body, stb.).
+ * @returns {Promise<Response|null>} A fetch válasza, vagy null ha átirányítás történt.
+ *
+ * @example
+ * import { authFetch } from "./utils";
+ * const res = await authFetch("/api/messages", { headers: { Authorization: "Bearer ..." } });
+ * if (!res) return; // Token lejárt, átirányítás történt
+ * const data = await res.json();
+ */
+export async function authFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    localStorage.clear();
+    window.location.href = "/";
+    return null;
+  }
+  return res;
+}

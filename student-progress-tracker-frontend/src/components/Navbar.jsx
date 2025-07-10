@@ -11,6 +11,7 @@ import Button from "../components/Button";
 
 /**
  * Segédfüggvény: JWT dekódolása (payload kinyerése)
+ * @returns {string|null} A felhasználó szerepköre vagy null.
  */
 function getRoleFromToken() {
   const token = localStorage.getItem("access_token");

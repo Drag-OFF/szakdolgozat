@@ -1,12 +1,40 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../styles/Chat.css";
-import Navbar from "../components/Navbar";
-import { formatDate, shortMsg, groupReactions, getUserName, findMessageById } from "../utils";
+import { shortMsg, getUserName, findMessageById, authFetch } from "../utils";
 import ChatUsers from "../components/ChatUsers";
 import ChatMessagesList from "../components/ChatMessagesList";
 import ChatInputRow from "../components/ChatInputRow";
 import ChatLeaderboard from "../components/ChatLeaderboard";
 
+/**
+ * Egyedi hook, amely figyeli az ablak méretét, és visszaadja, hogy mobil nézetben vagyunk-e.
+ * @param {number} [breakpoint=1000] - A mobil/desktop váltás szélessége.
+ * @returns {boolean} Igaz, ha mobil nézet.
+ */
+function useIsMobile(breakpoint = 1000) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [breakpoint]);
+  return isMobile;
+}
+
+/**
+ * Chat oldal fő komponense.
+ * Itt történik az üzenetek, felhasználók, reakciók, válaszok, ranglista és témaváltás kezelése.
+ * Mobil és asztali nézetet is támogat.
+ *
+ * Főbb funkciók:
+ * - Üzenetek lekérése, küldése, reakciók hozzáadása
+ * - Felhasználók és adminok listázása
+ * - Ranglista megjelenítése
+ * - Emoji picker, válasz funkció, anonim üzenetküldés
+ * - Téma (sötét/világos) és nyelv váltás
+ *
+ * @returns {JSX.Element} A chat oldal teljes tartalma.
+ */
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
@@ -17,6 +45,12 @@ export default function Chat() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const chatEndRef = useRef(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+  const [open, setOpen] = useState(false);
+  const chatListRef = useRef(null);
 
   // Dummy leaderboard, TODO: Fetch from API
   const leaderboard = [
@@ -25,22 +59,17 @@ export default function Chat() {
     { name: "Kiss Péter", points: 90, neptun: "GHI789" }
   ];
 
-  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
-
   useEffect(() => {
     fetchMessages();
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
   async function fetchMessages() {
     try {
-      const res = await fetch("http://enaploproject.ddns.net:8000/api/messages/", {
+      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/", {
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
       });
+      if (!res.ok) return;
       if (res.ok) {
         const data = await res.json();
         setMessages(data);
@@ -50,9 +79,10 @@ export default function Chat() {
 
   async function fetchUsers() {
     try {
-      const res = await fetch("http://enaploproject.ddns.net:8000/api/users/chat-users", {
+      const res = await authFetch("http://enaploproject.ddns.net:8000/api/users/chat-users", {
         headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
       });
+      if (!res.ok) return;
       if (res.ok) {
         const data = await res.json();
         setUsers(data);
@@ -67,7 +97,7 @@ export default function Chat() {
   async function sendMessage() {
     if (!input.trim()) return;
     try {
-      const res = await fetch("http://enaploproject.ddns.net:8000/api/messages/", {
+      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -82,6 +112,7 @@ export default function Chat() {
           reply_to_id: replyTo ? replyTo.id : null
         })
       });
+      if (!res.ok) return;
       if (res.ok) {
         setInput("");
         setShowEmoji(false);
@@ -97,7 +128,7 @@ export default function Chat() {
 
   async function addReaction(msgId, emoji) {
     try {
-      await fetch("http://enaploproject.ddns.net:8000/api/messages/" + msgId + "/reactions", {
+      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/" + msgId + "/reactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,6 +136,7 @@ export default function Chat() {
         },
         body: JSON.stringify({ emoji })
       });
+      if (!res) return;
       await fetchMessages();
     } catch (e) {}
     setReactingTo(null);
@@ -127,16 +159,64 @@ export default function Chat() {
     alert("A nyelvváltás funkció csak demó! (Itt lehetne magyar/angol szövegeket cserélni.)");
   }
 
+  useEffect(() => {
+    const el = chatListRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [messages]);
+  
   return (
     <div className="chat-root">
-      <ChatUsers admins={admins} users={normalUsers} />
+      <ChatUsers
+        admins={admins}
+        users={normalUsers}
+        ownNeptun={currentUser.neptun}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        isMobile={isMobile}
+      />
       <div className="chat-main">
         <div className="chat-header">
-          <span>Hallgatói Chat</span>
-          <span>
-            <button className="theme-switcher" onClick={toggleTheme}>🌙 / ☀️</button>
-            <button className="lang-switcher" onClick={toggleLang}>🇭🇺 / 🇬🇧</button>
-          </span>
+          <div className="chat-header-left">
+            <button
+              className="chat-header-btn"
+              onClick={() => setSidebarOpen(true)}
+              title="Bal sáv nyitása"
+            >
+              ☰
+              <span />
+              <span />
+              <span />
+            </button>
+            <div className={`navbar-links`}></div>
+          </div>
+
+          <div className="chat-header-center">
+            <button
+              className="chat-header-btn"
+              onClick={toggleTheme}
+              title="Téma váltás"
+            >
+              🌙 / ☀️
+            </button>
+            <button
+              className="chat-header-btn"
+              onClick={toggleLang}
+              title="Nyelv váltás"
+            >
+              🇭🇺 / 🇬🇧
+            </button>
+          </div>
+
+          <div className="chat-header-right">
+            <button
+              className="chat-header-btn"
+              onClick={() => setLeaderboardOpen(true)}
+              title="Jobb sáv nyitása"
+            >
+              ⚙️
+            </button>
+          </div>
         </div>
         <ChatMessagesList
           messages={messages}
@@ -151,7 +231,9 @@ export default function Chat() {
           addReaction={addReaction}
           findMessageById={findMessageById}
           chatEndRef={chatEndRef}
+          listRef={chatListRef}
         />
+        
         <ChatInputRow
           input={input}
           setInput={setInput}
@@ -168,7 +250,12 @@ export default function Chat() {
           shortMsg={shortMsg}
         />
       </div>
-      <ChatLeaderboard leaderboard={leaderboard} />
+      <ChatLeaderboard
+        leaderboard={leaderboard}
+        open={leaderboardOpen}
+        onClose={() => setLeaderboardOpen(false)}
+        isMobile={isMobile}
+      />
     </div>
   );
 }

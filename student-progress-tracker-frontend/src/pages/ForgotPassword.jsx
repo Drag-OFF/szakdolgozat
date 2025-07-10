@@ -1,16 +1,12 @@
+import { useState } from "react";
+import { authFetch, isValidEmail } from "../utils";
+import AuthInput from "../components/AuthInput";
+
 /**
  * Elfelejtett jelszó oldal.
  * Az e-mail cím megadása után lehetőség van jelszó-visszaállító e-mailt kérni.
  * Csak akkor engedi a kérést, ha az e-mail tartalmaz @ jelet.
- */
-
-import { useState } from "react";
-import { isValidEmail } from "../utils";
-import AuthInput from "../components/AuthInput";
-
-/**
- * ForgotPassword komponens.
- * Lehetővé teszi a felhasználónak, hogy jelszó-visszaállító e-mailt kérjen.
+ *
  * @returns {JSX.Element} Az elfelejtett jelszó oldal tartalma.
  */
 export default function ForgotPassword() {
@@ -26,11 +22,12 @@ export default function ForgotPassword() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/forgot-password", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      if (!res) return;
       const result = await resp.json();
       setMsg(result.message || "Ismeretlen hiba történt.");
       setSent(result.success);

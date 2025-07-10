@@ -1,16 +1,11 @@
-/**
- * Lábléc komponens.
- * Megjeleníti a projekt nevét és a készítő nevét az oldal alján.
- * Statikus tartalom.
- */
-
-/**
- * Footer komponens.
- * @returns {JSX.Element} A lábléc tartalma.
- */
-
 import "../styles/Footer.css";
 
+/**
+ * Lábléc (footer) komponens.
+ * Statikus tartalom, a projekt nevét és a készítő nevét jeleníti meg az oldal alján.
+ *
+ * @returns {JSX.Element}
+ */
 export default function Footer() {
   return (
     <footer className="footer">

@@ -1,14 +1,10 @@
+import { useState } from "react";
+import { authFetch, isValidEmail } from "../utils";
+
 /**
  * Megerősítő e-mail újraküldése oldal.
  * Lehetővé teszi a felhasználónak, hogy újra elküldje a regisztrációs megerősítő e-mailt.
- */
-
-import { useState } from "react";
-import { isValidEmail } from "../utils";
-
-/**
- * ResendVerify komponens.
- * E-mail cím bekérése, validálása, majd újraküldési kérés a backendnek.
+ *
  * @returns {JSX.Element} Az oldal tartalma.
  */
 export default function ResendVerify() {
@@ -29,11 +25,12 @@ export default function ResendVerify() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      if (!resp) return;
       const result = await resp.json();
       setMsg(result.detail || result.message || "Ismeretlen hiba történt.");
       setSent(result.success);

@@ -1,3 +1,24 @@
+/**
+ * Chat üzenetek listája komponens.
+ * Megjeleníti az összes üzenetet, minden üzenethez átadja a szükséges propokat.
+ *
+ * @param {Object} props
+ * @param {Array} props.messages - Az üzenetek tömbje.
+ * @param {Array} props.users - Felhasználók tömbje.
+ * @param {Object} props.currentUser - A jelenlegi felhasználó.
+ * @param {any} props.reactingTo - Melyik üzenetre reagálunk éppen.
+ * @param {function} props.setReactingTo - Reakció picker állapotkezelő.
+ * @param {any} props.hoveredReaction - Éppen fölé vitt reakció.
+ * @param {function} props.setHoveredReaction - Hover állapotkezelő.
+ * @param {any} props.replyTo - Melyik üzenetre válaszolunk.
+ * @param {function} props.setReplyTo - Válasz picker állapotkezelő.
+ * @param {function} props.addReaction - Reakció hozzáadása.
+ * @param {function} props.findMessageById - Üzenet keresése id alapján.
+ * @param {object} props.chatEndRef - Ref az üzenetlista végéhez.
+ * @param {object} props.listRef - Ref az üzenetlista DOM eleméhez.
+ * @returns {JSX.Element}
+ */
+
 import ChatMessage from "./ChatMessage";
 import React, { useRef, useEffect } from "react";
 
@@ -12,48 +33,23 @@ export default function ChatMessagesList({
   replyTo,
   setReplyTo,
   addReaction,
-  findMessageById
+  findMessageById,
+  chatEndRef,
+  listRef
 }) {
-  const listRef = useRef();
 
-  function isAtBottom() {
-    const el = listRef.current;
-    if (!el) return true;
-    return el.scrollHeight - el.scrollTop - el.clientHeight < 10;
+  function getUserNameById(userId) {
+    const user = users.find(
+      u => String(u.id) === String(userId) || String(u.neptun) === String(userId)
+    );
+    return user ? `${user.name} (${user.neptun})` : "Ismeretlen";
   }
-
-  // Scroll pozíció visszaállítása csak akkor, ha messages már betöltött
-  useEffect(() => {
-    const saved = localStorage.getItem("chat-scroll");
-    if (listRef.current && saved) {
-      listRef.current.scrollTop = parseInt(saved, 10);
-    }
-  }, [messages.length]); // csak akkor fusson, ha messages renderelve
-
-  // Automatikus scroll, ha a user a legalján volt
-  useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    if (isAtBottom()) {
-      el.scrollTop = el.scrollHeight;
-    }
-  }, [messages]);
-
-  // Scroll pozíció mentése kilépés/frissítés előtt
-  useEffect(() => {
-    const saveScroll = () => {
-      if (listRef.current) {
-        localStorage.setItem("chat-scroll", listRef.current.scrollTop);
-      }
-    };
-    window.addEventListener("beforeunload", saveScroll);
-    return () => window.removeEventListener("beforeunload", saveScroll);
-  }, []);
 
   return (
     <div className="chat-messages-list" ref={listRef}>
       {messages.map(msg => (
         <ChatMessage
+          userName={getUserNameById(msg.user_id)}
           key={msg.id}
           msg={msg}
           users={users}
@@ -68,6 +64,7 @@ export default function ChatMessagesList({
           addReaction={addReaction}
         />
       ))}
+      <div ref={chatEndRef} />
     </div>
   );
 }

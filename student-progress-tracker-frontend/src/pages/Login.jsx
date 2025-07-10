@@ -1,19 +1,16 @@
-/**
- * Bejelentkezési oldal komponens.
- * Lehetővé teszi a felhasználók számára, hogy e-mail vagy Neptun kód és jelszó megadásával bejelentkezzenek.
- * Sikeres bejelentkezéskor JWT tokent tárol a localStorage-ben, és átirányít a főoldalra.
- */
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
-import { isValidEmail, isValidNeptun } from "../utils";
+import { authFetch, isValidEmail, isValidNeptun } from "../utils";
 import AuthInput from "../components/AuthInput";
 
 /**
- * Login komponens.
+ * Bejelentkezési oldal komponens.
+ * Lehetővé teszi a felhasználók számára, hogy e-mail vagy Neptun kód és jelszó megadásával bejelentkezzenek.
+ * Sikeres bejelentkezéskor JWT tokent tárol a localStorage-ben, és átirányít a főoldalra.
+ *
  * @returns {JSX.Element} A bejelentkezési űrlap és kapcsolódó UI elemek.
  */
 export default function Login() {
@@ -22,7 +19,7 @@ export default function Login() {
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
 
-  /**
+    /**
    * Kezeli a bejelentkezési űrlap elküldését.
    * Ellenőrzi a felhasználó adatokat, elküldi a backendnek, és kezeli a választ.
    * Sikeres bejelentkezéskor JWT tokent ment a localStorage-be, majd átirányít a főoldalra.
@@ -42,11 +39,12 @@ export default function Login() {
     }
     const data = uid.includes("@") ? { email: uid, password } : { uid, password };
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/login", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (!resp) return;
       const result = await resp.json();
       if (resp.ok && result.access_token) {
         localStorage.setItem("access_token", result.access_token);
