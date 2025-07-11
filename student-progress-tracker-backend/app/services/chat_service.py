@@ -39,15 +39,12 @@ class ChatService:
         """
         data = message.dict()
         if data.get("anonymous"):
-            # 1. Keresd meg a usert
             user = self.db.query(User).filter(User.id == data.get("user_id")).first()
             if user is None:
                 raise HTTPException(status_code=404, detail="User not found")
-            # 2. Ha nincs még anonymous_name, generálj és ments el
             if not user.anonymous_name:
                 while True:
                     new_name = self.generate_anon_name(user.id)
-                    # Ellenőrizd, hogy unique legyen
                     if not self.db.query(User).filter(User.anonymous_name == new_name).first():
                         break
                 user.anonymous_name = new_name
