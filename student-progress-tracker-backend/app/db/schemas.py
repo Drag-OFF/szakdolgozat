@@ -228,6 +228,168 @@ class Course(CourseBase):
     class Config:
         from_attributes = True
 
+
+
+class MajorBase(BaseModel):
+    """
+    Szak alap séma.
+
+    Attributes:
+        name (str): Szak neve.
+    """
+    name: str
+
+class MajorCreate(MajorBase):
+    """
+    Szak létrehozási séma.
+
+    Attributes:
+        name (str): Szak neve.
+    """
+    pass
+
+class Major(MajorBase):
+    """
+    Szak séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Szak azonosító.
+        name (str): Szak neve.
+    """
+    id: int
+    class Config:
+        orm_mode = True
+
+class MajorRequirementBase(BaseModel):
+    """
+    Szak követelmény alap séma.
+
+    Attributes:
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    major_id: int
+    requirement_type: str
+    min_credits: int
+
+class MajorRequirementCreate(MajorRequirementBase):
+    """
+    Szak követelmény létrehozási séma.
+
+    Attributes:
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    pass
+
+class MajorRequirement(MajorRequirementBase):
+    """
+    Szak követelmény séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Követelmény azonosító.
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    id: int
+    class Config:
+        orm_mode = True
+
+class CourseMajorBase(BaseModel):
+    """
+    Kurzus-szak kapcsolat alap séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus (pl. kötelező/választható).
+        subgroup (Optional[str]): Alcsoport (lehet None).
+        prerequisites (Optional[str]): Előfeltételek (JSON vagy szöveg, lehet None).
+    """
+    course_id: int
+    major_id: int
+    credit: int
+    semester: int
+    type: str
+    subgroup: Optional[str] = None
+    prerequisites: Optional[str] = None
+
+class CourseMajorCreate(CourseMajorBase):
+    """
+    Kurzus-szak kapcsolat létrehozási séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus.
+        subgroup (Optional[str]): Alcsoport.
+        prerequisites (Optional[str]): Előfeltételek.
+    """
+    pass
+
+class CourseMajor(CourseMajorBase):
+    """
+    Kurzus-szak kapcsolat séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Kapcsolat azonosító.
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus.
+        subgroup (Optional[str]): Alcsoport.
+        prerequisites (Optional[str]): Előfeltételek.
+    """
+    id: int
+    class Config:
+        orm_mode = True
+
+class CourseEquivalenceBase(BaseModel):
+    """
+    Kurzus ekvivalencia alap séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    course_id: int
+    equivalent_course_id: int
+    major_id: int
+
+class CourseEquivalenceCreate(CourseEquivalenceBase):
+    """
+    Kurzus ekvivalencia létrehozási séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    pass
+
+class CourseEquivalence(CourseEquivalenceBase):
+    """
+    Kurzus ekvivalencia séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Ekvivalencia azonosító.
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    id: int
+    class Config:
+        orm_mode = True
+
 class ProgressBase(BaseModel):
     """
     Haladás alap séma.

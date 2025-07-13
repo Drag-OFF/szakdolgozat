@@ -79,6 +79,78 @@ class Course(Base):
 
     progress = relationship("Progress", back_populates="course")
 
+class Major(Base):
+    """
+    Szak adatbázis modell.
+
+    Attributes:
+        id (int): Szak azonosító.
+        name (str): Szak neve.
+    """
+    __tablename__ = "majors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, nullable=False)
+
+class MajorRequirement(Base):
+    """
+    Szak követelmény adatbázis modell.
+
+    Attributes:
+        id (int): Követelmény azonosító.
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    __tablename__ = "majors_requirements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False)
+    requirement_type = Column(String(50), nullable=False)
+    min_credits = Column(Integer, nullable=False)
+
+class CourseMajor(Base):
+    """
+    Kurzus-szak kapcsolat modell.
+
+    Attributes:
+        id (int): Kapcsolat azonosító.
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit.
+        semester (int): Ajánlott félév.
+        type (str): Típus (pl. kötelező/választható).
+        subgroup (str): Alcsoport (lehet NULL).
+        prerequisites (str): Előfeltételek (JSON vagy szöveg).
+    """
+    __tablename__ = "course_major"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False)
+    credit = Column(Integer, nullable=False)
+    semester = Column(Integer, nullable=False)
+    type = Column(String(50), nullable=False)
+    subgroup = Column(String(50), nullable=True)
+    prerequisites = Column(Text, nullable=True)
+
+class CourseEquivalence(Base):
+    """
+    Kurzus ekvivalencia modell.
+
+    Attributes:
+        id (int): Ekvivalencia azonosító.
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    __tablename__ = "course_equivalence"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    equivalent_course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    major_id = Column(Integer, ForeignKey("majors.id", ondelete="CASCADE"), nullable=False)
+
 class Progress(Base):
     """
     Haladás adatbázis modell.
