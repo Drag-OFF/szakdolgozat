@@ -68,20 +68,14 @@ class Course(Base):
         id (int): Kurzus azonosító.
         course_code (str): Kurzus kódja.
         name (str): Kurzus neve.
-        credit (int): Kredit érték.
-        recommended_semester (int): Ajánlott félév.
-        prerequisites (list[str]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (bool): Engedélyezett-e a párhuzamos teljesítés.
+
     """
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True, index=True)
     course_code = Column(String(50), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    credit = Column(Integer, nullable=False)
-    recommended_semester = Column(Integer, nullable=False)
-    prerequisites = Column(JSON, nullable=True)
-    allow_parallel_prerequisite = Column(Boolean, default=False)
+
 
     progress = relationship("Progress", back_populates="course")
 

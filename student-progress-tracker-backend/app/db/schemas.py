@@ -189,17 +189,9 @@ class CourseBase(BaseModel):
     Attributes:
         course_code (str): A kurzus kódja.
         name (str): A kurzus neve.
-        credit (int): A kredit érték.
-        recommended_semester (int): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: str
     name: str
-    credit: int
-    recommended_semester: int
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = False
 
 class CourseCreate(CourseBase):
     """
@@ -208,17 +200,9 @@ class CourseCreate(CourseBase):
     Attributes:
         course_code (str): A kurzus kódja.
         name (str): A kurzus neve.
-        credit (int): A kredit érték.
-        recommended_semester (int): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: str
     name: str
-    credit: int
-    recommended_semester: int
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = False
 
 class CourseUpdate(BaseModel):
     """
@@ -227,17 +211,9 @@ class CourseUpdate(BaseModel):
     Attributes:
         course_code (Optional[str]): A kurzus kódja.
         name (Optional[str]): A kurzus neve.
-        credit (Optional[int]): A kredit érték.
-        recommended_semester (Optional[int]): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: Optional[str] = None
     name: Optional[str] = None
-    credit: Optional[int] = None
-    recommended_semester: Optional[int] = None
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = None
 
 class Course(CourseBase):
     """
