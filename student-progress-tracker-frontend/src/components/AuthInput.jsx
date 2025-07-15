@@ -1,3 +1,5 @@
+import { useLang } from "../context/LangContext";
+
 /**
  * Egyedi input mező komponens hitelesítési (login/regisztráció) űrlapokhoz.
  * Megjeleníti a labelt, az inputot, és opcionálisan hibát.
@@ -20,10 +22,14 @@ export default function AuthInput({
   error,
   ...props
 }) {
+  const { lang } = useLang();
+  const getText = (obj) =>
+    typeof obj === "string" ? obj : obj?.[lang] || "";
+
   return (
     <div>
       <label htmlFor={id} style={{ fontWeight: 500, marginBottom: 4, display: "block" }}>
-        {label}
+        {getText(label)}
       </label>
       <input
         id={id}
@@ -36,12 +42,12 @@ export default function AuthInput({
           ...(error ? { border: "2px solid #e53935", background: "#fff6f6" } : {})
         }}
         {...props}
-    />
-        {error && (
-            <div className="auth-msg" style={{ color: "#e53935", marginTop: 2 }}>
-            {error}
+      />
+      {error && (
+        <div className="auth-msg" style={{ color: "#e53935", marginTop: 2 }}>
+          {getText(error)}
         </div>
-        )}
-        </div>
-    );
+      )}
+    </div>
+  );
 }

@@ -1,59 +1,83 @@
-import { useState } from "react";
-import { authFetch, isValidEmail } from "../utils";
-import AuthInput from "../components/AuthInput";
-
 /**
- * ResendVerify komponens.
- * E-mail cím bekérése, validálása, majd újraküldési kérés a backendnek.
- * @returns {JSX.Element} Az oldal tartalma.
+ * Jelszó visszaállítás oldal tokennel.
+ * A felhasználó a kiküldött linkre kattintva új jelszót állíthat be.
+ * A PasswordResetForm komponenst használja, amely két mezőt jelenít meg:
+ * - Új jelszó
+ * - Jelszó megerősítése
+ * A jelszó minimum 8 karakter kell legyen, és egyeznie kell a megerősítéssel.
+ * Sikeres jelszócsere után automatikusan átirányít a főoldalra.
  */
-export default function ResendVerify() {
-  const [email, setEmail] = useState("");
-  const [msg, setMsg] = useState("");
-  const [sent, setSent] = useState(false);
+import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import PasswordResetForm from "../components/PasswordResetForm";
+import { useLang } from "../context/LangContext";
+import { authFetch } from "../utils";
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setMsg("");
-    if (!isValidEmail(email)) {
-      setMsg("Érvényes e-mail címet adj meg!");
-      return;
+export default function ResetPassword() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const [sent, setSent] = useState(false);
+  const { lang } = useLang();
+  const navigate = useNavigate();
+
+  const texts = {
+    hu: {
+      title: "Új jelszó beállítása",
+      password: "Új jelszó",
+      confirm: "Jelszó megerősítése",
+      btn: "Mentés",
+      pwError: "A jelszavak nem egyeznek vagy túl rövid!",
+      success: "Sikeres jelszócsere! Most már bejelentkezhetsz.",
+      unknownError: "Ismeretlen hiba történt.",
+      reqError: "Hiba történt a kérés során."
+    },
+    en: {
+      title: "Set new password",
+      password: "New password",
+      confirm: "Confirm password",
+      btn: "Save",
+      pwError: "Passwords do not match or too short!",
+      success: "Password changed successfully! You can now log in.",
+      unknownError: "Unknown error occurred.",
+      reqError: "An error occurred during the request."
     }
+  };
+
+  /**
+   * Beküldi az új jelszót a backendnek.
+   * @param {string} password - Az új jelszó.
+   * @param {function} setMsg - Hibák/siker üzenet beállítása.
+   */
+  async function handlePasswordReset(password, setMsg) {
     try {
-      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/resend-verification", {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ token, password }),
       });
       if (!resp) return;
       const result = await resp.json();
-      setMsg(result.detail || result.message || "Ismeretlen hiba történt.");
-      setSent(result.success);
+      if (resp.ok) {
+        setMsg(texts[lang].success);
+        setSent(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        setMsg(result.detail || texts[lang].unknownError);
+      }
     } catch (err) {
-      setMsg("Hiba történt a kérés során.");
+      setMsg(texts[lang].reqError);
     }
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-image">
-        <img src="https://u-szeged.hu/site/upload/2020/12/felveteli_weboldal_nyito_1520x864_0000s_0000_ttik2.jpg" alt="SZTE" />
-        <h2>Szegedi Tudományegyetem</h2>
-      </div>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h3>Megerősítő e-mail újraküldése</h3>
-        <AuthInput
-          label="E-mail cím"
-          id="resend-email"
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          error={msg && !isValidEmail(email) ? "Érvényes e-mail címet adj meg!" : ""}
-          required
-        />
-        <button type="submit" disabled={sent}>Küldés</button>
-        <div className="auth-msg">{msg}</div>
-      </form>
+    <div className="auth-container" style={{ justifyContent: "center", alignItems: "center" }}>
+      <PasswordResetForm
+        onSubmit={handlePasswordReset}
+        texts={texts}
+        sent={sent}
+      />
     </div>
   );
 }

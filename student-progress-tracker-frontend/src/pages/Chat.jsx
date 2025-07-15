@@ -11,7 +11,7 @@ import ChatLeaderboard from "../components/ChatLeaderboard";
  * @param {number} [breakpoint=1000] - A mobil/desktop váltás szélessége.
  * @returns {boolean} Igaz, ha mobil nézet.
  */
-function useIsMobile(breakpoint = 1000) {
+function useIsMobile(breakpoint = 900) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < breakpoint);
@@ -154,11 +154,6 @@ export default function Chat() {
     );
   }
 
-  // Nyelv váltás gomb (csak demó)
-  function toggleLang() {
-    alert("A nyelvváltás funkció csak demó! (Itt lehetne magyar/angol szövegeket cserélni.)");
-  }
-
   useEffect(() => {
     const el = chatListRef.current;
     if (!el) return;
@@ -198,13 +193,6 @@ export default function Chat() {
               title="Téma váltás"
             >
               🌙 / ☀️
-            </button>
-            <button
-              className="chat-header-btn"
-              onClick={toggleLang}
-              title="Nyelv váltás"
-            >
-              🇭🇺 / 🇬🇧
             </button>
           </div>
 

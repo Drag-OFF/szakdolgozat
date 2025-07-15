@@ -1,13 +1,13 @@
 /**
  * Navigációs sáv komponens.
- * Megjeleníti a főoldal, bejelentkezés, regisztráció vagy kijelentkezés linkeket a felhasználó bejelentkezési állapotától függően.
- * A JWT token alapján dinamikusan frissül.
+ * Nyelvváltó gombbal, dinamikus linkekkel a bejelentkezési állapot és szerepkör szerint.
  */
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 import Button from "../components/Button";
+import { useLang } from "../context/LangContext";
 
 /**
  * Segédfüggvény: JWT dekódolása (payload kinyerése)
@@ -24,20 +24,36 @@ function getRoleFromToken() {
   }
 }
 
-/**
- * Navbar komponens.
- * @returns {JSX.Element} A navigációs sáv elemei.
- */
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
-  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
+  const { lang, setLang } = useLang();
 
-  /**
-   * Ellenőrzi, hogy van-e JWT token a localStorage-ben, és frissíti a bejelentkezési állapotot.
-   * Figyeli a storage eseményt is, hogy több tab esetén is frissüljön.
-   */
+  const texts = {
+    hu: {
+      home: "Főoldal",
+      login: "Bejelentkezés",
+      register: "Regisztráció",
+      profile: "Profil",
+      chat: "Chat",
+      progress: "Előrehaladás",
+      admin: "Admin",
+      logout: "Kijelentkezés"
+    },
+    en: {
+      home: "Home",
+      login: "Login",
+      register: "Register",
+      profile: "Profile",
+      chat: "Chat",
+      progress: "Progress",
+      admin: "Admin",
+      logout: "Logout"
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     setLoggedIn(!!token);
@@ -51,9 +67,6 @@ export default function Navbar() {
     return () => window.removeEventListener("storage", handler);
   }, []);
 
-  /**
-   * Kijelentkezteti a felhasználót: törli a JWT tokent, frissíti az állapotot, átirányít a login oldalra.
-   */
   function handleLogout() {
     localStorage.removeItem("access_token");
     setLoggedIn(false);
@@ -78,32 +91,37 @@ export default function Navbar() {
         <span />
       </button>
       <div className={`navbar-links${open ? " open" : ""}`}>
-        <Link to="/" onClick={() => setOpen(false)}>Főoldal</Link>
-        {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
+        <Button onClick={() => setLang(lang === "hu" ? "en" : "hu")}>
+          {lang === "hu" ? "EN" : "HU"}
+        </Button>
+        <Link to="/" onClick={() => setOpen(false)}>{texts[lang].home}</Link>
+        {isAdmin && (
+          <Link to="/admin" onClick={() => setOpen(false)}>{texts[lang].admin}</Link>
+        )}
         {loggedIn && (
-          <Link to="/chat" onClick={() => setOpen(false)}>Chat</Link>
-        )}{loggedIn && (
+          <Link to="/chat" onClick={() => setOpen(false)}>{texts[lang].chat}</Link>
+        )}
+        {loggedIn && (
+          <Link to="/progress" onClick={() => setOpen(false)}>{texts[lang].progress}</Link>
+        )}
+        {loggedIn && (
           <Link
             to="/profile"
-            style={{ marginLeft: "1rem", textDecoration: "none" }}
             onClick={() => setOpen(false)}
             className="navbar-profile-link"
           >
-            Profil
+            {texts[lang].profile}
           </Link>
         )}
         {!loggedIn && (
           <>
-            <Link to="/login" onClick={() => setOpen(false)}>Bejelentkezés</Link>
-            <Link to="/register" onClick={() => setOpen(false)}>Regisztráció</Link>
+            <Link to="/login" onClick={() => setOpen(false)}>{texts[lang].login}</Link>
+            <Link to="/register" onClick={() => setOpen(false)}>{texts[lang].register}</Link>
           </>
         )}
         {loggedIn && (
-          <Button
-            style={{ marginLeft: "1rem" }}
-            onClick={handleLogout}
-          >
-            Kijelentkezés
+          <Button onClick={handleLogout}>
+            {texts[lang].logout}
           </Button>
         )}
       </div>

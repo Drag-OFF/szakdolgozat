@@ -751,8 +751,9 @@ chat-input-controllers {
   }
 
   .slide-panel {
-    width: 28vw;
-    max-width: 50vw;
+    display: flex;
+    width: 60vw;
+    max-width: 70vw;
   }
 
   .chat-root {
@@ -776,8 +777,8 @@ chat-input-controllers {
 
   .slide-panel {
     display: flex;
-    width: 28vw;
-    max-width: 50vw;
+    width: 60vw;
+    max-width: 70vw;
   }
 
   .chat-root {
@@ -797,6 +798,13 @@ chat-input-controllers {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
   }
+
+  .slide-panel {
+    display: flex;
+    width: 60vw;
+    max-width: 70vw;
+  }
+
   .chat-header {
     font-size: 2.1rem;
   }

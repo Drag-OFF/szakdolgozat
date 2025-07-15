@@ -1,6 +1,7 @@
 /**
  * Egyetlen chat üzenet megjelenítéséért felelős komponens.
  * Kezeli a válasz (reply), reakció (emoji), saját üzenet kiemelését, és a reakció picker pozícionálását.
+ * Nyelvváltás támogatott minden feliraton.
  *
  * @param {Object} props
  * @param {Object} props.msg - Az üzenet objektum.
@@ -21,6 +22,7 @@
 import { shortMsg, getUserName, findMessageById, groupReactions, formatDate } from "../utils";
 import Picker from "emoji-picker-react";
 import React, { useState, useEffect } from "react";
+import { useLang } from "../context/LangContext";
 
 export default function ChatMessage({
   msg,
@@ -36,6 +38,25 @@ export default function ChatMessage({
   addReaction,
   userName
 }) {
+  const { lang } = useLang();
+
+  const texts = {
+    hu: {
+      replyAnon: "Anonim: ",
+      reply: "Válasz",
+      reaction: "Reakció",
+      replyBtn: "Válasz",
+      close: "Bezárás"
+    },
+    en: {
+      replyAnon: "Anonymous: ",
+      reply: "Reply",
+      reaction: "Reaction",
+      replyBtn: "Reply",
+      close: "Close"
+    }
+  };
+
   const reactionsGrouped = groupReactions(msg);
   const isOwn = String(msg.user_id) === String(currentUser.id);
   const repliedMsg = msg.reply_to_id ? findMessageById(messages, msg.reply_to_id) : null;
@@ -58,17 +79,17 @@ export default function ChatMessage({
     const pickerWidth = 350;
     const pickerHeight = 400;
     const margin = 16;
-  
+
     let x = e.clientX;
     let y = e.clientY - 60;
-  
+
     // Jobb vagy bal oldalra tolás
     if (isOwn) {
       x -= pickerWidth / 2 + 24; // saját üzenetnél balra tol
     } else {
       x += pickerWidth / 2 + 24; // más üzenetnél jobbra tol
     }
-  
+
     // Jobb szélre ne lógjon ki
     if (x + pickerWidth / 2 > window.innerWidth - margin) {
       x = window.innerWidth - pickerWidth / 2 - margin;
@@ -85,7 +106,7 @@ export default function ChatMessage({
     if (y + pickerHeight > window.innerHeight - margin) {
       y = window.innerHeight - pickerHeight - margin;
     }
-  
+
     setPickerPos({ x, y });
     setReactingTo(reactingTo === msg.id ? null : msg.id);
   }
@@ -105,8 +126,8 @@ export default function ChatMessage({
         <div className="chat-reply-preview">
           <span className="chat-reply-author">
             {repliedMsg.anonymous
-              ? (repliedMsg.anonymous_name || "Anonim: ")
-              : getUserName(users, repliedMsg.user_id)+ ": "
+              ? (repliedMsg.anonymous_name || texts[lang].replyAnon)
+              : getUserName(users, repliedMsg.user_id) + ": "
             }
           </span>
           <span className="chat-reply-text">
@@ -132,14 +153,14 @@ export default function ChatMessage({
           <div className={`chat-message-toolbar${hovered ? " visible" : ""}`}>
             <button
               className="chat-action-btn"
-              title="Reakció"
+              title={texts[lang].reaction}
               onClick={handleReactionBtn}
             >
               😊
             </button>
             <button
               className="chat-action-btn"
-              title="Válasz"
+              title={texts[lang].replyBtn}
               onClick={() => setReplyTo(msg)}
             >
               ↩️
@@ -153,14 +174,14 @@ export default function ChatMessage({
           <div className={`chat-message-toolbar${hovered ? " visible" : ""}`}>
             <button
               className="chat-action-btn"
-              title="Reakció"
+              title={texts[lang].reaction}
               onClick={handleReactionBtn}
             >
               😊
             </button>
             <button
               className="chat-action-btn"
-              title="Válasz"
+              title={texts[lang].replyBtn}
               onClick={() => setReplyTo(msg)}
             >
               ↩️

@@ -1,6 +1,7 @@
 /**
  * Chat üzenetek listája komponens.
  * Megjeleníti az összes üzenetet, minden üzenethez átadja a szükséges propokat.
+ * Nyelvváltás támogatott minden feliraton a ChatMessage komponensen keresztül.
  *
  * @param {Object} props
  * @param {Array} props.messages - Az üzenetek tömbje.
@@ -20,7 +21,7 @@
  */
 
 import ChatMessage from "./ChatMessage";
-import React, { useRef, useEffect } from "react";
+import React from "react";
 
 export default function ChatMessagesList({
   messages,
@@ -37,7 +38,6 @@ export default function ChatMessagesList({
   chatEndRef,
   listRef
 }) {
-
   function getUserNameById(userId) {
     const user = users.find(
       u => String(u.id) === String(userId) || String(u.neptun) === String(userId)

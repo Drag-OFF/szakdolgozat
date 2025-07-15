@@ -10,6 +10,8 @@ import ResendVerify from "./pages/ResendVerify";
 import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
+import ProgressTracker from "./pages/ProgressTracker";
+import { LangProvider } from "./context/LangContext";
 import "./App.css";
 
 /**
@@ -20,22 +22,25 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <div className="app-wrapper">
-      <Navbar />
-      <main className={location.pathname === "/chat" ? "chat-main-padding" : ""}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/resend-verify" element={<ResendVerify />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </main>
-      {location.pathname !== "/chat" && <Footer />}
-    </div>
+    <LangProvider>
+      <div className="app-wrapper">
+        <Navbar />
+        <main className={location.pathname === "/chat" ? "chat-main-padding" : ""}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/resend-verify" element={<ResendVerify />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/progress" element={<ProgressTracker />} />
+          </Routes>
+        </main>
+        {location.pathname !== "/chat" && <Footer />}
+      </div>
+    </LangProvider>
   );
 }

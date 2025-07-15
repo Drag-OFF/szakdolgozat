@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
 import { authFetch, isValidEmail, isValidNeptun } from "../utils";
 import AuthInput from "../components/AuthInput";
+import { useLang } from "../context/LangContext";
 
 /**
  * Bejelentkezési oldal komponens.
@@ -18,28 +18,53 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
+  const { lang } = useLang();
 
-    /**
-   * Kezeli a bejelentkezési űrlap elküldését.
-   * Ellenőrzi a felhasználó adatokat, elküldi a backendnek, és kezeli a választ.
-   * Sikeres bejelentkezéskor JWT tokent ment a localStorage-be, majd átirányít a főoldalra.
-   * @param {React.FormEvent} e Az űrlap elküldésének eseménye.
-   */
+  const texts = {
+    hu: {
+      title: "Hallgatói bejelentkezés",
+      uidLabel: "E-mail vagy Neptun kód",
+      passwordLabel: "Jelszó",
+      btn: "Bejelentkezés",
+      noAccount: "Nincs fiókod?",
+      register: "Regisztráció",
+      forgot: "Elfelejtett jelszó?",
+      invalidUid: "Adj meg érvényes e-mail címet vagy Neptun kódot!",
+      emptyPw: "A jelszó nem lehet üres!",
+      success: "Sikeres bejelentkezés!",
+      error: "Hiba",
+      network: "Hálózati hiba: "
+    },
+    en: {
+      title: "Student login",
+      uidLabel: "E-mail or Neptun code",
+      passwordLabel: "Password",
+      btn: "Login",
+      noAccount: "No account?",
+      register: "Register",
+      forgot: "Forgot password?",
+      invalidUid: "Please enter a valid e-mail address or Neptun code!",
+      emptyPw: "Password cannot be empty!",
+      success: "Login successful!",
+      error: "Error",
+      network: "Network error: "
+    }
+  };
+
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
-    // Validáció: legyen e-mail vagy neptun
     if (!isValidEmail(uid) && !isValidNeptun(uid)) {
-      setMsg("Adj meg érvényes e-mail címet vagy Neptun kódot!");
+      setMsg(texts[lang].invalidUid);
       return;
     }
     if (!password) {
-      setMsg("A jelszó nem lehet üres!");
+      setMsg(texts[lang].emptyPw);
       return;
     }
     const data = uid.includes("@") ? { email: uid, password } : { uid, password };
     try {
-      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/login", {
+      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -49,44 +74,49 @@ export default function Login() {
       if (resp.ok && result.access_token) {
         localStorage.setItem("access_token", result.access_token);
         localStorage.setItem("user", JSON.stringify(result.user));
-        setMsg("Sikeres bejelentkezés!");
+        setMsg(texts[lang].success);
         setTimeout(() => {
-          window.location.href = "/";
+          navigate("/"); // <-- csak itt navigálunk!
         }, 1000);
+      } else if (
+        result.detail &&
+        (result.detail.includes("erősítsd meg") || result.detail.toLowerCase().includes("verify"))
+      ) {
+        setMsg(result.detail);
+        // Nem navigál sehova, marad a loginon
       } else {
-        setMsg(result.detail || "Hiba");
+        setMsg(result.detail || texts[lang].error);
+        // Nem navigál sehova, marad a loginon
       }
     } catch (err) {
-      setMsg("Hálózati hiba: " + err);
+      setMsg(texts[lang].network + err);
     }
   }
 
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h3>Hallgatói bejelentkezés</h3>
-
+        <h3>{texts[lang].title}</h3>
         <AuthInput
-          label="E-mail vagy Neptun kód"
+          label={texts[lang].uidLabel}
           id="login-uid"
           value={uid}
           onChange={e => setUid(e.target.value)}
         />
         <AuthInput
-          label="Jelszó"
+          label={texts[lang].passwordLabel}
           id="login-password"
           type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-
-        <button type="submit">Bejelentkezés</button>
+        <button type="submit">{texts[lang].btn}</button>
         <div className="auth-msg">{msg}</div>
         <div className="auth-link">
-          Nincs fiókod? <Link to="/register">Regisztráció</Link>
+          {texts[lang].noAccount} <Link to="/register">{texts[lang].register}</Link>
         </div>
         <div className="auth-link">
-          <Link to="/forgot-password">Elfelejtett jelszó?</Link>
+          <Link to="/forgot-password">{texts[lang].forgot}</Link>
         </div>
       </form>
     </div>

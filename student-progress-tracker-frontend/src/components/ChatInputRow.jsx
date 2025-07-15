@@ -1,6 +1,28 @@
 import Picker from "emoji-picker-react";
 import React, { useRef, useState } from "react";
+import { useLang } from "../context/LangContext";
 
+/**
+ * Chat üzenet beküldő sor komponens.
+ * Emoji picker, szövegmező, küldés gomb, anonim checkbox, válasz sáv.
+ * Nyelvváltás támogatott minden feliraton.
+ *
+ * @param {Object} props
+ * @param {string} props.input - Üzenet szövege.
+ * @param {function} props.setInput - Üzenet setter.
+ * @param {boolean} props.showEmoji - Emoji picker láthatóság.
+ * @param {function} props.setShowEmoji - Emoji picker setter.
+ * @param {function} props.onEmojiClick - Emoji kiválasztás handler.
+ * @param {boolean} props.isAnonymous - Anonim mód.
+ * @param {function} props.setIsAnonymous - Anonim mód setter.
+ * @param {function} props.sendMessage - Üzenet küldése.
+ * @param {Object|null} props.replyTo - Válaszolt üzenet.
+ * @param {function} props.setReplyTo - Válasz törlése.
+ * @param {Array} props.users - Felhasználók tömbje.
+ * @param {function} props.getUserName - User név lekérdezése.
+ * @param {function} props.shortMsg - Rövidített üzenet szöveg.
+ * @returns {JSX.Element}
+ */
 export default function ChatInputRow({
   input,
   setInput,
@@ -18,6 +40,26 @@ export default function ChatInputRow({
 }) {
   const emojiBtnRef = useRef(null);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
+  const { lang } = useLang();
+
+  const texts = {
+    hu: {
+      reply: "Válasz:",
+      replyClose: "Válasz törlése",
+      send: "Küldés",
+      anon: "Anonim",
+      placeholder: "Írj üzenetet...",
+      emoji: "Emoji"
+    },
+    en: {
+      reply: "Reply:",
+      replyClose: "Remove reply",
+      send: "Send",
+      anon: "Anonymous",
+      placeholder: "Type a message...",
+      emoji: "Emoji"
+    }
+  };
 
   const theme =
     (document.body.getAttribute("data-theme") || "light") === "dark"
@@ -32,35 +74,25 @@ export default function ChatInputRow({
     }
   };
 
-
-
-
   function handleEmojiBtnClick(e) {
     const pickerWidth = 350;
     const pickerHeight = 400;
     const margin = 16;
 
-    // Az emoji gomb kattintásának pozíciója
     let x = e.clientX;
     let y = e.clientY - 60;
-
-    // Mindig jobbra tolja, mint a reaction picker
     x += 10;
-    y-=400;
+    y -= 400;
 
-    // Jobb szélre ne lógjon ki
     if (x + pickerWidth / 2 > window.innerWidth - margin) {
       x = window.innerWidth - pickerWidth / 2 - margin;
     }
-    // Bal szélre se lógjon ki
     if (x - pickerWidth / 2 < margin) {
       x = pickerWidth / 2 + margin;
     }
-    // Felső szélre ne lógjon ki
     if (y < margin) {
       y = margin;
     }
-    // Alsó szélre se lógjon ki
     if (y + pickerHeight > window.innerHeight - margin) {
       y = window.innerHeight - pickerHeight - margin;
     }
@@ -73,10 +105,10 @@ export default function ChatInputRow({
     <>
       {replyTo && (
         <div className="chat-reply-bar">
-          <span className="chat-reply-bar-label">Válasz:</span>
+          <span className="chat-reply-bar-label">{texts[lang].reply}</span>
           <span className="chat-reply-bar-author">
             {replyTo.anonymous
-              ? (replyTo.anonymous_name || "Anonim")
+              ? (replyTo.anonymous_name || texts[lang].anon)
               : getUserName(users, replyTo.user_id)
             }
           </span>
@@ -84,7 +116,7 @@ export default function ChatInputRow({
           <button
             className="chat-reply-bar-close"
             onClick={() => setReplyTo(null)}
-            title="Válasz törlése"
+            title={texts[lang].replyClose}
           >
             ×
           </button>
@@ -95,7 +127,7 @@ export default function ChatInputRow({
           className="chat-emoji-btn"
           ref={emojiBtnRef}
           onClick={handleEmojiBtnClick}
-          title="Emoji"
+          title={texts[lang].emoji}
           type="button"
         >
           😊
@@ -118,13 +150,13 @@ export default function ChatInputRow({
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Írj üzenetet..."
+          placeholder={texts[lang].placeholder}
           rows={1}
         />
 
         <div className="chat-input-controllers">
           <button className="chat-send-btn" onClick={sendMessage} type="button">
-            Küldés
+            {texts[lang].send}
           </button>
           <label className="chat-anon-label">
             <span className="chat-anon-checkbox">
@@ -144,7 +176,7 @@ export default function ChatInputRow({
                 </span>
               </span>
             </span>
-            Anonim
+            {texts[lang].anon}
           </label>
         </div>
       </div>
