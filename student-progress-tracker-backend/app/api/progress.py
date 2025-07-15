@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.db import schemas
+from app.db import schemas, models
 from app.db.database import get_db
 from app.services.progress_service import ProgressService
 from app.utils import get_current_user
@@ -107,3 +107,74 @@ def delete_progress(progress_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Progress not found")
     return {"detail": "Progress deleted successfully"}
+
+
+
+@router.get("/{user_id}/completed", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
+def get_user_completed_courses(user_id: int, db: Session = Depends(get_db)):
+    """
+    Egy adott felhasználó teljesített kurzusainak lekérése.
+
+    Args:
+        user_id (int): A felhasználó azonosítója.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        list[schemas.Progress]: A felhasználó összes 'completed' státuszú kurzusa.
+
+    Raises:
+        HTTPException: Ha a lekérdezés sikertelen.
+    """
+    progress_service = ProgressService(db)
+    return progress_service.get_user_completed_courses(user_id)
+
+@router.get("/{user_id}/in-progress", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
+def get_user_in_progress_courses(user_id: int, db: Session = Depends(get_db)):
+    """
+    Egy adott felhasználó folyamatban lévő kurzusainak lekérése.
+
+    Args:
+        user_id (int): A felhasználó azonosítója.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        list[schemas.Progress]: A felhasználó összes 'in_progress' státuszú kurzusa.
+
+    Raises:
+        HTTPException: Ha a lekérdezés sikertelen.
+    """
+    progress_service = ProgressService(db)
+    return progress_service.get_user_in_progress_courses(user_id)
+
+
+@router.get("/{user_id}/full", response_model=list[schemas.ProgressFull], dependencies=[Depends(get_current_user)])
+def get_user_progress_full(user_id: int, db: Session = Depends(get_db)):
+    """
+    Egy felhasználó összes haladását adja vissza, minden kapcsolódó kurzus, szak, ajánlott félév, kredit adattal együtt.
+    """
+    results = (
+        db.query(
+            models.Progress,
+            models.Course,
+            models.CourseMajor
+        )
+        .join(models.Course, models.Progress.course_id == models.Course.id)
+        .join(models.User, models.Progress.user_id == models.User.id)
+        .join(models.Major, models.User.major == models.Major.name)
+        .join(models.CourseMajor, (models.CourseMajor.course_id == models.Course.id) & (models.CourseMajor.major_id == models.Major.id))
+        .filter(models.Progress.user_id == user_id)
+        .all()
+    )
+    return [
+        schemas.ProgressFull(
+            id=p.Progress.id,
+            course_code=p.Course.course_code,
+            course_name=p.Course.name,
+            recommended_semester=p.CourseMajor.semester,
+            credit=p.CourseMajor.credit,
+            completed_semester=p.Progress.completed_semester,
+            status=p.Progress.status,
+            points=p.Progress.points
+        )
+        for p in results
+    ]

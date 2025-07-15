@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Júl 13. 09:18
+-- Létrehozás ideje: 2025. Júl 15. 18:34
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -53,6 +53,32 @@ INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `
 (38, 'Mérnökinformatikus', 26, 'Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?', '2025-07-06 22:50:34', 0, NULL, NULL),
 (47, 'Mérnökinformatikus', 26, 'Szia hogy vagy?', '2025-07-07 16:15:43', 0, NULL, NULL),
 (67, 'Villamosmérnök', 55, 'Remélem az életben nem kapsz diplomát', '2025-07-11 19:09:38', 0, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `chat_reaction`
+--
+
+DROP TABLE IF EXISTS `chat_reaction`;
+CREATE TABLE `chat_reaction` (
+  `id` int(11) NOT NULL,
+  `message_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `emoji` varchar(32) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `chat_reaction`
+--
+
+INSERT INTO `chat_reaction` (`id`, `message_id`, `user_id`, `emoji`, `created_at`) VALUES
+(3, 1, 17, '🦊', '2025-07-02 19:29:17'),
+(7, 1, 26, '🦊', '2025-07-03 14:21:38'),
+(13, 30, 26, '😃', '2025-07-06 20:47:10'),
+(19, 36, 53, '🦊', '2025-07-06 21:31:50'),
+(25, 67, 17, '🥰', '2025-07-11 19:14:50');
 
 -- --------------------------------------------------------
 
@@ -223,6 +249,256 @@ INSERT INTO `courses` (`id`, `course_code`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Tábla szerkezet ehhez a táblához `course_equivalence`
+--
+
+DROP TABLE IF EXISTS `course_equivalence`;
+CREATE TABLE `course_equivalence` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `equivalent_course_id` int(11) NOT NULL,
+  `major_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `course_equivalence`
+--
+
+INSERT INTO `course_equivalence` (`id`, `course_id`, `equivalent_course_id`, `major_id`) VALUES
+(1, 96, 98, 1),
+(2, 97, 99, 1),
+(3, 105, 107, 1),
+(4, 106, 108, 1),
+(5, 109, 111, 1),
+(6, 110, 112, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `course_major`
+--
+
+DROP TABLE IF EXISTS `course_major`;
+CREATE TABLE `course_major` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `major_id` int(11) NOT NULL,
+  `credit` int(11) NOT NULL DEFAULT 0,
+  `semester` int(11) NOT NULL DEFAULT 0,
+  `type` varchar(50) DEFAULT NULL,
+  `subgroup` varchar(50) DEFAULT NULL,
+  `prerequisites` varchar(255) DEFAULT '[]'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `course_major`
+--
+
+INSERT INTO `course_major` (`id`, `course_id`, `major_id`, `credit`, `semester`, `type`, `subgroup`, `prerequisites`) VALUES
+(4, 64, 1, 2, 1, 'required', NULL, '[]'),
+(5, 65, 1, 3, 1, 'required', NULL, '[]'),
+(6, 66, 1, 2, 2, 'required', NULL, '[\"MBNXK311E\",\"MBNXK311G\"]'),
+(7, 67, 1, 3, 2, 'required', NULL, '[\"MBNXK311E\",\"MBNXK311G\"]'),
+(8, 68, 1, 2, 3, 'required', NULL, '[\"MBNXK262E\"]'),
+(9, 69, 1, 1, 3, 'required', NULL, '[\"MBNXK262E\"]'),
+(10, 70, 1, 2, 1, 'required', NULL, '[]'),
+(11, 71, 1, 3, 1, 'required', NULL, '[]'),
+(12, 72, 1, 2, 3, 'required', NULL, '[\"IB304e\"]'),
+(13, 73, 1, 2, 3, 'required', NULL, '[\"IB304e\"]'),
+(14, 74, 1, 2, 4, 'required', NULL, '[\"IBK304e\",\"IBK304g\"]'),
+(15, 75, 1, 2, 4, 'required', NULL, '[\"IBK304e\",\"IBK304g\"]'),
+(16, 76, 1, 3, 5, 'required', NULL, '[\"MBNX111G\",\"MBNX111E\"]'),
+(17, 77, 1, 2, 5, 'required', NULL, '[\"MBNX111G\",\"MBNX111E\"]'),
+(18, 78, 1, 2, 1, 'required', NULL, '[]'),
+(19, 79, 1, 3, 2, 'required', NULL, '[]'),
+(20, 80, 1, 2, 2, 'required', NULL, '[]'),
+(21, 81, 1, 3, 3, 'required', NULL, '[\"GKBN04E\"]'),
+(22, 82, 1, 3, 2, 'required', NULL, '[]'),
+(23, 83, 1, 3, 7, 'required', NULL, '[]'),
+(24, 84, 1, 3, 4, 'required', NULL, '[\"GKBN15E\"]'),
+(25, 85, 1, 3, 4, 'required', NULL, '[\"GKBN15E\"]'),
+(26, 86, 1, 2, 6, 'required', NULL, '[\"GKBN15E\"]'),
+(27, 87, 1, 2, 6, 'required', NULL, '[\"GKBN15E\"]'),
+(28, 88, 1, 1, 5, 'required', NULL, '[\"GKBN06E\"]'),
+(29, 94, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(30, 95, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(31, 96, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB204L\",\"IB204E\"]'),
+(32, 97, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB204L\",\"IB204E\"]'),
+(33, 98, 1, 2, 2, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(34, 99, 1, 2, 2, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(35, 100, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB204E\",\"MBNX111E\"]'),
+(36, 101, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB204E\",\"MBNX111E\"]'),
+(37, 102, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(38, 103, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB104E\",\"IB104L\"]'),
+(39, 104, 1, 3, 1, 'elective', 'elective_core_credits', '[]'),
+(40, 105, 1, 2, 2, 'elective', 'elective_core_credits', '[\"MBNX111E\"]'),
+(41, 106, 1, 2, 2, 'elective', 'elective_core_credits', '[\"MBNX111E\"]'),
+(42, 107, 1, 1, 1, 'elective', 'elective_core_credits', '[]'),
+(43, 108, 1, 3, 1, 'elective', 'elective_core_credits', '[]'),
+(44, 109, 1, 2, 3, 'elective', 'elective_core_credits', '[\"MBNXK311E\",\"MBNXK111E\"]'),
+(45, 110, 1, 2, 3, 'elective', 'elective_core_credits', '[\"MBNXK311E\",\"MBNXK111E\"]'),
+(46, 111, 1, 2, 2, 'elective', 'elective_core_credits', '[\"MBNXK111E\"]'),
+(47, 112, 1, 2, 2, 'elective', 'elective_core_credits', '[\"MBNXK111E\"]'),
+(48, 113, 1, 2, 3, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(49, 114, 1, 2, 3, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(50, 115, 1, 2, 3, 'elective', 'elective_core_credits', '[]'),
+(51, 116, 1, 2, 3, 'elective', 'elective_core_credits', '[]'),
+(52, 117, 1, 2, 2, 'elective', 'elective_core_credits', '[\"IB162E\"]'),
+(53, 118, 1, 2, 2, 'elective', 'elective_core_credits', '[\"IB162E\"]'),
+(54, 119, 1, 1, 4, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(55, 120, 1, 2, 4, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(56, 121, 1, 1, 1, 'elective', 'elective_core_credits', '[]'),
+(57, 122, 1, 2, 4, 'elective', 'elective_core_credits', '[\"IB204L\",\"IB204E\"]'),
+(58, 123, 1, 2, 4, 'elective', 'elective_core_credits', '[\"IB204L\",\"IB204E\"]'),
+(59, 124, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB414-2g\",\"IB414-2e\"]'),
+(60, 125, 1, 2, 5, 'elective', 'elective_core_credits', '[\"IB414-2g\",\"IB414-2e\"]'),
+(61, 126, 1, 2, 3, 'elective', 'elective_core_credits', '[\"MBNX111E\",\"IB104E\"]'),
+(62, 127, 1, 2, 3, 'elective', 'elective_core_credits', '[\"MBNX111E\",\"IB104E\"]'),
+(63, 128, 1, 2, 6, 'elective', 'elective_core_credits', '[\"IB153e\",\"IB153l\"]'),
+(64, 129, 1, 2, 6, 'elective', 'elective_core_credits', '[\"IB153e\",\"IB153l\"]'),
+(65, 130, 1, 2, 4, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(66, 131, 1, 2, 4, 'elective', 'elective_core_credits', '[\"IB204E\",\"IB204L\"]'),
+(67, 132, 1, 2, 6, 'elective', 'elective_core_credits', '[\"IB153e\",\"IB407e\",\"IB153e\"]'),
+(68, 133, 1, 1, 6, 'elective', 'elective_core_credits', '[\"IB153e\",\"IB407e\",\"IB153e\"]'),
+(69, 134, 1, 4, 1, 'elective', 'elective_info_credits', '[]'),
+(70, 135, 1, 4, 1, 'elective', 'elective_info_credits', '[]'),
+(71, 136, 1, 3, 2, 'elective', 'elective_info_credits', '[\"IB104L\"]'),
+(72, 137, 1, 3, 2, 'elective', 'elective_info_credits', '[\"IB104L\"]'),
+(73, 138, 1, 2, 1, 'elective', 'elective_info_credits', '[]'),
+(74, 139, 1, 3, 1, 'elective', 'elective_info_credits', '[]'),
+(75, 140, 1, 2, 2, 'elective', 'elective_info_credits', '[\"IBNa1001L\"]'),
+(76, 141, 1, 3, 2, 'elective', 'elective_info_credits', '[\"IBNa1001L\"]'),
+(77, 142, 1, 2, 0, 'elective', 'elective_info_credits', '[\"IBNa1001L\"]'),
+(78, 143, 1, 2, 0, 'elective', 'elective_info_credits', '[\"IBNa1001L\"]'),
+(79, 144, 1, 2, 0, 'elective', NULL, '[]'),
+(80, 145, 1, 3, 4, 'elective', NULL, '[\"TT-MBNXK111\"]'),
+(81, 146, 1, 1, 4, 'elective', NULL, '[\"TT-MBNXK111\"]'),
+(82, 147, 1, 2, 1, 'elective', NULL, '[]'),
+(83, 148, 1, 2, 4, 'elective', NULL, '[\"IB501e\",\"IB501g\"]'),
+(84, 149, 1, 3, 4, 'elective', NULL, '[\"IB501e\",\"IB501g\"]'),
+(85, 150, 1, 2, 1, 'elective', NULL, '[]'),
+(86, 151, 1, 2, 1, 'elective', NULL, '[]'),
+(87, 152, 1, 4, 0, 'elective', NULL, '[]'),
+(88, 153, 1, 3, 0, 'elective', NULL, '[]'),
+(89, 154, 1, 3, 0, 'elective', NULL, '[]'),
+(90, 155, 1, 4, 0, 'elective', NULL, '[]'),
+(91, 156, 1, 0, 0, 'elective', NULL, '[]'),
+(92, 157, 1, 5, 0, 'elective', NULL, '[]'),
+(93, 158, 1, 0, 0, 'elective', NULL, '[]'),
+(94, 159, 1, 4, 0, 'elective', NULL, '[]'),
+(95, 160, 1, 0, 0, 'elective', NULL, '[]'),
+(96, 161, 1, 3, 0, 'elective', NULL, '[]'),
+(97, 162, 1, 0, 0, 'elective', NULL, '[]'),
+(98, 163, 1, 5, 0, 'elective', NULL, '[]'),
+(99, 164, 1, 0, 0, 'elective', NULL, '[]'),
+(100, 165, 1, 4, 0, 'elective', NULL, '[]'),
+(101, 166, 1, 2, 0, 'elective', NULL, '[]'),
+(102, 167, 1, 2, 0, 'elective', NULL, '[\"IB304e\"]'),
+(103, 168, 1, 2, 0, 'elective', NULL, '[\"IB304e\"]'),
+(104, 169, 1, 3, 0, 'elective', NULL, '[]'),
+(105, 170, 1, 2, 0, 'elective', NULL, '[\"IBK604e\",\"IBK604g\"]'),
+(106, 171, 1, 2, 0, 'elective', NULL, '[\"IBK604e\",\"IBK604g\"]'),
+(107, 172, 1, 1, 0, 'elective', NULL, '[\"IB162E\"]'),
+(108, 173, 1, 1, 0, 'elective', NULL, '[\"IB162E\"]'),
+(109, 174, 1, 1, 0, 'elective', NULL, '[]'),
+(110, 175, 1, 2, 0, 'elective', NULL, '[]'),
+(111, 176, 1, 2, 0, 'elective', NULL, '[\"IB402e\",\"IB402g\"]'),
+(112, 177, 1, 2, 0, 'elective', NULL, '[\"IB402e\",\"IB402g\"]'),
+(113, 178, 1, 3, 0, 'elective', NULL, '[\"IB204E\"]'),
+(114, 179, 1, 3, 0, 'elective', NULL, '[\"IB153e\"]'),
+(115, 180, 1, 3, 0, 'elective', NULL, '[\"IB407e\",\"IB204E\"]'),
+(116, 181, 1, 3, 0, 'elective', NULL, '[\"IB153e\"]'),
+(117, 182, 1, 3, 0, 'elective', NULL, '[\"IB414e\"]'),
+(118, 183, 1, 3, 0, 'elective', NULL, '[\"IB104E\"]'),
+(119, 184, 1, 3, 0, 'elective', NULL, '[\"IB104E\"]'),
+(120, 185, 1, 3, 0, 'elective', NULL, '[]'),
+(121, 186, 1, 3, 0, 'elective', NULL, '[\"IB301e\"]'),
+(122, 187, 1, 3, 0, 'elective', NULL, '[]'),
+(123, 188, 1, 3, 0, 'elective', NULL, '[\"IB204E\",\"IB204L\"]'),
+(124, 189, 1, 3, 0, 'elective', NULL, '[]'),
+(125, 190, 1, 2, 0, 'elective', NULL, '[\"MBNXK111E\",\"MBNXK111G\"]'),
+(126, 191, 1, 3, 0, 'elective', NULL, '[\"MBNXK111E\",\"MBNXK111G\"]'),
+(127, 192, 1, 2, 0, 'elective', NULL, '[\"MBNXK112E\",\"MBNXK112G\"]'),
+(128, 193, 1, 3, 0, 'elective', NULL, '[\"MBNXK112E\",\"MBNXK112G\"]'),
+(129, 194, 1, 2, 0, 'elective', NULL, '[\"MBNXK311E\",\"MBNXK311G\"]'),
+(130, 195, 1, 3, 0, 'elective', NULL, '[\"MBNXK311E\",\"MBNXK311G\"]'),
+(131, 196, 1, 1, 0, 'elective', NULL, '[\"IB204L\",\"IB204E\"]'),
+(132, 197, 1, 2, 0, 'elective', NULL, '[\"IB204L\",\"IB204E\"]'),
+(133, 198, 1, 1, 0, 'elective', NULL, '[\"IB370e\",\"IB370g\"]'),
+(134, 199, 1, 2, 0, 'elective', NULL, '[\"IB370e\",\"IB370g\"]'),
+(135, 200, 1, 3, 0, 'elective', NULL, '[\"IB302e\",\"IB302g\"]'),
+(136, 201, 1, 2, 0, 'elective', NULL, '[\"IB153e\",\"IB153l\"]'),
+(137, 202, 1, 3, 0, 'elective', NULL, '[\"IB153e\",\"IB153l\"]'),
+(138, 203, 1, 1, 0, 'elective', NULL, '[\"IB153e\",\"IB153l\"]'),
+(139, 204, 1, 2, 0, 'elective', NULL, '[\"IB153e\",\"IB153l\"]'),
+(140, 205, 1, 2, 0, 'elective', NULL, '[\"IB714e\",\"IB714g\"]'),
+(141, 206, 1, 2, 0, 'elective', NULL, '[\"IB714e\",\"IB714g\"]'),
+(142, 207, 1, 3, 0, 'elective', NULL, '[\"GKBN05E\"]'),
+(143, 89, 1, 1, 5, 'required', NULL, '[\"GKBN06E\"]'),
+(144, 90, 1, 3, 5, 'required', NULL, '[\"GKBN05E\"]'),
+(145, 91, 1, 2, 5, 'required', NULL, '[]'),
+(146, 92, 1, 2, 5, 'required', NULL, '[]'),
+(147, 93, 1, 3, 0, 'required', NULL, '[]'),
+(148, 208, 1, 320, 0, 'required', 'practice_hours', '[\"IB204E\"]'),
+(149, 209, 1, 5, 6, 'required', NULL, '[]'),
+(150, 210, 1, 10, 7, 'required', NULL, '[]');
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `majors`
+--
+
+DROP TABLE IF EXISTS `majors`;
+CREATE TABLE `majors` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `majors`
+--
+
+INSERT INTO `majors` (`id`, `name`) VALUES
+(1, 'Gazdaságinformatikus'),
+(2, 'Mérnökinformatikus'),
+(3, 'Programtervező informatikus'),
+(4, 'Villamosmérnök'),
+(5, 'Üzemmérnök-informatikus');
+
+-- --------------------------------------------------------
+
+--
+-- Tábla szerkezet ehhez a táblához `major_requirements`
+--
+
+DROP TABLE IF EXISTS `major_requirements`;
+CREATE TABLE `major_requirements` (
+  `id` int(11) NOT NULL,
+  `major_id` int(11) NOT NULL,
+  `total_credits` int(11) NOT NULL,
+  `required_credits` int(11) NOT NULL,
+  `elective_credits` int(11) NOT NULL,
+  `optional_credits` int(11) NOT NULL,
+  `elective_info_credits` int(11) DEFAULT 0,
+  `elective_math_credits` int(11) DEFAULT 0,
+  `pe_semesters` int(11) DEFAULT 0,
+  `practice_hours` int(11) DEFAULT 0,
+  `elective_non_core_credits` int(11) DEFAULT 0,
+  `elective_core_credits` int(11) DEFAULT 0,
+  `thesis_credits` int(11) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `major_requirements`
+--
+
+INSERT INTO `major_requirements` (`id`, `major_id`, `total_credits`, `required_credits`, `elective_credits`, `optional_credits`, `elective_info_credits`, `elective_math_credits`, `pe_semesters`, `practice_hours`, `elective_non_core_credits`, `elective_core_credits`, `thesis_credits`) VALUES
+(1, 1, 210, 69, 116, 10, 14, 0, 2, 320, 36, 80, 15);
+
+-- --------------------------------------------------------
+
+--
 -- Tábla szerkezet ehhez a táblához `progress`
 --
 
@@ -235,6 +511,49 @@ CREATE TABLE `progress` (
   `status` enum('completed','in_progress','pending') NOT NULL,
   `points` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- A tábla adatainak kiíratása `progress`
+--
+
+INSERT INTO `progress` (`id`, `user_id`, `course_id`, `completed_semester`, `status`, `points`) VALUES
+(5, 57, 79, 1, 'completed', 6),
+(6, 57, 80, 1, 'completed', 6),
+(7, 57, 64, 1, 'completed', 5),
+(8, 57, 65, 1, 'completed', 5),
+(9, 57, 70, 1, 'completed', 5),
+(10, 57, 71, 1, 'completed', 5),
+(11, 57, 134, 1, 'completed', 5),
+(12, 57, 135, 1, 'completed', 5),
+(13, 57, 104, 1, 'completed', 5),
+(14, 57, 121, 1, 'completed', 5),
+(15, 57, 147, 1, 'completed', 5),
+(16, 57, 78, 2, 'completed', 3),
+(17, 57, 115, 1, 'completed', 6),
+(18, 57, 116, 1, 'completed', 6),
+(19, 57, 105, 2, 'in_progress', 2),
+(20, 57, 66, 2, 'in_progress', 2),
+(21, 57, 67, 2, 'in_progress', 2),
+(22, 57, 136, 2, 'in_progress', 2),
+(23, 57, 137, 2, 'in_progress', 2),
+(24, 57, 117, 2, 'in_progress', 2),
+(25, 57, 118, 2, 'in_progress', 2),
+(26, 57, 82, 2, 'in_progress', 2),
+(27, 57, 107, 2, 'completed', 2),
+(28, 57, 108, 2, 'completed', 2),
+(29, 57, 74, 2, 'completed', 6),
+(30, 57, 75, 2, 'completed', 6),
+(31, 57, 128, 2, 'in_progress', 6),
+(32, 57, 129, 2, 'in_progress', 6),
+(33, 57, 142, 1, 'completed', 3),
+(34, 57, 143, 1, 'completed', 3),
+(35, 57, 138, 2, 'completed', 6),
+(36, 57, 139, 2, 'completed', 6),
+(37, 57, 107, 2, 'completed', 5),
+(38, 57, 108, 2, 'completed', 5),
+(39, 57, 172, 2, 'completed', 2),
+(40, 57, 173, 2, 'completed', 2),
+(41, 57, 208, 100, 'completed', 2);
 
 -- --------------------------------------------------------
 
@@ -271,12 +590,12 @@ INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`
 (1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL, NULL, NULL, NULL),
 (2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL, NULL, NULL, NULL),
 (3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL, NULL, NULL, NULL),
-(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$9mrHAsD7an5.LNBOxcJ8T.uGXX7GCtd5sX0fNTCBDmFx0vsQtMxPS', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, NULL, NULL, 'Anon#17245'),
+(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$gtV5BB2QxPRgy8J89LbfiuM0Q5ddq/MELLWg1Z9L2C.uwQfK3yINS', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, NULL, NULL, 'Anon#17245'),
 (26, 'GBG15D', 'buskristof415@gmail.com', '$2b$12$LB44D11dm2AS9vviNAeJRuDi7OOFPIU8F2RJmmMOLU/z8RA1oZo8u', 'Bús Kristóf', '2010-06-11', '666666AD', '666666AD', 'Lakatos Máriané', 'Mérnökinformatikus', 1, 'user', '2025-06-24 22:42:08', NULL, 'c3222117-8329-4995-b740-114181a6545b', '2025-06-26 19:06:28', NULL),
 (52, 'ASDFGH', 'harkai.dominik69@gmail.com', '$2b$12$V0INM6eJi6K7iRVwURKAPOnKmaJcN.QuhBUDp6SVrUgRHgdlc7vqq', 'Pityi Palkó', '2001-11-11', '123456EE', '123456EE', 'Csereeps Virág', 'Gazdaságinformatikus', 1, 'user', '2025-07-06 11:52:49', NULL, NULL, NULL, NULL),
 (53, 'GBG16D', 'zsomle401@gmail.com', '$2b$12$uL0o.b9hHlo/XXnh6bMmveEw/oVEcFYIgCwoCrLlyDnSYCBQwlhKm', 'József Mária', '2003-06-04', '666666ZZ', '666666ZZ', 'Mária király', 'Programtervező informatikus', 1, 'user', '2025-07-06 22:58:11', NULL, NULL, NULL, NULL),
 (55, 'KUR013', 'racikaw@gmail.com', '$2b$12$rxqdS4vcvvHOVs0zFxo5T.XuKHOXC7qDQxS8/7yUPIyM2TPxEwfia', 'Szeret Elek', '1999-06-11', '123456AB', '123456AB', 'Arika Corba', 'Villamosmérnök', 1, 'user', '2025-07-11 21:10:24', NULL, NULL, NULL, NULL),
-(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyok', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 0, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, NULL);
+(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyok', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 1, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, NULL);
 
 --
 -- Indexek a kiírt táblákhoz
@@ -291,11 +610,49 @@ ALTER TABLE `chat_messages`
   ADD KEY `fk_chat_messages_user` (`user_id`);
 
 --
+-- A tábla indexei `chat_reaction`
+--
+ALTER TABLE `chat_reaction`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `message_id` (`message_id`,`user_id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- A tábla indexei `courses`
 --
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `course_code` (`course_code`);
+
+--
+-- A tábla indexei `course_equivalence`
+--
+ALTER TABLE `course_equivalence`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `equivalent_course_id` (`equivalent_course_id`),
+  ADD KEY `major_id` (`major_id`);
+
+--
+-- A tábla indexei `course_major`
+--
+ALTER TABLE `course_major`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_course` (`course_id`),
+  ADD KEY `fk_major` (`major_id`);
+
+--
+-- A tábla indexei `majors`
+--
+ALTER TABLE `majors`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- A tábla indexei `major_requirements`
+--
+ALTER TABLE `major_requirements`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `major_id` (`major_id`);
 
 --
 -- A tábla indexei `progress`
@@ -324,16 +681,46 @@ ALTER TABLE `chat_messages`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
+-- AUTO_INCREMENT a táblához `chat_reaction`
+--
+ALTER TABLE `chat_reaction`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+
+--
 -- AUTO_INCREMENT a táblához `courses`
 --
 ALTER TABLE `courses`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
 
 --
+-- AUTO_INCREMENT a táblához `course_equivalence`
+--
+ALTER TABLE `course_equivalence`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT a táblához `course_major`
+--
+ALTER TABLE `course_major`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=151;
+
+--
+-- AUTO_INCREMENT a táblához `majors`
+--
+ALTER TABLE `majors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT a táblához `major_requirements`
+--
+ALTER TABLE `major_requirements`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT a táblához `progress`
 --
 ALTER TABLE `progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT a táblához `users`
@@ -352,6 +739,34 @@ ALTER TABLE `chat_messages`
   ADD CONSTRAINT `fk_chat_messages_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_messages_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_reply_to_message` FOREIGN KEY (`reply_to_id`) REFERENCES `chat_messages` (`id`) ON DELETE SET NULL;
+
+--
+-- Megkötések a táblához `chat_reaction`
+--
+ALTER TABLE `chat_reaction`
+  ADD CONSTRAINT `chat_reaction_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `chat_messages` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `chat_reaction_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `course_equivalence`
+--
+ALTER TABLE `course_equivalence`
+  ADD CONSTRAINT `course_equivalence_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_equivalence_ibfk_2` FOREIGN KEY (`equivalent_course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_equivalence_ibfk_3` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `course_major`
+--
+ALTER TABLE `course_major`
+  ADD CONSTRAINT `fk_course` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_major` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`) ON DELETE CASCADE;
+
+--
+-- Megkötések a táblához `major_requirements`
+--
+ALTER TABLE `major_requirements`
+  ADD CONSTRAINT `major_requirements_ibfk_1` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`);
 
 --
 -- Megkötések a táblához `progress`

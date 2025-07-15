@@ -81,3 +81,33 @@ class ProgressService:
         if progress:
             self.db.delete(progress)
             self.db.commit()
+
+    def get_user_completed_courses(self, user_id: int) -> list[ProgressModel]:
+        """
+        Visszaadja a felhasználó összes teljesített kurzusát.
+
+        Args:
+            user_id (int): A felhasználó azonosítója.
+
+        Returns:
+            list[ProgressModel]: A felhasználóhoz tartozó, 'completed' státuszú kurzusok listája.
+        """
+        return self.db.query(ProgressModel).filter(
+            ProgressModel.user_id == user_id,
+            ProgressModel.status == "completed"
+        ).all()
+
+    def get_user_in_progress_courses(self, user_id: int) -> list[ProgressModel]:
+        """
+        Visszaadja a felhasználó összes folyamatban lévő kurzusát.
+
+        Args:
+            user_id (int): A felhasználó azonosítója.
+
+        Returns:
+            list[ProgressModel]: A felhasználóhoz tartozó, 'in_progress' státuszú kurzusok listája.
+        """
+        return self.db.query(ProgressModel).filter(
+            ProgressModel.user_id == user_id,
+            ProgressModel.status == "in_progress"
+        ).all()

@@ -220,6 +220,11 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
     users_service = UsersService(db)
     try:
         user = users_service.login_user(login_data)
+        if not getattr(user, "verified", True):
+            raise HTTPException(
+                status_code=401,
+                detail="Kérjük, előbb erősítsd meg az e-mail címedet a belépéshez!"
+            )
         access_token = create_access_token({"user_id": user.id, "role": user.role})
         user_profile = {
             "id": user.id,
@@ -229,5 +234,7 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
             "major": user.major
         }
         return {"access_token": access_token, "token_type": "bearer", "user": user_profile}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))

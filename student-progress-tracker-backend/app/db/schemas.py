@@ -454,6 +454,19 @@ class Progress(ProgressBase):
     class Config:
         from_attributes = True
 
+class ProgressFull(BaseModel):
+    id: int
+    course_code: str
+    course_name: str
+    recommended_semester: int | None = None
+    credit: int | None = None
+    completed_semester: int | None = None
+    status: str
+    points: int | None = None
+
+    class Config:
+        from_attributes = True
+
 class ChatMessageBase(BaseModel):
     """
     Chat üzenet alap séma.
