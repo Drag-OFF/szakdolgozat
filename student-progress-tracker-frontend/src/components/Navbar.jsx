@@ -54,18 +54,20 @@ export default function Navbar() {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+  const updateAuth = () => {
     const token = localStorage.getItem("access_token");
     setLoggedIn(!!token);
     setIsAdmin(getRoleFromToken() === "admin");
-    const handler = () => {
-      const token = localStorage.getItem("access_token");
-      setLoggedIn(!!token);
-      setIsAdmin(getRoleFromToken() === "admin");
-    };
-    window.addEventListener("storage", handler);
-    return () => window.removeEventListener("storage", handler);
-  }, []);
+  };
+  updateAuth();
+  window.addEventListener("storage", updateAuth);
+  window.addEventListener("user-login", updateAuth);
+  return () => {
+    window.removeEventListener("storage", updateAuth);
+    window.removeEventListener("user-login", updateAuth);
+  };
+}, []);
 
   function handleLogout() {
     localStorage.removeItem("access_token");

@@ -91,7 +91,7 @@ export default function Register() {
       return;
     }
     try {
-      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/", {
+      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

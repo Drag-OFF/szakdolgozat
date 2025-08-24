@@ -1,0 +1,149 @@
+import React, { useRef, useState } from "react";
+import { useLang } from "../context/LangContext";
+
+/**
+ * Egységes kinézetű fájlfeltöltő komponens, magyar és angol feliratokkal.
+ * - Nincs külső padding/margin, csak a belső elemek stílusa van itt.
+ * - Megjeleníti a kiválasztott fájl nevét.
+ * - A feltöltés gomb csak akkor aktív, ha van kiválasztott fájl.
+ * - onUpload: (file) => void callback prop.
+ */
+export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userId }) {
+  const { lang } = useLang ? useLang() : { lang: "hu" };
+  const fileInputRef = useRef();
+  const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState(null);
+
+  const texts = {
+    hu: {
+      select: "Fájl kiválasztása",
+      browse: "Tallózás",
+      noFile: "Nincs kiválasztva fájl",
+      upload: "Feltöltés",
+      template: "Szakos sablon letöltése"
+    },
+    en: {
+      select: "Select file",
+      browse: "Browse",
+      noFile: "No file selected",
+      upload: "Upload",
+      template: "Download template"
+    }
+  };
+
+  const handleFileChange = e => {
+    const f = e.target.files[0];
+    setFile(f || null);
+    setFileName(f ? f.name : "");
+  };
+
+  const handleUpload = () => {
+    if (file && onUpload) onUpload(file);
+  };
+
+  const handleTemplateDownload = async () => {
+    try {
+      const res = await fetch(
+        `http://enaploproject.ddns.net:8000/api/progress/${userId}/template-xlsx`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      if (!res.ok) {
+        throw new Error("Hiba a sablon letöltésekor!");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `progress_template_${userId}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Nem sikerült letölteni a sablont! Lehet, hogy nincs jogosultságod.");
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <label style={{ fontWeight: 500 }}>
+        {texts[lang]?.select || "Fájl kiválasztása"}
+        <input
+          type="file"
+          accept={accept}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
+      </label>
+      <span>
+        {fileName || texts[lang]?.noFile || "Nincs fájl"}
+        {fileName && (
+          <button
+            type="button"
+            onClick={() => {
+              setFile(null);
+              setFileName("");
+              if (fileInputRef.current) fileInputRef.current.value = "";
+            }}
+            style={{
+              marginLeft: 6,
+              background: "transparent",
+              border: "none",
+              color: "#d32f2f",
+              fontWeight: "bold",
+              cursor: "pointer",
+              fontSize: "1.1em"
+            }}
+            aria-label="Fájl törlése"
+            title="Fájl törlése"
+          >
+            ×
+          </button>
+        )}
+      </span>
+      <button
+        type="button"
+        onClick={handleUpload}
+        disabled={!file}
+        style={{
+          background: "#1976d2",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          padding: "0.3rem 0.9rem",
+          fontWeight: 500,
+          fontSize: "1rem",
+          cursor: file ? "pointer" : "not-allowed"
+        }}
+      >
+        {texts[lang]?.upload || "Feltöltés"}
+      </button>
+      {/* Sablon letöltő gomb */}
+      {userId && (
+        <button
+          type="button"
+          onClick={handleTemplateDownload}
+          style={{
+            marginLeft: 8,
+            background: "#eee",
+            color: "#1976d2",
+            border: "1px solid #1976d2",
+            borderRadius: "6px",
+            padding: "0.3rem 0.9rem",
+            fontWeight: 500,
+            fontSize: "1rem",
+            cursor: "pointer"
+          }}
+        >
+          {console.log("userId", userId, "token", localStorage.getItem("access_token"))}
+          {texts[lang]?.template || "Szakos sablon letöltése"}
+        </button>
+      )}
+    </div>
+  );
+}

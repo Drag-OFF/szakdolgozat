@@ -1,0 +1,139 @@
+/* Fő konténer */
+.course-table-section {
+  width: 100%;
+  margin: 0 auto 24px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px #1976d222;
+  overflow: hidden;
+}
+
+/* Szekció fejlécek (lenyitható) */
+.course-table-header {
+  background: #1976d2;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 600;
+  padding: 14px 24px;
+  border-bottom: 2px solid #1565c0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.course-table-header .toggle-icon {
+  font-size: 1.3rem;
+  margin-left: 8px;
+  transition: transform 0.2s;
+}
+
+.course-table-section.open .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Alcsoport alcímek */
+.course-table-subheader {
+  background: #f4f8ff;
+  color: #1976d2;
+  font-size: 1.08rem;
+  font-weight: 500;
+  padding: 10px 24px;
+  border-bottom: 1px solid #e3eafc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.course-table-subheader .toggle-icon {
+  font-size: 1.1rem;
+  margin-left: 8px;
+  transition: transform 0.2s;
+}
+
+.course-table-subsection.open .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Táblázat */
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.course-table th, .course-table td {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e3eafc;
+  font-size: 1.05rem;
+}
+
+.course-table th {
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  border-bottom: 2px solid #1565c0;
+}
+
+.course-table tr:nth-child(even) td {
+  background: #f4f8ff;
+}
+
+.course-table tr:hover td {
+  background: #e3eafc;
+}
+
+.course-table td {
+  color: #222;
+}
+
+/* Kereső input */
+.course-search-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 12px;
+  padding: 0 24px;
+}
+
+.course-search-input {
+  width: 300px;
+  height: 40px;
+  border: none;
+  outline: none;
+  background-color: #fff;
+  border-radius: 30px;
+  padding-left: 15px;
+  letter-spacing: 0.8px;
+  color: #222;
+  font-size: 14px;
+  box-shadow: 2px 2px 10px #1976d222;
+  border: 1px solid #e3eafc;
+}
+
+.course-search-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px #e3eafc88;
+}
+
+@media (max-width: 900px) {
+  .course-table-section, .course-table {
+    width: 100vw;
+    padding: 6px 0;
+  }
+  .course-table th, .course-table td {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.98rem;
+  }
+  .course-search-input {
+    width: 180px;
+    font-size: 13px;
+  }
+  .course-table-header, .course-table-subheader {
+    padding: 10px 8px;
+  }
+}

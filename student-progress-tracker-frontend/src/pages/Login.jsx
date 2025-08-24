@@ -74,6 +74,7 @@ export default function Login() {
       if (resp.ok && result.access_token) {
         localStorage.setItem("access_token", result.access_token);
         localStorage.setItem("user", JSON.stringify(result.user));
+        window.dispatchEvent(new Event("user-login"));
         setMsg(texts[lang].success);
         setTimeout(() => {
           navigate("/"); // <-- csak itt navigálunk!

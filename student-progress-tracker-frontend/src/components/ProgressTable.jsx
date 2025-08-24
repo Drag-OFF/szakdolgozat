@@ -1,12 +1,26 @@
 import React from "react";
 
+
 export default function ProgressTable({ progressFull }) {
+
+const CATEGORY_LABELS = {
+  required: "Kötelező",
+  elective: "Kötelezően választható",
+  "szabadon választható": "Szabadon választható"
+};
+
+const STATUS_LABELS = {
+  completed: "Teljesített",
+  in_progress: "Folyamatban"
+};
+
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <table className="progress-table" style={{ width: "100%", borderCollapse: "collapse" }}>
       <thead>
         <tr>
           <th>Kód</th>
           <th>Név</th>
+          <th>Kategória</th>
           <th>Ajánlott félév</th>
           <th>Kredit</th>
           <th>Teljesítés szemesztere</th>
@@ -19,6 +33,7 @@ export default function ProgressTable({ progressFull }) {
           <tr key={p.id}>
             <td>{p.course_code || "?"}</td>
             <td>{p.course_name || "?"}</td>
+            <td>{CATEGORY_LABELS[p.category] || p.category || "?"}</td>
             <td>
               {p.recommended_semester !== null && p.recommended_semester !== undefined
                 ? p.recommended_semester > 0
@@ -34,7 +49,7 @@ export default function ProgressTable({ progressFull }) {
                 : "?"}
             </td>
             <td>{p.completed_semester || "-"}</td>
-            <td>{p.status}</td>
+            <td>{STATUS_LABELS[p.status] || p.status || "?"}</td>
             <td>{p.points}</td>
           </tr>
         ))}
