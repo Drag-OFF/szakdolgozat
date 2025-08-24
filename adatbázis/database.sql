@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Júl 15. 18:34
+-- Létrehozás ideje: 2025. Aug 24. 10:13
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -52,7 +52,8 @@ INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `
 (37, 'Gazdaságinformatikus', 17, 'Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?', '2025-07-06 21:42:21', 0, NULL, NULL),
 (38, 'Mérnökinformatikus', 26, 'Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?Sziasztok, van itt programtervezős?', '2025-07-06 22:50:34', 0, NULL, NULL),
 (47, 'Mérnökinformatikus', 26, 'Szia hogy vagy?', '2025-07-07 16:15:43', 0, NULL, NULL),
-(67, 'Villamosmérnök', 55, 'Remélem az életben nem kapsz diplomát', '2025-07-11 19:09:38', 0, NULL, NULL);
+(67, 'Villamosmérnök', 55, 'Remélem az életben nem kapsz diplomát', '2025-07-11 19:09:38', 0, NULL, NULL),
+(68, 'Gazdaságinformatikus', 57, 'Kys', '2025-07-23 12:55:41', 1, 'Anon#57875', NULL);
 
 -- --------------------------------------------------------
 
@@ -244,7 +245,17 @@ INSERT INTO `courses` (`id`, `course_code`, `name`) VALUES
 (207, 'IB913E', 'Ipargazdaságtan ea'),
 (208, 'IB000gi14G', 'Szakmai gyakorlat'),
 (209, 'IB970', 'Szakdolgozat készítése 1. (gi)'),
-(210, 'IB975', 'Szakdolgozat készítése 2. (gi)');
+(210, 'IB975', 'Szakdolgozat készítése 2. (gi)'),
+(211, 'PE_BASKET', 'Kosárlabda'),
+(212, 'PE_FOOTBALL', 'Labdarúgás'),
+(213, 'PE_VOLLEY', 'Röplabda'),
+(214, 'PE_SWIM', 'Úszás'),
+(215, 'PE_TENNIS', 'Tenisz'),
+(216, 'PE_TABLETENNIS', 'Asztalitenisz'),
+(217, 'PE_RUN', 'Futás'),
+(218, 'PE_GYM', 'Tornatermi edzés'),
+(219, 'PE_YOGA', 'Jóga'),
+(220, 'PE_BADMINTON', 'Tollaslabda');
 
 -- --------------------------------------------------------
 
@@ -269,8 +280,8 @@ INSERT INTO `course_equivalence` (`id`, `course_id`, `equivalent_course_id`, `ma
 (2, 97, 99, 1),
 (3, 105, 107, 1),
 (4, 106, 108, 1),
-(5, 109, 111, 1),
-(6, 110, 112, 1);
+(5, 111, 109, 1),
+(6, 112, 110, 1);
 
 -- --------------------------------------------------------
 
@@ -441,7 +452,17 @@ INSERT INTO `course_major` (`id`, `course_id`, `major_id`, `credit`, `semester`,
 (147, 93, 1, 3, 0, 'required', NULL, '[]'),
 (148, 208, 1, 320, 0, 'required', 'practice_hours', '[\"IB204E\"]'),
 (149, 209, 1, 5, 6, 'required', NULL, '[]'),
-(150, 210, 1, 10, 7, 'required', NULL, '[]');
+(150, 210, 1, 10, 7, 'required', NULL, '[]'),
+(151, 211, 1, 0, 0, 'optional', 'pe', '[]'),
+(152, 212, 1, 0, 0, 'optional', 'pe', '[]'),
+(153, 213, 1, 0, 0, 'optional', 'pe', '[]'),
+(154, 214, 1, 0, 0, 'optional', 'pe', '[]'),
+(155, 215, 1, 0, 0, 'optional', 'pe', '[]'),
+(156, 216, 1, 0, 0, 'optional', 'pe', '[]'),
+(157, 217, 1, 0, 0, 'optional', 'pe', '[]'),
+(158, 218, 1, 0, 0, 'optional', 'pe', '[]'),
+(159, 219, 1, 0, 0, 'optional', 'pe', '[]'),
+(160, 220, 1, 0, 0, 'optional', 'pe', '[]');
 
 -- --------------------------------------------------------
 
@@ -531,7 +552,6 @@ INSERT INTO `progress` (`id`, `user_id`, `course_id`, `completed_semester`, `sta
 (16, 57, 78, 2, 'completed', 3),
 (17, 57, 115, 1, 'completed', 6),
 (18, 57, 116, 1, 'completed', 6),
-(19, 57, 105, 2, 'in_progress', 2),
 (20, 57, 66, 2, 'in_progress', 2),
 (21, 57, 67, 2, 'in_progress', 2),
 (22, 57, 136, 2, 'in_progress', 2),
@@ -553,7 +573,9 @@ INSERT INTO `progress` (`id`, `user_id`, `course_id`, `completed_semester`, `sta
 (38, 57, 108, 2, 'completed', 5),
 (39, 57, 172, 2, 'completed', 2),
 (40, 57, 173, 2, 'completed', 2),
-(41, 57, 208, 100, 'completed', 2);
+(41, 57, 208, 100, 'in_progress', 2),
+(42, 57, 211, 1, 'completed', 2),
+(43, 57, 209, 6, 'completed', 5);
 
 -- --------------------------------------------------------
 
@@ -595,7 +617,7 @@ INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`
 (52, 'ASDFGH', 'harkai.dominik69@gmail.com', '$2b$12$V0INM6eJi6K7iRVwURKAPOnKmaJcN.QuhBUDp6SVrUgRHgdlc7vqq', 'Pityi Palkó', '2001-11-11', '123456EE', '123456EE', 'Csereeps Virág', 'Gazdaságinformatikus', 1, 'user', '2025-07-06 11:52:49', NULL, NULL, NULL, NULL),
 (53, 'GBG16D', 'zsomle401@gmail.com', '$2b$12$uL0o.b9hHlo/XXnh6bMmveEw/oVEcFYIgCwoCrLlyDnSYCBQwlhKm', 'József Mária', '2003-06-04', '666666ZZ', '666666ZZ', 'Mária király', 'Programtervező informatikus', 1, 'user', '2025-07-06 22:58:11', NULL, NULL, NULL, NULL),
 (55, 'KUR013', 'racikaw@gmail.com', '$2b$12$rxqdS4vcvvHOVs0zFxo5T.XuKHOXC7qDQxS8/7yUPIyM2TPxEwfia', 'Szeret Elek', '1999-06-11', '123456AB', '123456AB', 'Arika Corba', 'Villamosmérnök', 1, 'user', '2025-07-11 21:10:24', NULL, NULL, NULL, NULL),
-(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyok', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 1, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, NULL);
+(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyok', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 1, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, 'Anon#57875');
 
 --
 -- Indexek a kiírt táblákhoz
@@ -678,7 +700,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
 
 --
 -- AUTO_INCREMENT a táblához `chat_reaction`
@@ -690,7 +712,7 @@ ALTER TABLE `chat_reaction`
 -- AUTO_INCREMENT a táblához `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=221;
 
 --
 -- AUTO_INCREMENT a táblához `course_equivalence`
@@ -702,7 +724,7 @@ ALTER TABLE `course_equivalence`
 -- AUTO_INCREMENT a táblához `course_major`
 --
 ALTER TABLE `course_major`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=151;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
 -- AUTO_INCREMENT a táblához `majors`
@@ -720,13 +742,13 @@ ALTER TABLE `major_requirements`
 -- AUTO_INCREMENT a táblához `progress`
 --
 ALTER TABLE `progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- Megkötések a kiírt táblákhoz

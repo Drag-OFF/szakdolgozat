@@ -258,7 +258,7 @@ class Major(MajorBase):
     """
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class MajorRequirementBase(BaseModel):
     """
@@ -296,7 +296,7 @@ class MajorRequirement(MajorRequirementBase):
     """
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CourseMajorBase(BaseModel):
     """
@@ -350,7 +350,7 @@ class CourseMajor(CourseMajorBase):
     """
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CourseEquivalenceBase(BaseModel):
     """
@@ -388,7 +388,7 @@ class CourseEquivalence(CourseEquivalenceBase):
     """
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ProgressBase(BaseModel):
     """
@@ -463,6 +463,7 @@ class ProgressFull(BaseModel):
     completed_semester: int | None = None
     status: str
     points: int | None = None
+    category: str | None = None
 
     class Config:
         from_attributes = True

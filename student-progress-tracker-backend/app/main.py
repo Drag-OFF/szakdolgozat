@@ -4,7 +4,6 @@ from app.api import chat, courses, progress, users, forgot_password, reset_passw
 from app.api import course_major, course_equivalence, majors, majors_requirements
 
 app = FastAPI()
-print("### FASTAPI ELINDULT ###")
 # CORS konfiguráció
 app.add_middleware(
     CORSMiddleware,
