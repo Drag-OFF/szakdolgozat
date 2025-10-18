@@ -5,6 +5,7 @@ import DownloadProgressButton from "../components/DownloadProgressButton";
 import FileUpload from "../components/FileUpload";
 import ProgressToolbar from "../components/ProgressToolbar";
 import { authFetch } from "../utils";
+import { useLang } from "../context/LangContext"; // <-- ezt add hozzá
 import "../styles/ProgressTable.css";
 
 export default function ProgressTracker() {
@@ -15,17 +16,19 @@ export default function ProgressTracker() {
   const [status, setStatus] = useState("");
   const [semester, setSemester] = useState("");
   const [points, setPoints] = useState("");
-  const [open, setOpen] = useState(false);      // alapból csukva
-  const [reqOpen, setReqOpen] = useState(false); // alapból csukva
+  const [open, setOpen] = useState(false);
+  const [reqOpen, setReqOpen] = useState(false);
+
+  const { lang } = useLang(); // <-- aktuális nyelv
 
   useEffect(() => {
     if (!user.id) return;
-    authFetch(`http://enaploproject.ddns.net:8000/api/progress/${user.id}/full`, {
+    authFetch(`http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
     })
       .then(res => res.json())
       .then(data => setProgressFull(data));
-  }, [user.id]);
+  }, [user.id, lang]);
 
   if (!user.id) {
     return <div className="auth-msg">Jelentkezz be az előrehaladás megtekintéséhez!</div>;
@@ -72,24 +75,41 @@ export default function ProgressTracker() {
             {/* Fájl feltöltő komponens */}
             <FileUpload
               userId={user.id}
-              onUpload={file => {
+              lang={lang} // <-- add át a nyelvet
+              onUpload={async (file) => {
                 const formData = new FormData();
                 formData.append("file", file);
-                fetch(`http://enaploproject.ddns.net:8000/api/progress/${user.id}/import`, {
-                  method: "POST",
-                  headers: {
-                    Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                  },
-                  body: formData,
-                })
-                  .then(res => res.json())
-                  .then(data => {
-                    setProgressFull(data);
-                    alert("Sikeres feltöltés!");
-                  })
-                  .catch(() => alert("Hiba történt a feltöltés során!"));
+                try {
+                  const res = await fetch(
+                    `http://enaploproject.ddns.net:8000/api/progress/${user.id}/import?lang=${lang}`,
+                    {
+                      method: "POST",
+                      headers: {
+                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                      },
+                      body: formData,
+                    }
+                  );
+                  const data = await res.json();
+                  if (!res.ok) {
+                    console.error("Import failed:", data);
+                    alert(lang === "en" ? "Upload failed!" : "Hiba történt a feltöltés során!");
+                    return;
+                  }
+                  // sikeres import után újra lekérdezzük a teljes előrehaladást és frissítjük a state-et
+                  const fullRes = await authFetch(
+                    `http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`,
+                    { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+                  );
+                  const fullData = await fullRes.json();
+                  setProgressFull(Array.isArray(fullData) ? fullData : []);
+                  alert(lang === "en" ? "Upload successful!" : "Sikeres feltöltés!");
+                } catch (err) {
+                  console.error("Upload error:", err);
+                  alert(lang === "en" ? "Upload failed!" : "Hiba történt a feltöltés során!");
+                }
               }}
-            />
+             />
             {/* ...selectek, inputok... */}
             <DownloadProgressButton userId={user.id} />
           </div>

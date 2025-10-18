@@ -1,7 +1,10 @@
 import FileUpload from "./FileUpload";
 import DownloadProgressButton from "./DownloadProgressButton";
+import { useLang } from "../context/LangContext";
 
 export default function ProgressToolbar({ search, setSearch, userId, onFileUpload }) {
+  const { lang } = useLang();
+
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
       <div className="progress-input-container">

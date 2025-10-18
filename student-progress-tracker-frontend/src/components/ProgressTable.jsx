@@ -1,31 +1,20 @@
 import React from "react";
+import { useLang } from "../context/LangContext";
 
 
 export default function ProgressTable({ progressFull }) {
+  const { lang } = useLang();
 
-const CATEGORY_LABELS = {
-  required: "Kötelező",
-  elective: "Kötelezően választható",
-  "szabadon választható": "Szabadon választható"
-};
-
-const STATUS_LABELS = {
-  completed: "Teljesített",
-  in_progress: "Folyamatban"
-};
+  const HEADERS = {
+    hu: ["Kód", "Név", "Kategória", "Ajánlott félév", "Kredit", "Teljesítés szemesztere", "Státusz", "Pontszám"],
+    en: ["Code", "Name", "Category", "Recommended semester", "Credit", "Completed semester", "Status", "Points"]
+  };
 
   return (
     <table className="progress-table" style={{ width: "100%", borderCollapse: "collapse" }}>
       <thead>
         <tr>
-          <th>Kód</th>
-          <th>Név</th>
-          <th>Kategória</th>
-          <th>Ajánlott félév</th>
-          <th>Kredit</th>
-          <th>Teljesítés szemesztere</th>
-          <th>Státusz</th>
-          <th>Pontszám</th>
+          {HEADERS[lang].map(h => <th key={h}>{h}</th>)}
         </tr>
       </thead>
       <tbody>
@@ -33,23 +22,23 @@ const STATUS_LABELS = {
           <tr key={p.id}>
             <td>{p.course_code || "?"}</td>
             <td>{p.course_name || "?"}</td>
-            <td>{CATEGORY_LABELS[p.category] || p.category || "?"}</td>
+            <td>{p.category || "?"}</td>
             <td>
               {p.recommended_semester !== null && p.recommended_semester !== undefined
                 ? p.recommended_semester > 0
                   ? p.recommended_semester
-                  : "Nincs ajánlott félév"
+                  : (lang === "en" ? "No recommended semester" : "Nincs ajánlott félév")
                 : "?"}
             </td>
             <td>
               {p.credit !== null && p.credit !== undefined
                 ? p.credit > 30
-                  ? `${p.credit} óra`
+                  ? `${p.credit} ${lang === "en" ? "hours" : "óra"}`
                   : p.credit
                 : "?"}
             </td>
             <td>{p.completed_semester || "-"}</td>
-            <td>{STATUS_LABELS[p.status] || p.status || "?"}</td>
+            <td>{p.status || "?"}</td>
             <td>{p.points}</td>
           </tr>
         ))}

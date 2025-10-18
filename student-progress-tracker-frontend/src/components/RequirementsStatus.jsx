@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import CourseList from "./CourseList";
-import { authFetch } from "../utils";
+import useAuthFetch from "../hooks/useAuthFetch";
 import "../styles/RequirementsStatus.css";
+import { useLang } from "../context/LangContext";
+import { REQUIREMENTS_LABELS } from "../translations";
 
 function CreditRow({ title, data }) {
   return (
@@ -29,19 +31,16 @@ export default function RequirementsStatus() {
   const [openPractice, setOpenPractice] = useState(false);
   const [openThesis1, setOpenThesis1] = useState(false);
   const [openThesis2, setOpenThesis2] = useState(false);
+  const { lang } = useLang();
+  const { fetchJson } = useAuthFetch();
 
   useEffect(() => {
     if (!user.id) return;
-    setLoading(true);
-    authFetch(`http://192.168.0.12:8000/api/progress/${user.id}/requirements`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
-    })
-      .then(res => res.json())
-      .then(data => {
-        setReq(data);
-        setLoading(false);
-      });
-  }, [user.id]);
+    (async () => {
+      const { res, body } = await fetchJson(`/api/requirements/${user.id}`);
+      setReq(body || {});
+    })();
+  }, [user.id, fetchJson]);
 
   if (!user.id) return <div className="auth-msg">Jelentkezz be a követelmények megtekintéséhez!</div>;
   if (loading) return <div>Betöltés...</div>;
@@ -49,78 +48,74 @@ export default function RequirementsStatus() {
 
   return (
     <div className="requirements-status">
-      <h2>Követelmények állapota</h2>
+      <h2>{lang === "en" ? "Requirements status" : "Követelmények állapota"}</h2>
       <table>
         <thead>
           <tr>
-            <th>Kategória</th>
-            <th>Teljesített</th>
-            <th>Szükséges</th>
-            <th>Hiányzik</th>
+            {REQUIREMENTS_LABELS.tableHeaders[lang].map(h => <th key={h}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
-          <CreditRow title="Összes kredit" data={req.total_credits} />
-          <CreditRow title="Kötelező" data={req.required_credits} />
-          <CreditRow title="Kötelezően választható" data={req.elective_credits} />
-          <CreditRow title="Szabadon választható" data={req.optional_credits} />
-          <CreditRow title="Testnevelés félévek" data={req.pe_semesters} />
-          <CreditRow title="Szakmai gyakorlat" data={req.practice_hours} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].total} data={req.total_credits} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].required} data={req.required_credits} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].elective} data={req.elective_credits} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].optional} data={req.optional_credits} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].pe} data={req.pe_semesters} />
+          <CreditRow title={REQUIREMENTS_LABELS.sectionTitles[lang].practice} data={req.practice_hours} />
         </tbody>
       </table>
 
-      {/* Minden szekció külön lenyitható, alapból csukva */}
       <CourseList
         courses={req.required_credits.available_courses}
-        title="Kötelező tárgyak – elérhető kurzusok"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].required}
         defaultOpen={openRequired}
         setDefaultOpen={setOpenRequired}
       />
       <CourseList
         courses={req.elective_credits.core.available_courses}
-        title="Kötelezően választható – Tözsanyag (minimum 80 kredit informatikai törzsanyaggal együtt)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].core}
         defaultOpen={openCore}
         setDefaultOpen={setOpenCore}
       />
       <CourseList
         courses={req.elective_credits.core.info_core.available_courses}
-        title="Kötelezően választható – Tözsanyag informatikai (minimum 14 kredit)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].info_core}
         defaultOpen={openInfoCore}
         setDefaultOpen={setOpenInfoCore}
       />
       <CourseList
         courses={req.elective_credits.non_core.available_courses}
-        title="Kötelezően választható – Nem törzsanyag (Minimum 36 kredit)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].non_core}
         defaultOpen={openNonCore}
         setDefaultOpen={setOpenNonCore}
       />
       <CourseList
         courses={req.optional_credits.available_courses}
-        title="Szabadon választható – elérhető kurzusok (minimum 10 kredit)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].optional}
         defaultOpen={openOptional}
         setDefaultOpen={setOpenOptional}
       />
       <CourseList
         courses={req.pe_semesters.available_courses}
-        title="Testnevelés – elérhető kurzusok (minimum 2 félév)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].pe}
         defaultOpen={openPE}
         setDefaultOpen={setOpenPE}
       />
       <CourseList
         courses={req.practice_hours.available_courses}
-        title="Szakmai gyakorlat – elérhető kurzusok (minimum 320 óra)"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].practice}
         defaultOpen={openPractice}
         setDefaultOpen={setOpenPractice}
       />
       <CourseList
         courses={req.available_thesis1}
-        title="Szakdolgozat 1 – elérhető kurzusok"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].thesis1}
         defaultOpen={openThesis1}
         setDefaultOpen={setOpenThesis1}
       />
       <CourseList
         courses={req.available_thesis2}
-        title="Szakdolgozat 2 – elérhető kurzusok"
+        title={REQUIREMENTS_LABELS.courseListTitles[lang].thesis2}
         defaultOpen={openThesis2}
         setDefaultOpen={setOpenThesis2}
       />

@@ -1,5 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useLang } from "../context/LangContext";
+import useFileDownload from "../hooks/useFileDownload";
+import useFileUpload from "../hooks/useFileUpload.js";
 
 /**
  * Egységes kinézetű fájlfeltöltő komponens, magyar és angol feliratokkal.
@@ -13,6 +15,8 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
   const fileInputRef = useRef();
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
+  const { download } = useFileDownload();
+  const { upload } = useFileUpload();
 
   const texts = {
     hu: {
@@ -38,33 +42,37 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
   };
 
   const handleUpload = () => {
-    if (file && onUpload) onUpload(file);
+    if (!file) return;
+    if (onUpload) {
+      onUpload(file);
+      return;
+    }
+    // fallback: használjuk a hook-ot
+    (async () => {
+      try {
+        const res = await upload({ endpoint: "/api/progress/{userId}/import", file, userId, lang });
+        if (!res.ok) {
+          const cnt = res.body?.errors?.length ?? 0;
+          alert(lang === "en" ? `Upload completed with errors (${cnt})` : `Feltöltés hibákkal (${cnt})`);
+          console.table(res.body?.errors || []);
+          return;
+        }
+        alert(lang === "en" ? "Upload successful!" : "Sikeres feltöltés!");
+        window.dispatchEvent(new Event("refresh-progress"));
+      } catch (e) {
+        console.error(e);
+        alert(lang === "en" ? "Upload failed!" : "Hiba történt a feltöltés során!");
+      }
+    })();
   };
 
   const handleTemplateDownload = async () => {
+    if (!userId) return;
     try {
-      const res = await fetch(
-        `http://enaploproject.ddns.net:8000/api/progress/${userId}/template-xlsx`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        }
-      );
-      if (!res.ok) {
-        throw new Error("Hiba a sablon letöltésekor!");
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `progress_template_${userId}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      alert("Nem sikerült letölteni a sablont! Lehet, hogy nincs jogosultságod.");
+      await download(`http://enaploproject.ddns.net:8000/api/progress/${userId}/template-xlsx?lang=${lang}`);
+    } catch (e) {
+      console.error(e);
+      alert(lang === "en" ? "Failed to download the template!" : "Nem sikerült letölteni a sablont!");
     }
   };
 
@@ -140,7 +148,6 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
             cursor: "pointer"
           }}
         >
-          {console.log("userId", userId, "token", localStorage.getItem("access_token"))}
           {texts[lang]?.template || "Szakos sablon letöltése"}
         </button>
       )}
