@@ -3,6 +3,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from app.utils.translations import STATUS_MAP, ERROR_MESSAGES
 
 
 SECRET_KEY = "nagyon-titkos-jelszo"
@@ -89,3 +90,41 @@ def admin_required(user=Depends(get_current_user)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Nincs jogosultság")
     return user
+
+def normalize_status(raw):
+    """
+    Elfogad magyar és angol megnevezéseket, visszaadja a canonical kulcsot:
+    'completed' vagy 'in_progress', vagy None ha nem értelmezhető.
+    """
+    if raw is None:
+        return None
+    s = str(raw).strip().lower().replace(" ", "_")
+    translations = {}
+    for k, v in STATUS_MAP.get("hu", {}).items():
+        translations[v.lower().replace(" ", "_")] = k
+    for k, v in STATUS_MAP.get("en", {}).items():
+        translations[v.lower().replace(" ", "_")] = k
+    translations.update({"completed": "completed", "in_progress": "in_progress", "inprogress": "in_progress"})
+    return translations.get(s)
+
+def parse_int(value):
+    """
+    Megpróbál int-re konvertálni; visszatér (int vagy None, hiba_uzenet vagy None).
+    """
+    if value is None or str(value).strip() == "":
+        return None, None
+    try:
+        if isinstance(value, float):
+            return int(value), None
+        return int(str(value).strip()), None
+    except Exception as e:
+        return None, str(e)
+
+def get_error_message(key, lang="hu", **kwargs):
+    """
+    Lokalizált hibaüzenet lekérése és formázása.
+    """
+    tmpl = ERROR_MESSAGES.get(key, {}).get(lang)
+    if not tmpl:
+        tmpl = ERROR_MESSAGES.get(key, {}).get("hu", "") 
+    return tmpl.format(**kwargs)

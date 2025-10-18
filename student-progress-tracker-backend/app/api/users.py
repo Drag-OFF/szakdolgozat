@@ -7,7 +7,7 @@ from app.db.schemas import EmailRequest
 from app.services.users_service import UsersService
 from typing import List
 from mailjet_rest import Client
-from app.utils import create_access_token, admin_required, get_current_user
+from app.utils.utils import create_access_token, admin_required, get_current_user
 import uuid
 
 router = APIRouter()

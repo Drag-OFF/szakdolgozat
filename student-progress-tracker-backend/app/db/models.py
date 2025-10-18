@@ -68,6 +68,7 @@ class Course(Base):
         id (int): Kurzus azonosító.
         course_code (str): Kurzus kódja.
         name (str): Kurzus neve.
+        name_en (str): Kurzus neve angolul.
 
     """
     __tablename__ = "courses"
@@ -75,7 +76,7 @@ class Course(Base):
     id = Column(Integer, primary_key=True, index=True)
     course_code = Column(String(50), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-
+    name_en = Column(String(255), nullable=False)
 
     progress = relationship("Progress", back_populates="course")
 

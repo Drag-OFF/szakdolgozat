@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from app.db.models import User as UserModel
 from app.db.schemas import User, UserCreate, UserUpdate, UserLogin
 from passlib.context import CryptContext
-from app.utils import hash_password, verify_password
+from app.utils.utils import hash_password, verify_password
 import uuid
 from typing import Optional
 from datetime import datetime, timedelta
