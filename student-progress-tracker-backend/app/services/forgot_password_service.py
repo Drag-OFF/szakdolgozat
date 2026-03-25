@@ -1,9 +1,15 @@
-import os
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 import uuid
 from app.db.models import User
 from mailjet_rest import Client
+from app.config import (
+    MAILJET_API_KEY,
+    MAILJET_API_SECRET,
+    PUBLIC_SITE_URL,
+    MAIL_FROM_EMAIL,
+    MAIL_FROM_NAME,
+)
 
 class ForgotPasswordService:
     """
@@ -17,16 +23,16 @@ class ForgotPasswordService:
         """
         Jelszó-visszaállító e-mail küldése Mailjet segítségével.
         """
-        api_key = os.getenv("MAILJET_API_KEY", "8500664c47d6156ee0ba18594fdd88c6")
-        api_secret = os.getenv("MAILJET_API_SECRET", "c9327b1703b7e2eb1ab59ebea33cad27")
-        mailjet = Client(auth=(api_key, api_secret), version='v3.1')
-        reset_link = f"http://enaploproject.ddns.net/reset-password?token={reset_token}"
+        if not MAILJET_API_KEY or not MAILJET_API_SECRET:
+            return 503, {"error": "Mailjet nincs konfigurálva a .env-ben."}
+        mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version="v3.1")
+        reset_link = f"{PUBLIC_SITE_URL}/reset-password?token={reset_token}"
         data = {
             'Messages': [
                 {
                     "From": {
-                        "Email": "enaploproject@gmail.com",
-                        "Name": "Enaplo Project"
+                        "Email": MAIL_FROM_EMAIL,
+                        "Name": MAIL_FROM_NAME
                     },
                     "To": [
                         {

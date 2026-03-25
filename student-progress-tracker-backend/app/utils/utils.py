@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from .translations import STATUS_MAP, ERROR_MESSAGES
+from app.config import JWT_SECRET_KEY
 
 
-SECRET_KEY = "nagyon-titkos-jelszo"
+SECRET_KEY = JWT_SECRET_KEY
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 

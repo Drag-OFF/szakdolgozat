@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import cors_allow_origins
 from app.api import chat, courses, progress, users, forgot_password, reset_password
 from app.api import course_major, course_equivalence, majors, course_recommendations, major_requirement_rules
 
@@ -7,8 +8,10 @@ app = FastAPI()
 # CORS konfiguráció
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=cors_allow_origins(),
+    # JWT Authorization headerrel dolgozunk, nem cookie-val; True + allow_origins=["*"]
+    # böngészőnként elhasalhat (preflight / Failed to fetch).
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["Content-Disposition"],
