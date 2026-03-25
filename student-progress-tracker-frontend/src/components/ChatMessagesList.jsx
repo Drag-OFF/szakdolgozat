@@ -22,6 +22,7 @@
 
 import ChatMessage from "./ChatMessage";
 import React from "react";
+import { useLang } from "../context/LangContext";
 
 export default function ChatMessagesList({
   messages,
@@ -38,11 +39,12 @@ export default function ChatMessagesList({
   chatEndRef,
   listRef
 }) {
+  const { lang } = useLang();
   function getUserNameById(userId) {
     const user = users.find(
       u => String(u.id) === String(userId) || String(u.neptun) === String(userId)
     );
-    return user ? `${user.name} (${user.neptun})` : "Ismeretlen";
+    return user ? `${user.name} (${user.neptun})` : (lang === "en" ? "Unknown" : "Ismeretlen");
   }
 
   return (

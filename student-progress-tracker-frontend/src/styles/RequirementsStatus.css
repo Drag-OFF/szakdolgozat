@@ -1,26 +1,26 @@
 /* Fő konténer */
 .course-table-section {
   width: 100%;
-  margin: 0 auto 24px auto;
+  margin: 12px 0;
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px #1976d222;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(30,60,90,0.05);
   overflow: hidden;
+  border: 1px solid #e6f0fa;
 }
 
 /* Szekció fejlécek (lenyitható) */
 .course-table-header {
-  background: #1976d2;
-  color: #fff;
-  font-size: 1.15rem;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #f2f9ff, #eaf4ff);
+  color: #0b66c3;
   font-weight: 600;
-  padding: 14px 24px;
-  border-bottom: 2px solid #1565c0;
-  cursor: pointer;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
   user-select: none;
+  border-bottom: 1px solid #e6f0fa;
 }
 
 .course-table-header .toggle-icon {
@@ -33,14 +33,23 @@
   transform: rotate(180deg);
 }
 
+.course-table-header.open { box-shadow: inset 0 -6px 10px rgba(10,90,180,0.02); }
+
+/* tartalom: belső scroll ha túl magas */
+.course-table-section > div {
+  max-height: calc(60vh); /* ne engedjük túlnyúlni a képernyőt */
+  overflow: auto;
+  padding: 18px; /* több belső tér, ne érjenek közvetlenül a szegélyhez */
+}
+
 /* Alcsoport alcímek */
 .course-table-subheader {
-  background: #f4f8ff;
+  background: linear-gradient(180deg,#fbfdff,#f4f8ff);
+  border-bottom: 1px solid #e9f3ff;
   color: #1976d2;
   font-size: 1.08rem;
   font-weight: 500;
   padding: 10px 24px;
-  border-bottom: 1px solid #e3eafc;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -95,29 +104,73 @@
 .course-search-container {
   display: flex;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 8px;
   gap: 12px;
   padding: 0 24px;
 }
 
 .course-search-input {
-  width: 300px;
+  width: 100%;
   height: 40px;
-  border: none;
-  outline: none;
-  background-color: #fff;
-  border-radius: 30px;
-  padding-left: 15px;
+  border: 1px solid #dbeaf8;
+  border-radius: 6px;
+  box-sizing: border-box;
+  padding: 8px 10px;
   letter-spacing: 0.8px;
   color: #222;
   font-size: 14px;
   box-shadow: 2px 2px 10px #1976d222;
-  border: 1px solid #e3eafc;
 }
 
 .course-search-input:focus {
   border-color: #1976d2;
   box-shadow: 0 0 0 2px #e3eafc88;
+}
+
+/* Kiegészített stílusok: admin-panel jellegű fül háttér + görgetés és footer védés */
+.requirements-status {
+  padding: 16px;
+  padding-bottom: 200px; /* több hely a footer számára — csökkenthető ha szükséges */
+  box-sizing: border-box;
+}
+
+/* Fő panel címsorok (Kurzusok / Követelmények állapota) — admin‑szerű, nem olvad bele a háttérbe */
+.panel-main-header,
+.requirements-status > h2,
+.requirements-status > h3 {
+  display: inline-block;
+  padding: 10px 14px;
+  margin: 6px 0 12px 0;
+  background: linear-gradient(180deg, #f7fbff, #eef6ff);
+  color: #0b66c3;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #e6f6ff;
+  box-shadow: 0 2px 6px rgba(10,60,120,0.04);
+  line-height: 1;
+}
+
+/* Kis árnyék a lenyíló fülön belüli alcímeknek is */
+.course-table-subheader {
+  background: linear-gradient(180deg,#fbfdff,#f4f8ff);
+  border-bottom: 1px solid #e9f3ff;
+}
+
+/* ha mindkét panel (Kurzusok + Követelmények) nyitva van, a belső görgetés működik és a footernek marad hely */
+.course-table-section.open > div,
+.course-table-subsection.open > div {
+  /* ha kell, egyedi max-height-ot felülírhatsz itt */
+}
+
+/* kisebb képernyőn is biztosítjuk a plusz aljhelyet */
+@media (max-width: 720px) {
+  .requirements-status { padding-bottom: 260px; }
+}
+
+/* kisebb képernyőn lazább max-height */
+@media (max-width: 720px) {
+  .course-table-section > div { max-height: calc(50vh); }
+  .requirements-status { padding-bottom: 160px; }
 }
 
 @media (max-width: 900px) {
@@ -136,4 +189,61 @@
   .course-table-header, .course-table-subheader {
     padding: 10px 8px;
   }
+}
+
+/* Összegző táblázat stílusok */
+.req-summary {
+  max-width: 880px;
+  margin: 6px auto 18px auto;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border: 1px solid #e6f6ff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(10,60,120,0.03);
+  overflow: hidden;
+}
+
+.req-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.96rem;
+}
+
+.req-summary-table thead th {
+  text-align: left;
+  padding: 10px 14px;
+  background: #eef7ff;
+  color: #0b66c3;
+  font-weight: 700;
+  border-bottom: 1px solid #e6f6ff;
+}
+
+.req-summary-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f3f8ff;
+  color: #222;
+}
+
+.req-summary-table tbody tr:nth-child(even) td {
+  background: #fbfeff;
+}
+
+.req-summary-table .cat {
+  color: #0b66c3;
+  font-weight: 600;
+}
+
+.req-summary-table .num {
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  min-width: 80px;
+}
+
+.req-summary-table .missing {
+  color: #d33;
+  font-weight: 700;
+}
+
+/* kisebb képernyőn sűrítjük a paddingot */
+@media (max-width: 720px) {
+  .req-summary-table thead th, .req-summary-table td { padding: 8px 10px; font-size: 0.92rem; }
 }

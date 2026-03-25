@@ -17,8 +17,12 @@ export default function DownloadProgressButton({ userId }) {
   };
 
   return (
-    <Button onClick={handleDownload}>
-      {lang === "en" ? "Download progress (CSV)" : "Előrehaladás letöltése (CSV)"}
+    <Button
+      onClick={handleDownload}
+      className="btn-compact"
+      style={{ height: 36, minWidth: 160, padding: "6px 12px" }}
+    >
+      {lang === "en" ? "Download progress" : "Előrehaladás letöltése"}
     </Button>
   );
 }

@@ -1,0 +1,282 @@
+/* design tokens */
+:root{
+  --accent: #1e6fbf;
+  --accent-dark: #155a9a;
+  --panel-bg: #ffffff;
+  --panel-border: #e6eef6;
+  --row-alt: #f7fbfd;
+  --muted: #6b7785;
+  --gap: 10px;
+}
+
+/* admin card wrapper */
+.admin-card {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.admin-card-body {
+  padding: 10px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+/* header inside admin card (clickable section titles) */
+.admin-card-body > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 4px;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--accent-dark);
+  margin-bottom: 8px;
+}
+
+/* inputs/buttons in admin panels */
+.admin-panel input[type="text"],
+.admin-panel input[type="number"],
+.admin-panel select,
+.admin-panel .progress-input {
+  padding: 8px 10px;
+  border: 1px solid #dbeaf8;
+  border-radius: 4px;
+  background: #fff;
+  box-sizing: border-box;
+  min-height: 36px;
+}
+
+/* unify table style: use same look as ProgressTable */
+.progress-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  font-size: 14px;
+  color: #222;
+  background: #fff;
+}
+
+.progress-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: linear-gradient(180deg,#eef8ff,#ffffff);
+  color: var(--accent);
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.progress-table th, .progress-table td {
+  padding: 10px 12px;
+  vertical-align: middle;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: clip;
+  border-bottom: 1px solid #f1f6fb;
+}
+
+/* alternate row colors + hover */
+.progress-table tbody tr:nth-child(even) { background: var(--row-alt); }
+.progress-table tbody tr:hover { background: #f3fbff; }
+
+/* Kijelölt sor: erősebb, jól látható (cellákra is, hogy felülírja a csíkozást) */
+.progress-table tbody tr.row-selected > td,
+.progress-table tbody tr[aria-selected="true"] > td,
+.progress-table tbody tr.selected > td {
+  background: #cfe5ff !important;
+  box-shadow: inset 4px 0 0 0 #0d47a1;
+  font-weight: 600;
+  color: #0a2a4a;
+  border-bottom-color: #b3d4fc;
+}
+.progress-table tbody tr.row-selected:hover > td,
+.progress-table tbody tr[aria-selected="true"]:hover > td,
+.progress-table tbody tr.selected:hover > td {
+  background: #c5e0ff !important;
+}
+
+/* Ugyanaz a kijelölés: sima <table> admin panelben (pl. ProgressPanel felhasználó lista) */
+.admin-panel table tbody tr.row-selected > td {
+  background: #cfe5ff !important;
+  box-shadow: inset 4px 0 0 0 #0d47a1;
+  font-weight: 600;
+  color: #0a2a4a;
+  border-bottom-color: #b3d4fc;
+}
+.admin-panel table tbody tr.row-selected:hover > td {
+  background: #c5e0ff !important;
+}
+
+/* narrow columns: let first column be small */
+.progress-table td:first-child, .progress-table th:first-child {
+  width: 60px;
+  max-width: 80px;
+}
+
+/* make long text wrap inside second/third columns if needed on small screens */
+@media (max-width: 900px) {
+  .progress-table th, .progress-table td { font-size: 13px; padding: 8px; }
+  .progress-table td:nth-child(2), .progress-table td:nth-child(3) { white-space: normal; word-break: break-word; }
+  .admin-card-body { padding: 8px; }
+  .admin-panel form { gap: 6px; }
+}
+
+/* pagination / controls row */
+.admin-panel .controls {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:8px;
+}
+
+/* ensure embedded panels (Courses + nested tables) take full width */
+.admin-panel, .admin-card, .admin-card-body { width: 100%; }
+
+/* small helper for sub-headers inside the courses section */
+.admin-subheader {
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: var(--accent-dark);
+}
+
+/* keep table header visible above background image */
+.progress-table thead th { backdrop-filter: blur(0.5px); }
+
+/* ensure consistent button style */
+.admin-panel button {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #cfe3f7;
+  background: #fff;
+  color: var(--accent-dark);
+  cursor: pointer;
+}
+.admin-panel button:disabled { opacity: 0.5; cursor: default; }
+
+/* preserve previous visual identity if other CSS exists */
+:where(.progress-table, .admin-card) { box-sizing: border-box; }
+
+/* end of AdminPanels.css additions */
+
+/* egyszerű kártya stílus admin panelekhez (fehér háttér, árnyék) */
+.admin-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.13);
+  overflow: hidden;
+  border: 1px solid #eee;
+  margin-bottom: 12px;
+}
+
+.admin-card-body {
+  padding: 8px;
+}
+
+
+/* --- admin panel table styles (kizárólag admin felületre) --- */
+.admin-card .admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.admin-card .admin-table th,
+.admin-card .admin-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* hover a soron */
+.admin-card .admin-table tbody tr:hover {
+  background: #f7f7ee;
+}
+
+/* rikító kijelölt sor (admin felület) */
+.admin-card .admin-table tbody tr.selected {
+  background: linear-gradient(90deg, rgba(255,250,140,1) 0%, rgba(255,230,90,1) 100%); /* rikító sárga */
+  color: #000;
+  box-shadow: inset 4px 0 0 0 rgba(255,180,0,0.25);
+}
+
+/* biztosítsuk a jó kontrasztot cellákban */
+.admin-card .admin-table tbody tr.selected td {
+  color: #000;
+}
+
+/* kurzor */
+.admin-card .admin-table tbody tr {
+  cursor: pointer;
+}
+
+/* Accordion / mobile friendly styles (append or merge into your AdminPanels.css) */
+
+.accordion { margin-bottom: 12px; border: 1px solid #e6eef6; border-radius: 6px; overflow: hidden; background: #fff; }
+.accordion-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 14px; background: linear-gradient(180deg,#f7fbff,#ffffff);
+  cursor:pointer; color: #0b3a66; font-weight:600;
+  border-bottom:1px solid #eef6fb;
+}
+.accordion-caret { font-size:18px; opacity:0.9; }
+
+.accordion-content { padding: 12px; background: transparent; }
+
+/* nested sub-accordions */
+.sub-accordion { margin-bottom: 8px; border-radius:4px; overflow:visible; }
+.sub-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; background:#f3f8ff; cursor:pointer; border:1px solid #e8f2fb; color:#0b4f85; font-weight:600;
+}
+.sub-content { padding:10px 12px; background:transparent; }
+
+/* ensure panel children take full width and mobile-friendly */
+.admin-panel { width: 100%; box-sizing: border-box; padding: 0; margin: 0; }
+.admin-card { margin-top: 8px; }
+.admin-card-body { max-height: none; overflow: visible; }
+
+/* keep table style consistent (blue theme) */
+.progress-table thead th { background: #eef8ff; color: #1e6fbf; position: sticky; top: 0; z-index: 2; }
+.progress-table tbody tr:hover { background: #f6fbff; }
+
+/* --- add these desktop-specific styles to the existing AdminPanels.css --- */
+
+/* Desktop navigation (visible on wide screens) */
+.desktop-nav { display:flex; gap:10px; justify-content:center; margin-bottom:12px; }
+.nav-btn {
+  padding:8px 14px; border-radius:8px; border:1px solid #dbeaf8; background:#fff; color:#0b3a66; cursor:pointer;
+}
+.nav-btn.active { background:#1e6fbf; color:#fff; border-color:#155a9a; box-shadow:0 2px 6px rgba(30,111,191,0.12); }
+
+/* Desktop subnav for Kurzusok */
+.desktop-subnav { display:flex; gap:8px; margin-bottom:8px; justify-content:center; flex-wrap:wrap; }
+.sub-btn { padding:6px 12px; border-radius:6px; border:1px solid #e4f0fb; background:#f7fbff; color:#0b4f85; cursor:pointer; }
+.sub-btn.active { background:#1e6fbf; color:#fff; border-color:#155a9a; }
+
+/* Desktop content wrapper */
+.desktop-content { min-height: 200px; }
+
+/* Hide mobile accordion on desktop, hide desktop nav on small screens */
+@media (min-width: 801px) {
+  .accordion { display: none !important; }     /* hide old accordion on desktop */
+  .mobile-accordion { display: none !important; }
+  .desktop-nav { display:flex; }
+  .desktop-content { display:block; }
+}
+
+@media (max-width: 800px) {
+  .desktop-nav { display: none; }
+  .desktop-content { display: none; }
+  .mobile-accordion { display:block; }
+}

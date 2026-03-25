@@ -39,6 +39,7 @@ export default function Navbar() {
       profile: "Profil",
       chat: "Chat",
       progress: "Előrehaladás",
+      recommendations: "Kurzusajánló",
       admin: "Admin",
       logout: "Kijelentkezés"
     },
@@ -49,6 +50,7 @@ export default function Navbar() {
       profile: "Profile",
       chat: "Chat",
       progress: "Progress",
+      recommendations: "Course recommendations",
       admin: "Admin",
       logout: "Logout"
     }
@@ -105,6 +107,9 @@ useEffect(() => {
         )}
         {loggedIn && (
           <Link to="/progress" onClick={() => setOpen(false)}>{texts[lang].progress}</Link>
+        )}
+        {loggedIn && (
+          <Link to="/recommendations" onClick={() => setOpen(false)}>{texts[lang].recommendations}</Link>
         )}
         {loggedIn && (
           <Link

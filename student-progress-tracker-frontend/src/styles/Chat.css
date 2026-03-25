@@ -93,7 +93,10 @@ body {
   color: var(--text);
   border-right: 2.5px solid var(--border);
   transition: background 0.3s;
-
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
   opacity: 0.98;
 }
 
@@ -109,6 +112,9 @@ body {
   flex-direction: column;
   font-weight: 350;
   gap: 0.7rem;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 
 .chat-user {
@@ -636,7 +642,8 @@ chat-input-controllers {
   min-width: 160px;
   max-width: 320px;
   transition: background 0.3s;
-
+  min-height: 0;
+  overflow: hidden;
   opacity: 0.98;
 }
 
@@ -650,6 +657,9 @@ chat-input-controllers {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
 }
 .leaderboard-user {
   color: var(--text);

@@ -1,0 +1,117 @@
+/* Profil oldal stílusai (kíméletes, az AdminPanels dizájnhoz illeszkedik) */
+
+.profile-panel {
+  max-width: 980px;
+  margin: 12px auto;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(30,60,90,0.06);
+  color: #222;
+  font-family: inherit;
+}
+
+/* Headerek */
+.profile-panel h2 { margin: 0 0 12px; font-size: 1.4rem; color: #0b66c3; }
+.profile-panel h3 { margin: 18px 0 8px; font-size: 1.05rem; color: #0b66c3; }
+
+/* Alap mezők és gombok */
+.profile-panel input[type="text"],
+.profile-panel input[type="email"],
+.profile-panel input[type="password"],
+.profile-panel textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #dbeaf8;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.profile-panel button {
+  background: #0b66c3;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.profile-panel button[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* segéd gombok */
+.profile-panel button.secondary {
+  background: #eef6fb;
+  color: #0b66c3;
+  border: 1px solid #dbeaf8;
+}
+
+/* info sorok */
+.profile-panel .info-row { margin-bottom: 8px; color: #333; }
+.profile-panel .info-row b { color: #0b66c3; margin-right: 6px; }
+
+/* form elrendezés */
+.profile-panel .profile-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.profile-panel .profile-main {
+  flex: 1 1 420px;
+  min-width: 280px;
+}
+.profile-panel .profile-side {
+  width: 360px;
+  min-width: 260px;
+}
+
+/* státusz üzenetek */
+.profile-panel .status-ok { color: #0a0; margin-top: 8px; }
+.profile-panel .status-err { color: #a33; margin-top: 8px; }
+
+.profile-delete-card {
+  margin-top: 18px;
+  border: 1px solid #f4b5b5;
+  border-radius: 8px;
+  background: #fff6f6;
+  padding: 12px;
+}
+
+.profile-delete-warning {
+  color: #a11111;
+  font-weight: 700;
+  background: #ffe8e8;
+  border: 1px solid #ffc9c9;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.profile-delete-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #7a1616;
+  font-weight: 600;
+}
+
+.profile-panel .danger-btn {
+  background: #c62828;
+  border: 1px solid #b71c1c;
+}
+
+.profile-panel .danger-btn:hover:not([disabled]) {
+  background: #b71c1c;
+}
+
+/* kis képernyőn érthetően legyen */
+@media (max-width: 720px) {
+  .profile-panel { padding: 12px; }
+  .profile-panel .profile-grid { flex-direction: column; }
+  .profile-panel .profile-side { width: 100%; }
+}
