@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <title>Verifikáció</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="verify.css">
+  <script>
+    /**
+     * Verifikációs oldal logika.
+     * Ha az URL-ben van msg paraméter, azt írja ki, majd visszaszámolás után főoldalra irányít.
+     * Egyébként a token alapján próbál verifikálni, és kiírja az eredményt.
+     */
+    let countdown = 10;
+    async function verify() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("token");
+      const msgDiv = document.getElementById("msg");
+      const countdownDiv = document.getElementById("countdown");
+      const urlMsg = params.get("msg");
+      if (urlMsg) {
+        msgDiv.innerText = decodeURIComponent(urlMsg);
+        countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+        const interval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+          } else {
+            countdownDiv.innerText = "Átirányítás...";
+            clearInterval(interval);
+            window.location.href = "/";
+          }
+        }, 1000);
+        return;
+      }
+      if (!token) {
+        msgDiv.innerText = "Hiányzó vagy érvénytelen token!";
+        return;
+      }
+      try {
+        const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/verify?token=" + encodeURIComponent(token));
+        const result = await resp.json();
+        msgDiv.innerText = result.detail || "Ismeretlen hiba történt.";
+      } catch {
+        msgDiv.innerText = "Hiba történt a verifikáció során.";
+      }
+      countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+      const interval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
+        } else {
+          countdownDiv.innerText = "Átirányítás...";
+          clearInterval(interval);
+          window.location.href = "/";
+        }
+      }, 1000);
+    }
+    window.onload = verify;
+  </script>
+</head>
+<body>
+  <nav class="navbar">
+    <span class="navbar-logo">
+      <img src="https://u-szeged.hu/site/upload/2020/12/felveteli_weboldal_nyito_1520x864_0000s_0000_ttik2.jpg" alt="SZTE" />
+      <span>Hallgatói előrehaladás-követő</span>
+    </span>
+    <span class="navbar-links">
+      <a href="/">Főoldal</a>
+    </span>
+  </nav>
+  <div class="verify-centerbox">
+    <div class="verify-card">
+      <div class="verify-title">Felhasználó verifikáció</div>
+      <div id="msg">Ellenőrzés folyamatban...</div>
+      <div id="countdown"></div>
+    </div>
+  </div>
+  <footer class="footer">
+    &copy; 2025 Hallgatói előrehaladás-követő | Készítette: <b>Harkai Dominik</b>
+  </footer>
+</body>
+</html>

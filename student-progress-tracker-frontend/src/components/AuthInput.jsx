@@ -1,0 +1,53 @@
+import { useLang } from "../context/LangContext";
+
+/**
+ * Egyedi input mező komponens hitelesítési (login/regisztráció) űrlapokhoz.
+ * Megjeleníti a labelt, az inputot, és opcionálisan hibát.
+ *
+ * @param {Object} props
+ * @param {string} props.label - A mező felirata.
+ * @param {string} props.id - Az input egyedi azonosítója.
+ * @param {string} [props.type="text"] - Az input típusa.
+ * @param {string} props.value - Az input aktuális értéke.
+ * @param {function} props.onChange - Változáskezelő függvény.
+ * @param {string} [props.error] - Hibaszöveg, ha van.
+ * @returns {JSX.Element}
+ */
+export default function AuthInput({
+  label,
+  id,
+  type = "text",
+  value,
+  onChange,
+  error,
+  ...props
+}) {
+  const { lang } = useLang();
+  const getText = (obj) =>
+    typeof obj === "string" ? obj : obj?.[lang] || "";
+
+  return (
+    <div>
+      <label htmlFor={id} style={{ fontWeight: 500, marginBottom: 4, display: "block" }}>
+        {getText(label)}
+      </label>
+      <input
+        id={id}
+        type={type}
+        className="auth-form-input"
+        value={value}
+        onChange={onChange}
+        style={{
+          width: "100%",
+          ...(error ? { border: "2px solid #e53935", background: "#fff6f6" } : {})
+        }}
+        {...props}
+      />
+      {error && (
+        <div className="auth-msg" style={{ color: "#e53935", marginTop: 2 }}>
+          {getText(error)}
+        </div>
+      )}
+    </div>
+  );
+}

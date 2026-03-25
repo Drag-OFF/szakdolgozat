@@ -1,0 +1,83 @@
+/**
+ * Jelszó visszaállítás oldal tokennel.
+ * A felhasználó a kiküldött linkre kattintva új jelszót állíthat be.
+ * A PasswordResetForm komponenst használja, amely két mezőt jelenít meg:
+ * - Új jelszó
+ * - Jelszó megerősítése
+ * A jelszó minimum 8 karakter kell legyen, és egyeznie kell a megerősítéssel.
+ * Sikeres jelszócsere után automatikusan átirányít a főoldalra.
+ */
+import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import PasswordResetForm from "../components/PasswordResetForm";
+import { useLang } from "../context/LangContext";
+import { authFetch } from "../utils";
+
+export default function ResetPassword() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const [sent, setSent] = useState(false);
+  const { lang } = useLang();
+  const navigate = useNavigate();
+
+  const texts = {
+    hu: {
+      title: "Új jelszó beállítása",
+      password: "Új jelszó",
+      confirm: "Jelszó megerősítése",
+      btn: "Mentés",
+      pwError: "A jelszavak nem egyeznek vagy túl rövid!",
+      success: "Sikeres jelszócsere! Most már bejelentkezhetsz.",
+      unknownError: "Ismeretlen hiba történt.",
+      reqError: "Hiba történt a kérés során."
+    },
+    en: {
+      title: "Set new password",
+      password: "New password",
+      confirm: "Confirm password",
+      btn: "Save",
+      pwError: "Passwords do not match or too short!",
+      success: "Password changed successfully! You can now log in.",
+      unknownError: "Unknown error occurred.",
+      reqError: "An error occurred during the request."
+    }
+  };
+
+  /**
+   * Beküldi az új jelszót a backendnek.
+   * @param {string} password - Az új jelszó.
+   * @param {function} setMsg - Hibák/siker üzenet beállítása.
+   */
+  async function handlePasswordReset(password, setMsg) {
+    try {
+      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
+      if (!resp) return;
+      const result = await resp.json();
+      if (resp.ok) {
+        setMsg(texts[lang].success);
+        setSent(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        setMsg(result.detail || texts[lang].unknownError);
+      }
+    } catch (err) {
+      setMsg(texts[lang].reqError);
+    }
+  }
+
+  return (
+    <div className="auth-container" style={{ justifyContent: "center", alignItems: "center" }}>
+      <PasswordResetForm
+        onSubmit={handlePasswordReset}
+        texts={texts}
+        sent={sent}
+      />
+    </div>
+  );
+}
