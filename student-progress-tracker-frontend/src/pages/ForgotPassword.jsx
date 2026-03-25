@@ -1,4 +1,5 @@
 import EmailActionForm from "../components/EmailActionForm";
+import { apiUrl } from "../config";
 
 const texts = {
   hu: {
@@ -29,7 +30,7 @@ const texts = {
 export default function ForgotPassword() {
   return (
     <EmailActionForm
-      apiUrl="http://enaploproject.ddns.net:8000/api/users/forgot-password"
+      apiUrl={apiUrl("/api/users/forgot-password")}
       texts={texts}
     />
   );

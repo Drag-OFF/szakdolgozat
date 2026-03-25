@@ -8,9 +8,11 @@ import { authFetch } from "../utils";
 import { useLang } from "../context/LangContext"; // <-- ezt add hozzá
 import { PROGRESS_TRACKER_LABELS } from "../translations";
 import "../styles/ProgressTable.css";
+import { apiUrl } from "../config";
+import { getUserObject, getAccessToken } from "../authStorage";
 
 export default function ProgressTracker() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const user = getUserObject();
   const [progressFull, setProgressFull] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -25,8 +27,8 @@ export default function ProgressTracker() {
 
   useEffect(() => {
     if (!user.id) return;
-    authFetch(`http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+    authFetch(apiUrl(`/api/progress/${user.id}/full?lang=${lang}`), {
+      headers: { Authorization: `Bearer ${getAccessToken()}` }
     })
       .then(res => res.json())
       .then(data => setProgressFull(data));
@@ -84,11 +86,11 @@ export default function ProgressTracker() {
                     formData.append("file", file);
                     try {
                       const res = await fetch(
-                        `http://enaploproject.ddns.net:8000/api/progress/${user.id}/import?lang=${lang}`,
+                        apiUrl(`/api/progress/${user.id}/import?lang=${lang}`),
                         {
                           method: "POST",
                           headers: {
-                            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                            Authorization: `Bearer ${getAccessToken()}`,
                           },
                           body: formData,
                         }
@@ -101,8 +103,8 @@ export default function ProgressTracker() {
                       }
                       // sikeres import után újra lekérdezzük a teljes előrehaladást és frissítjük a state-et
                       const fullRes = await authFetch(
-                        `http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`,
-                        { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+                        apiUrl(`/api/progress/${user.id}/full?lang=${lang}`),
+                        { headers: { Authorization: `Bearer ${getAccessToken()}` } }
                       );
                       const fullData = await fullRes.json();
                       setProgressFull(Array.isArray(fullData) ? fullData : []);

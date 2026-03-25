@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { useLang } from "../context/LangContext";
 import useFileDownload from "../hooks/useFileDownload";
 import useFileUpload from "../hooks/useFileUpload.js";
+import { apiUrl } from "../config";
 
 /**
  * Egységes kinézetű fájlfeltöltő komponens, magyar és angol feliratokkal.
@@ -69,7 +70,7 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
   const handleTemplateDownload = async () => {
     if (!userId) return;
     try {
-      await download(`http://enaploproject.ddns.net:8000/api/progress/${userId}/template-xlsx?lang=${lang}`);
+      await download(apiUrl(`/api/progress/${userId}/template-xlsx?lang=${lang}`));
     } catch (e) {
       console.error(e);
       alert(lang === "en" ? "Failed to download the template!" : "Nem sikerült letölteni a sablont!");

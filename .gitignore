@@ -1,0 +1,5 @@
+# Központi titkok — a repó gyökerében
+.env
+.env.local
+.env.*.local
+!.env.example

@@ -3,8 +3,8 @@ import useAuthFetch from "../hooks/useAuthFetch";
 import "../styles/Profile.css";
 import { useLang } from "../context/LangContext";
 import { PROFILE_LABELS } from "../translations";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../config";
+import { getUserObject, setUserJson, clearAuth } from "../authStorage";
 
 /**
  * Profil oldal komponens.
@@ -15,7 +15,7 @@ export default function Profile() {
   const { authFetch } = useAuthFetch();
   const { lang } = useLang();
   const t = PROFILE_LABELS[lang] || PROFILE_LABELS.hu;
-  const stored = JSON.parse(localStorage.getItem("user")) || {};
+  const stored = getUserObject();
   const [user, setUser] = useState(stored);
   const [majors, setMajors] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export default function Profile() {
           const data = await res.json().catch(()=>null);
           if (data) {
             setUser(data);
-            localStorage.setItem("user", JSON.stringify(data));
+            setUserJson(data);
           }
         }
       } catch (e) { /* ignore */ } finally { setLoading(false); }
@@ -129,8 +129,7 @@ export default function Profile() {
       if (res.ok) {
         setDeleteStatus(t.deleteSuccess);
         setDeleteOk(true);
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("user");
+        clearAuth();
         setTimeout(() => {
           window.location.href = "/login";
         }, 700);
@@ -171,7 +170,7 @@ export default function Profile() {
 
           <div style={{ marginTop:8 }}>
             {/* nem engedünk szerkesztést név/email mezőkben */}
-            <button onClick={() => { localStorage.removeItem("access_token"); localStorage.removeItem("user"); window.location.reload(); }}>
+            <button onClick={() => { clearAuth(); window.location.reload(); }}>
               {t.logout}
             </button>
           </div>

@@ -1,3 +1,5 @@
+import { clearAuth } from "./authStorage";
+
 /**
  * Dátumot formáz emberi olvasható formára.
  * Ha a dátum ma van, csak az időt adja vissza, különben teljes dátumot és időt.
@@ -150,7 +152,7 @@ export function passwordsMatch(pw1, pw2) {
 /**
  * API hívás wrapper, amely automatikusan kezeli a lejárt vagy érvénytelen tokeneket.
  *
- * Ha a szerver 401-es (Unauthorized) választ ad, törli a localStorage tartalmát,
+ * Ha a szerver 401-es (Unauthorized) választ ad, törli a bejelentkezési adatokat,
  * majd átirányítja a felhasználót a főoldalra ("/").
  * Egyébként ugyanúgy viselkedik, mint a fetch: visszaadja a Response objektumot.
  *
@@ -167,7 +169,7 @@ export function passwordsMatch(pw1, pw2) {
 export async function authFetch(url, options = {}) {
   const res = await fetch(url, options);
   if (res.status === 401) {
-    localStorage.clear();
+    clearAuth();
     window.location.href = "/";
     return null;
   }

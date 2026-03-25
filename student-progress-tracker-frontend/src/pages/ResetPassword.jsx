@@ -12,6 +12,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import PasswordResetForm from "../components/PasswordResetForm";
 import { useLang } from "../context/LangContext";
 import { authFetch } from "../utils";
+import { apiUrl } from "../config";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -50,7 +51,7 @@ export default function ResetPassword() {
    */
   async function handlePasswordReset(password, setMsg) {
     try {
-      const resp = await authFetch("http://enaploproject.ddns.net:8000/api/users/reset-password", {
+      const resp = await authFetch(apiUrl("/api/users/reset-password"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),

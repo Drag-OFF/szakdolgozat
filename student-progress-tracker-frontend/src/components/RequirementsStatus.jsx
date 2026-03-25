@@ -3,6 +3,8 @@ import CourseList from "./CourseList";
 import { authFetch } from "../utils";
 import "../styles/RequirementsStatus.css";
 import { useLang } from "../context/LangContext";
+import { apiUrl } from "../config";
+import { getUserObject, getAccessToken } from "../authStorage";
 
 function CreditRow({ title, data }) {
   const d = data || { completed: 0, required: 0, missing: 0 };
@@ -141,7 +143,7 @@ function DynamicSummaryTable({ rows, lang }) {
 }
 
 export default function RequirementsStatus() {
-  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const user = getUserObject();
   const [req, setReq] = useState(null);
   const [loading, setLoading] = useState(true);
   const { lang } = useLang();
@@ -194,8 +196,8 @@ export default function RequirementsStatus() {
     if (!user.id) return;
     setLoading(true);
     // kérjük a backendet a jelenlegi nyelv szerint, így minden adat lokalizált lesz
-    authFetch(`http://enaploproject.ddns.net:8000/api/progress/${user.id}/requirements?lang=${lang || "hu"}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+    authFetch(apiUrl(`/api/progress/${user.id}/requirements?lang=${lang || "hu"}`), {
+      headers: { Authorization: `Bearer ${getAccessToken()}` }
     })
       .then(res => res.json().catch(() => null))
       .then(data => {
