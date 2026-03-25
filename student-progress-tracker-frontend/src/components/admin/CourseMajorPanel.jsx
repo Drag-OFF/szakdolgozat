@@ -1,11 +1,9 @@
-// ...existing code...
 import React, { useEffect, useState } from "react";
 import useAuthFetch from "../../hooks/useAuthFetch";
 import Autocomplete from "../common/Autocomplete";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../../config";
 const PAGE_SIZE = 10;
 
 export default function CourseMajorPanel() {
@@ -250,4 +248,3 @@ export default function CourseMajorPanel() {
     </div>
   );
 }
-// ...existing code...

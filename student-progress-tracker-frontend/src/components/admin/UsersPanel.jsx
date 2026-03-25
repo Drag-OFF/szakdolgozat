@@ -1,10 +1,9 @@
-// ...existing code...
 import React, { useEffect, useState } from "react";
 import useAuthFetch from "../../hooks/useAuthFetch";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
+import { API_BASE } from "../../config";
 
-const API_BASE = "http://enaploproject.ddns.net:8000";
 const PAGE_SIZE = 10;
 
 export default function UsersPanel() {
@@ -141,4 +140,3 @@ export default function UsersPanel() {
     </div>
   );
 }
-// ...existing code...

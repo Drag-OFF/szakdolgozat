@@ -1,6 +1,7 @@
 import useAuthFetch from "./useAuthFetch";
+import { API_BASE } from "../config";
 
-export default function useFileUpload(baseUrl = "http://enaploproject.ddns.net:8000") {
+export default function useFileUpload(baseUrl = API_BASE) {
   const { authFetch, fetchJson } = useAuthFetch();
 
   const upload = async ({ endpoint, file, userId, lang = "hu" }) => {

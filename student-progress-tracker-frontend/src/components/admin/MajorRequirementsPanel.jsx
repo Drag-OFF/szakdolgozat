@@ -3,8 +3,7 @@ import useAuthFetch from "../../hooks/useAuthFetch";
 import Autocomplete from "../common/Autocomplete";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../../config";
 
 const emptyForm = {
   id: null,
