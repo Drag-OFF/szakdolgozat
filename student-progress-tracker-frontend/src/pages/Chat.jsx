@@ -6,6 +6,8 @@ import ChatMessagesList from "../components/ChatMessagesList";
 import ChatInputRow from "../components/ChatInputRow";
 import ChatLeaderboard from "../components/ChatLeaderboard";
 import { useLang } from "../context/LangContext";
+import { apiUrl } from "../config";
+import { getAccessToken, getUserObject } from "../authStorage";
 
 /**
  * Egyedi hook, amely figyeli az ablak méretét, és visszaadja, hogy mobil nézetben vagyunk-e.
@@ -50,7 +52,7 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const isMobile = useIsMobile();
-  const currentUser = JSON.parse(localStorage.getItem("user")) || {};
+  const currentUser = getUserObject();
   const [open, setOpen] = useState(false);
   const chatListRef = useRef(null);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -63,8 +65,8 @@ export default function Chat() {
 
   async function fetchMessages() {
     try {
-      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+      const res = await authFetch(apiUrl("/api/messages/"), {
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
       });
       if (!res.ok) return;
       if (res.ok) {
@@ -76,8 +78,8 @@ export default function Chat() {
 
   async function fetchUsers() {
     try {
-      const res = await authFetch("http://enaploproject.ddns.net:8000/api/users/chat-users", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+      const res = await authFetch(apiUrl("/api/users/chat-users"), {
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
       });
       if (!res.ok) return;
       if (res.ok) {
@@ -93,8 +95,8 @@ export default function Chat() {
 
   async function fetchLeaderboard() {
     try {
-      const res = await authFetch("http://enaploproject.ddns.net:8000/api/users/chat-leaderboard", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+      const res = await authFetch(apiUrl("/api/users/chat-leaderboard"), {
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
       });
       if (!res.ok) return;
       const data = await res.json().catch(() => []);
@@ -107,11 +109,11 @@ export default function Chat() {
   async function sendMessage() {
     if (!input.trim()) return;
     try {
-      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/", {
+      const res = await authFetch(apiUrl("/api/messages/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+          Authorization: `Bearer ${getAccessToken()}`
         },
         body: JSON.stringify({
           message: input,
@@ -138,11 +140,11 @@ export default function Chat() {
 
   async function addReaction(msgId, emoji) {
     try {
-      const res = await authFetch("http://enaploproject.ddns.net:8000/api/messages/" + msgId + "/reactions", {
+      const res = await authFetch(apiUrl(`/api/messages/${msgId}/reactions`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`
+          Authorization: `Bearer ${getAccessToken()}`
         },
         body: JSON.stringify({ emoji })
       });

@@ -4,8 +4,8 @@ import useAuthFetch from "../hooks/useAuthFetch";
 import "../styles/ProgressTable.css";
 import "../styles/CourseRecommender.css";
 import { COURSE_RECOMMENDER_LABELS } from "../translations";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../config";
+import { getUserObject } from "../authStorage";
 
 function splitCodes(raw) {
   return String(raw || "")
@@ -16,13 +16,7 @@ function splitCodes(raw) {
 }
 
 export default function CourseRecommender() {
-  const user = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("user")) || {};
-    } catch {
-      return {};
-    }
-  }, []);
+  const user = useMemo(() => getUserObject(), []);
   const userId = user?.id;
   const { lang } = useLang();
   const { authFetch } = useAuthFetch();

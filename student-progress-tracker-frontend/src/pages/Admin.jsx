@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import AdminDashboard from "../components/admin/AdminDashboard";
+import { getAccessToken } from "../authStorage";
 
 /**
  * JWT tokenből visszaadja a felhasználó szerepkörét.
  * @returns {string|null} A szerepkör vagy null.
  */
 function getRoleFromToken() {
-  const token = localStorage.getItem("access_token");
+  const token = getAccessToken();
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -27,15 +27,14 @@ function getRoleFromToken() {
  */
 
 export default function Admin() {
-  const navigate = useNavigate();
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     const role = (() => {
-      const t = localStorage.getItem("access_token");
+      const t = getAccessToken();
       if (!t) return null;
       try { return JSON.parse(atob(t.split(".")[1])).role || null; } catch { return null; }
     })();
-    if (!token || role !== "admin") window.location.href = "http://enaploproject.ddns.net/";
+    if (!token || role !== "admin") window.location.href = "/";
   }, []);
 
   return <AdminDashboard />;

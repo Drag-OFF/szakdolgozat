@@ -2,6 +2,7 @@ import React from "react";
 import Button from "./Button";
 import { useLang } from "../context/LangContext";
 import useFileDownload from "../hooks/useFileDownload";
+import { apiUrl } from "../config";
 
 export default function DownloadProgressButton({ userId }) {
   const { lang } = useLang();
@@ -9,7 +10,7 @@ export default function DownloadProgressButton({ userId }) {
 
   const handleDownload = async () => {
     try {
-      await download(`http://enaploproject.ddns.net:8000/api/progress/${userId}/export-xlsx?lang=${lang}`);
+      await download(apiUrl(`/api/progress/${userId}/export-xlsx?lang=${lang}`));
     } catch (e) {
       console.error(e);
       alert(lang === "en" ? "Download failed!" : "Hiba történt a letöltés során!");

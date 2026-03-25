@@ -4,8 +4,18 @@
   <meta charset="UTF-8">
   <title>Verifikáció</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Éles környezetben állítsd a backend origin-t (Vite .env-ből ez a fájl nem kapja meg automatikusan). -->
+  <meta name="enaplo-api-base" content="http://localhost:8000">
   <link rel="stylesheet" href="verify.css">
   <script>
+    function enaploApiBase() {
+      if (window.__ENAPLO_API_BASE__) {
+        return String(window.__ENAPLO_API_BASE__).replace(/\/+$/, "");
+      }
+      var m = document.querySelector('meta[name="enaplo-api-base"]');
+      if (m && m.content) return String(m.content).replace(/\/+$/, "");
+      return "http://localhost:8000";
+    }
     /**
      * Verifikációs oldal logika.
      * Ha az URL-ben van msg paraméter, azt írja ki, majd visszaszámolás után főoldalra irányít.
@@ -38,7 +48,7 @@
         return;
       }
       try {
-        const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/verify?token=" + encodeURIComponent(token));
+        const resp = await fetch(enaploApiBase() + "/api/users/verify?token=" + encodeURIComponent(token));
         const result = await resp.json();
         msgDiv.innerText = result.detail || "Ismeretlen hiba történt.";
       } catch {

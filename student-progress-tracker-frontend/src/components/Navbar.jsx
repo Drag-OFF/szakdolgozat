@@ -8,13 +8,14 @@ import { Link, useNavigate } from "react-router-dom";
 import "../styles/Navbar.css";
 import Button from "../components/Button";
 import { useLang } from "../context/LangContext";
+import { getAccessToken, clearAuth } from "../authStorage";
 
 /**
  * Segédfüggvény: JWT dekódolása (payload kinyerése)
  * @returns {string|null} A felhasználó szerepköre vagy null.
  */
 function getRoleFromToken() {
-  const token = localStorage.getItem("access_token");
+  const token = getAccessToken();
   if (!token) return null;
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -58,7 +59,7 @@ export default function Navbar() {
 
 useEffect(() => {
   const updateAuth = () => {
-    const token = localStorage.getItem("access_token");
+    const token = getAccessToken();
     setLoggedIn(!!token);
     setIsAdmin(getRoleFromToken() === "admin");
   };
@@ -72,7 +73,7 @@ useEffect(() => {
 }, []);
 
   function handleLogout() {
-    localStorage.removeItem("access_token");
+    clearAuth();
     setLoggedIn(false);
     setIsAdmin(false);
     setOpen(false);
