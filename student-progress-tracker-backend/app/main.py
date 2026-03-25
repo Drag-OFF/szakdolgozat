@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, courses, progress, users, forgot_password, reset_password
-from app.api import course_major, course_equivalence, majors, majors_requirements
+from app.api import course_major, course_equivalence, majors, course_recommendations, major_requirement_rules
 
 app = FastAPI()
 # CORS konfiguráció
@@ -24,7 +24,8 @@ app.include_router(reset_password.router, prefix="/api/users", tags=["users"])
 app.include_router(course_major.router, prefix="/api/course_major", tags=["course_major"])
 app.include_router(course_equivalence.router, prefix="/api/course_equivalence", tags=["course_equivalence"])
 app.include_router(majors.router, prefix="/api/majors", tags=["majors"])
-app.include_router(majors_requirements.router, prefix="/api/majors_requirements", tags=["majors_requirements"])
+app.include_router(major_requirement_rules.router, prefix="/api/major_requirement_rules", tags=["major_requirement_rules"])
+app.include_router(course_recommendations.router, prefix="/api/course_recommendations", tags=["course_recommendations"])
 
 @app.get("/")
 def read_root():

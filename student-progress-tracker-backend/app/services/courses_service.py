@@ -82,18 +82,19 @@ class CoursesService:
         self.db.refresh(course)
         return course
 
-    def delete_course(self, course_id: int) -> None:
+    def delete_course(self, course_id: int) -> bool:
         """
         Kurzus törlése azonosító alapján.
 
         Args:
             course_id (int): A törlendő kurzus azonosítója.
 
-        Raises:
-            Exception: Ha a kurzus nem található.
+        Returns:
+            bool: True ha törölve lett, False ha nem található.
         """
         course = self.db.query(CourseModel).filter(CourseModel.id == course_id).first()
         if not course:
-            raise Exception("Kurzus nem található.")
+            return False
         self.db.delete(course)
         self.db.commit()
+        return True

@@ -43,6 +43,13 @@ class MajorsRequirementsService:
         """
         return self.db.query(models.MajorRequirement).filter(models.MajorRequirement.id == req_id).first()
 
+    def get_by_major_id(self, major_id: int):
+        """
+        Egy követelmény lekérdezése `major_id` alapján.
+        Feltételezzük, hogy egy szakhoz egy darab követelmény sor tartozik.
+        """
+        return self.db.query(models.MajorRequirement).filter(models.MajorRequirement.major_id == major_id).first()
+
     def create(self, req: schemas.MajorRequirementCreate):
         """
         Új követelmény létrehozása.

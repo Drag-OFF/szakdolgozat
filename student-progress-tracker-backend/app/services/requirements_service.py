@@ -7,6 +7,15 @@ elérhető kurzusainak kiszámításához szükséges segédfüggvényeket és a
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+
+def get_dynamic_rules(major_id: int, db: Session):
+    return db.execute(text("""
+        SELECT id, major_id, code, label_hu, label_en, requirement_type, subgroup, value_type, min_value, include_in_total, sort_order
+        FROM major_requirement_rules
+        WHERE major_id = :mid
+        ORDER BY sort_order ASC, id ASC
+    """), {"mid": major_id}).fetchall()
+
 def get_major_and_requirements(user_id: int, db: Session):
     """
     Lekéri a felhasználó szakját és a szak követelményeit.
@@ -16,15 +25,14 @@ def get_major_and_requirements(user_id: int, db: Session):
         db (Session): SQLAlchemy adatbázis kapcsolat.
 
     Returns:
-        tuple: (major neve, major_id, requirements rekord)
+        tuple: (major neve, major_id)
     """
     user = db.execute(text("SELECT major FROM users WHERE id = :uid"), {"uid": user_id}).fetchone()
     if not user:
         raise ValueError("Felhasználó nem található.")
     major = user.major
     major_id = db.execute(text("SELECT id FROM majors WHERE name = :major"), {"major": major}).scalar()
-    req = db.execute(text("SELECT * FROM major_requirements WHERE major_id = :mid"), {"mid": major_id}).fetchone()
-    return major, major_id, req
+    return major, major_id
 
 def get_equivalents(course_id: int, db: Session) -> set:
     """
@@ -121,7 +129,9 @@ def get_credits_with_equiv(type_: str, db: Session, major_id: int, completed_cou
         WHERE cm.major_id = :mid AND cm.type = :type
     """
     params = {"mid": major_id, "type": type_}
-    if subgroup == "elective_non_core_credits":
+    if subgroup == "__NULL__":
+        sql += " AND cm.subgroup IS NULL"
+    elif subgroup == "elective_non_core_credits":
         sql += " AND cm.subgroup IS NULL"
     elif subgroup:
         sql += " AND cm.subgroup = :sg"
@@ -165,7 +175,9 @@ def get_available_with_equiv(type_: str, db: Session, major_id: int, completed_c
         WHERE cm.major_id = :mid AND cm.type = :type
     """
     params = {"mid": major_id, "type": type_}
-    if subgroup == "elective_non_core_credits":
+    if subgroup == "__NULL__":
+        sql += " AND cm.subgroup IS NULL"
+    elif subgroup == "elective_non_core_credits":
         sql += " AND cm.subgroup IS NULL"
     elif subgroup:
         sql += " AND cm.subgroup = :sg"
@@ -190,6 +202,100 @@ def get_available_with_equiv(type_: str, db: Session, major_id: int, completed_c
                 "credit": row[5]
             })
     return available
+
+def get_completed_count(type_: str, db: Session, major_id: int, completed_courses: set, subgroup=None) -> int:
+    """
+    Teljesített kurzusok darabszáma ekvivalencia nélkül (egyszerű számolás).
+    """
+    sql = """
+        SELECT cm.course_id
+        FROM course_major cm
+        WHERE cm.major_id = :mid AND cm.type = :type
+    """
+    params = {"mid": major_id, "type": type_}
+    if subgroup == "__NULL__":
+        sql += " AND cm.subgroup IS NULL"
+    elif subgroup:
+        sql += " AND cm.subgroup = :sg"
+        params["sg"] = subgroup
+    ids = [row[0] for row in db.execute(text(sql), params).fetchall()]
+    return len([cid for cid in ids if cid in completed_courses])
+
+def get_completed_hours(type_: str, db: Session, major_id: int, user_id: int, subgroup=None) -> int:
+    """
+    Óra alapú követelményhez összegzi a completed_semester mezőt.
+    """
+    sql = """
+        SELECT COALESCE(SUM(p.completed_semester), 0)
+        FROM progress p
+        JOIN course_major cm ON cm.course_id = p.course_id
+        WHERE p.user_id = :uid
+          AND p.status IN ('completed', 'in_progress')
+          AND cm.major_id = :mid
+          AND cm.type = :type
+    """
+    params = {"uid": user_id, "mid": major_id, "type": type_}
+    if subgroup == "__NULL__":
+        sql += " AND cm.subgroup IS NULL"
+    elif subgroup:
+        sql += " AND cm.subgroup = :sg"
+        params["sg"] = subgroup
+    return db.execute(text(sql), params).scalar() or 0
+
+def build_dynamic_requirements(user_id: int, major: str, major_id: int, lang: str, db: Session, completed_courses: set) -> dict:
+    rules = get_dynamic_rules(major_id, db)
+    rows = []
+    completed_total = 0
+    required_total = 0
+
+    for r in rules:
+        rule_type = r.requirement_type
+        subgroup = r.subgroup
+        value_type = (r.value_type or "credits").lower()
+
+        if value_type == "hours":
+            completed = get_completed_hours(rule_type, db, major_id, user_id, subgroup=subgroup)
+            available_courses = get_available_with_equiv(rule_type, db, major_id, completed_courses, lang, subgroup=subgroup)
+        elif value_type == "count":
+            completed = get_completed_count(rule_type, db, major_id, completed_courses, subgroup=subgroup)
+            available_courses = get_available_with_equiv(rule_type, db, major_id, completed_courses, lang, subgroup=subgroup)
+        else:
+            completed = get_credits_with_equiv(rule_type, db, major_id, completed_courses, subgroup=subgroup)
+            available_courses = get_available_with_equiv(rule_type, db, major_id, completed_courses, lang, subgroup=subgroup)
+
+        required = int(r.min_value or 0)
+        missing = max(0, required - int(completed or 0))
+
+        if int(r.include_in_total or 0) == 1:
+            completed_total += int(completed or 0)
+            required_total += required
+
+        rows.append({
+            "id": r.id,
+            "code": r.code,
+            "label": (r.label_en if lang == "en" and r.label_en else r.label_hu) or r.code,
+            "label_hu": r.label_hu,
+            "label_en": r.label_en,
+            "requirement_type": rule_type,
+            "subgroup": subgroup,
+            "value_type": value_type,
+            "completed": int(completed or 0),
+            "required": required,
+            "missing": missing,
+            "include_in_total": bool(r.include_in_total),
+            "available_courses": available_courses
+        })
+
+    return {
+        "mode": "dynamic",
+        "major": major,
+        "requirements": rows,
+        "summary": {
+            "completed_total": completed_total,
+            "required_total": required_total,
+            "missing_total": max(0, required_total - completed_total)
+        }
+    }
 
 def get_available_thesis(thesis_code: str, thesis_name: str, db: Session, major_id: int, completed_courses: set, lang: str) -> list:
     """
@@ -340,103 +446,20 @@ def get_user_requirements(user_id: int, lang: str, db: Session) -> dict:
     Returns:
         dict: A követelmények, teljesített kreditek, elérhető kurzusok, stb.
     """
-    major, major_id, req = get_major_and_requirements(user_id, db)
+    major, major_id = get_major_and_requirements(user_id, db)
     completed_courses = get_completed_courses(user_id, db)
 
-    required = get_credits_with_equiv('required', db, major_id, completed_courses, exclude_subgroup='practice_hours')
-    available_required = get_available_with_equiv('required', db, major_id, completed_courses, lang)
-
-    core = get_credits_with_equiv('elective', db, major_id, completed_courses, subgroup='elective_core_credits')
-    info = get_credits_with_equiv('elective', db, major_id, completed_courses, subgroup='elective_info_credits')
-    non_core = get_credits_with_equiv('elective', db, major_id, completed_courses, subgroup='elective_non_core_credits')
-    available_core = get_available_with_equiv('elective', db, major_id, completed_courses, lang, subgroup='elective_core_credits')
-    available_info = get_available_with_equiv('elective', db, major_id, completed_courses, lang, subgroup='elective_info_credits')
-    available_non_core = get_available_with_equiv('elective', db, major_id, completed_courses, lang, subgroup='elective_non_core_credits')
-
-    optional = get_credits_with_equiv('optional', db, major_id, completed_courses)
-    available_optional = get_available_with_equiv('optional', db, major_id, completed_courses, lang)
-
-    thesis1_completed = db.execute(text("""
-        SELECT COUNT(*) FROM progress p
-        JOIN course_major cm ON cm.course_id = p.course_id
-        WHERE cm.major_id = :mid AND p.user_id = :uid AND p.status = 'completed'
-          AND (p.course_id IN (
-                SELECT id FROM courses WHERE name LIKE '%Szakdolgozat 1%' OR course_code LIKE '%970%'
-          ))
-    """), {"mid": major_id, "uid": user_id}).scalar() > 0
-
-    thesis2_completed = db.execute(text("""
-        SELECT COUNT(*) FROM progress p
-        JOIN course_major cm ON cm.course_id = p.course_id
-        WHERE cm.major_id = :mid AND p.user_id = :uid AND p.status = 'completed'
-          AND (p.course_id IN (
-                SELECT id FROM courses WHERE name LIKE '%Szakdolgozat 2%' OR course_code LIKE '%975%'
-          ))
-    """), {"mid": major_id, "uid": user_id}).scalar() > 0
-
-    available_thesis1 = get_available_thesis("IB970", "Szakdolgozat készítése 1. (gi)", db, major_id, completed_courses, lang)
-    available_thesis2 = get_available_thesis("IB975", "Szakdolgozat készítése 2. (gi)", db, major_id, completed_courses, lang)
-
-    practice_completed_hours, practice_required_hours, practice_missing_hours, available_practice = get_practice_hours(user_id, db, major_id, req)
-    pe_semesters, available_pe = get_pe_semesters(user_id, db, major_id)
-
-    total_credits = (required or 0) + (core or 0) + (non_core or 0) + (optional or 0)
-
+    dynamic_rules = get_dynamic_rules(major_id, db)
+    if dynamic_rules:
+        return build_dynamic_requirements(user_id, major, major_id, lang, db, completed_courses)
     return {
-        "total_credits": {
-            "completed": total_credits or 0,
-            "required": req.total_credits,
-            "missing": max(0, req.total_credits - (total_credits or 0))
+        "mode": "dynamic",
+        "major": major,
+        "requirements": [],
+        "summary": {
+            "completed_total": 0,
+            "required_total": 0,
+            "missing_total": 0
         },
-        "required_credits": {
-            "completed": required or 0,
-            "required": req.required_credits,
-            "missing": max(0, req.required_credits - (required or 0)),
-            "available_courses": available_required
-        },
-        "elective_credits": {
-            "completed": (core or 0) + (non_core or 0),
-            "required": req.elective_credits,
-            "missing": max(0, req.elective_credits - ((core or 0) + (non_core or 0))),
-            "core": {
-                "completed": core or 0,
-                "required": req.elective_core_credits,
-                "missing": max(0, req.elective_core_credits - (core or 0)),
-                "available_courses": available_core,
-                "info_core": {
-                    "completed": info or 0,
-                    "required": req.elective_info_credits,
-                    "missing": max(0, req.elective_info_credits - (info or 0)),
-                    "available_courses": available_info
-                }
-            },
-            "non_core": {
-                "completed": non_core or 0,
-                "required": req.elective_non_core_credits,
-                "missing": max(0, req.elective_non_core_credits - (non_core or 0)),
-                "available_courses": available_non_core
-            }
-        },
-        "optional_credits": {
-            "completed": optional or 0,
-            "required": req.optional_credits,
-            "missing": max(0, req.optional_credits - (optional or 0)),
-            "available_courses": available_optional
-        },
-        "pe_semesters": {
-            "completed": pe_semesters or 0,
-            "required": req.pe_semesters,
-            "missing": max(0, req.pe_semesters - (pe_semesters or 0)),
-            "available_courses": available_pe
-        },
-        "practice_hours": {
-            "completed": practice_completed_hours or 0,
-            "required": practice_required_hours,
-            "missing": practice_missing_hours,
-            "available_courses": available_practice
-        },
-        "thesis1_completed": thesis1_completed,
-        "thesis2_completed": thesis2_completed,
-        "available_thesis1": available_thesis1,
-        "available_thesis2": available_thesis2
+        "message": "No dynamic requirement rules configured for this major."
     }

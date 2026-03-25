@@ -22,8 +22,17 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
     Returns:
         StreamingResponse: Letölthető XLSX fájl.
     """
-    if current_user["user_id"] != user_id:
-        from fastapi import HTTPException
+    try:
+        role_val = current_user.get("role") or current_user.get("roles")
+        def is_admin(v):
+            if v is None:
+                return False
+            if isinstance(v, (list, tuple, set)):
+                return any("admin" in str(x).lower() for x in v)
+            return "admin" in str(v).lower()
+        if not is_admin(role_val) and int(current_user.get("user_id", -1)) != int(user_id):
+            raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó sablonjához.")
+    except KeyError:
         raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó sablonjához.")
 
     user_row = db.execute(text("SELECT major, uid FROM users WHERE id = :uid"), {"uid": user_id}).fetchone()

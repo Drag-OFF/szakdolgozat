@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2025. Okt 18. 15:08
+-- Létrehozás ideje: 2026. Már 25. 20:37
 -- Kiszolgáló verziója: 10.4.32-MariaDB
 -- PHP verzió: 8.2.12
 
@@ -54,7 +54,12 @@ INSERT INTO `chat_messages` (`id`, `major`, `user_id`, `message`, `timestamp`, `
 (47, 'Mérnökinformatikus', 26, 'Szia hogy vagy?', '2025-07-07 16:15:43', 0, NULL, NULL),
 (67, 'Villamosmérnök', 55, 'Remélem az életben nem kapsz diplomát', '2025-07-11 19:09:38', 0, NULL, NULL),
 (68, 'Gazdaságinformatikus', 57, 'Kys', '2025-07-23 12:55:41', 1, 'Anon#57875', NULL),
-(69, 'Gazdaságinformatikus', 60, 'Sziasztook!', '2025-10-17 22:11:34', 0, NULL, NULL);
+(69, 'Gazdaságinformatikus', 60, 'Sziasztook!', '2025-10-17 22:11:34', 0, NULL, NULL),
+(70, 'Gazdaságinformatikus', 17, 'Csumika', '2025-12-18 21:14:55', 0, NULL, 69),
+(71, 'Gazdaságinformatikus', 17, 'Ez egy anonim üzenet', '2025-12-18 21:15:08', 1, 'Anon#17245', NULL),
+(72, 'Gazdaságinformatikus', 17, '😅😅😅', '2025-12-18 21:16:06', 0, NULL, NULL),
+(73, 'Gazdaságinformatikus', 57, 'asd', '2026-03-24 10:26:58', 1, 'Anon#57875', NULL),
+(74, 'Gazdaságinformatikus', 57, 'asd', '2026-03-24 10:27:01', 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -80,7 +85,8 @@ INSERT INTO `chat_reaction` (`id`, `message_id`, `user_id`, `emoji`, `created_at
 (7, 1, 26, '🦊', '2025-07-03 14:21:38'),
 (13, 30, 26, '😃', '2025-07-06 20:47:10'),
 (19, 36, 53, '🦊', '2025-07-06 21:31:50'),
-(25, 67, 17, '🥰', '2025-07-11 19:14:50');
+(25, 67, 17, '🤪', '2025-07-11 19:14:50'),
+(26, 74, 57, '😂', '2026-03-24 10:27:09');
 
 -- --------------------------------------------------------
 
@@ -257,7 +263,8 @@ INSERT INTO `courses` (`id`, `course_code`, `name`, `name_en`) VALUES
 (217, 'PE_RUN', 'Futás', 'Running'),
 (218, 'PE_GYM', 'Tornatermi edzés', 'Gym Training'),
 (219, 'PE_YOGA', 'Jóga', 'Yoga'),
-(220, 'PE_BADMINTON', 'Tollaslabda', 'Badminton');
+(220, 'PE_BADMINTON', 'Tollaslabda', 'Badminton'),
+(222, 'VALAMI', 'Valami', 'Something');
 
 -- --------------------------------------------------------
 
@@ -464,7 +471,9 @@ INSERT INTO `course_major` (`id`, `course_id`, `major_id`, `credit`, `semester`,
 (157, 217, 1, 0, 0, 'optional', 'pe', '[]'),
 (158, 218, 1, 0, 0, 'optional', 'pe', '[]'),
 (159, 219, 1, 0, 0, 'optional', 'pe', '[]'),
-(160, 220, 1, 0, 0, 'optional', 'pe', '[]');
+(160, 220, 1, 0, 0, 'optional', 'pe', '[]'),
+(164, 222, 1, 2, 3, 'required', 'semmilyen', '[\"semmi\"]'),
+(165, 64, 2, 1, 1, 'required', 'lective_core_credit', '[\"GKBN15E\"]');
 
 -- --------------------------------------------------------
 
@@ -475,49 +484,56 @@ INSERT INTO `course_major` (`id`, `course_id`, `major_id`, `credit`, `semester`,
 DROP TABLE IF EXISTS `majors`;
 CREATE TABLE `majors` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
+  `name` varchar(100) NOT NULL,
+  `name_en` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `majors`
 --
 
-INSERT INTO `majors` (`id`, `name`) VALUES
-(1, 'Gazdaságinformatikus'),
-(2, 'Mérnökinformatikus'),
-(3, 'Programtervező informatikus'),
-(4, 'Villamosmérnök'),
-(5, 'Üzemmérnök-informatikus');
+INSERT INTO `majors` (`id`, `name`, `name_en`) VALUES
+(1, 'Gazdaságinformatikus', 'Business Informatics'),
+(2, 'Mérnökinformatikus', 'Computer Engineering'),
+(3, 'Programtervező informatikus', 'Computer Science'),
+(4, 'Villamosmérnök', 'Electrical Engineering'),
+(5, 'Üzemmérnök-informatikus', 'Engineering Informatics');
 
 -- --------------------------------------------------------
 
 --
--- Tábla szerkezet ehhez a táblához `major_requirements`
+-- Tábla szerkezet ehhez a táblához `major_requirement_rules`
 --
 
-DROP TABLE IF EXISTS `major_requirements`;
-CREATE TABLE `major_requirements` (
+DROP TABLE IF EXISTS `major_requirement_rules`;
+CREATE TABLE `major_requirement_rules` (
   `id` int(11) NOT NULL,
   `major_id` int(11) NOT NULL,
-  `total_credits` int(11) NOT NULL,
-  `required_credits` int(11) NOT NULL,
-  `elective_credits` int(11) NOT NULL,
-  `optional_credits` int(11) NOT NULL,
-  `elective_info_credits` int(11) DEFAULT 0,
-  `elective_math_credits` int(11) DEFAULT 0,
-  `pe_semesters` int(11) DEFAULT 0,
-  `practice_hours` int(11) DEFAULT 0,
-  `elective_non_core_credits` int(11) DEFAULT 0,
-  `elective_core_credits` int(11) DEFAULT 0,
-  `thesis_credits` int(11) DEFAULT 0
+  `code` varchar(80) NOT NULL,
+  `label_hu` varchar(255) NOT NULL,
+  `label_en` varchar(255) DEFAULT NULL,
+  `requirement_type` varchar(50) NOT NULL,
+  `subgroup` varchar(80) DEFAULT NULL,
+  `value_type` varchar(20) NOT NULL DEFAULT 'credits',
+  `min_value` int(11) NOT NULL DEFAULT 0,
+  `include_in_total` tinyint(1) NOT NULL DEFAULT 1,
+  `sort_order` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- A tábla adatainak kiíratása `major_requirements`
+-- A tábla adatainak kiíratása `major_requirement_rules`
 --
 
-INSERT INTO `major_requirements` (`id`, `major_id`, `total_credits`, `required_credits`, `elective_credits`, `optional_credits`, `elective_info_credits`, `elective_math_credits`, `pe_semesters`, `practice_hours`, `elective_non_core_credits`, `elective_core_credits`, `thesis_credits`) VALUES
-(1, 1, 210, 69, 116, 10, 14, 0, 2, 320, 36, 80, 15);
+INSERT INTO `major_requirement_rules` (`id`, `major_id`, `code`, `label_hu`, `label_en`, `requirement_type`, `subgroup`, `value_type`, `min_value`, `include_in_total`, `sort_order`) VALUES
+(1, 1, 'required_credits', 'Kotelezo kreditek', 'Required credits', 'required', NULL, 'credits', 69, 1, 10),
+(2, 1, 'elective_core_credits', 'Kotelezoen valaszthato torzs', 'Core elective credits', 'elective', 'elective_core_credits', 'credits', 80, 1, 20),
+(3, 1, 'elective_info_credits', 'Informatikai torzs', 'IT core credits', 'elective', 'elective_info_credits', 'credits', 44, 1, 30),
+(4, 1, 'elective_non_core_credits', 'Kotelezoen valaszthato nem torzs', 'Non-core elective credits', 'elective', '__NULL__', 'credits', 36, 1, 40),
+(5, 1, 'optional_credits', 'Szabadon valaszthato kreditek', 'Optional credits', 'optional', NULL, 'credits', 10, 1, 50),
+(6, 1, 'pe_semesters', 'Testneveles felevek', 'PE semesters', 'pe', 'pe', 'count', 2, 0, 60),
+(7, 1, 'practice_hours', 'Szakmai gyakorlat orak', 'Practice hours', 'required', 'practice_hours', 'hours', 320, 0, 70),
+(8, 5, 'required_credits', 'Kötelező kreditek', 'Elective Creditss', 'elective', NULL, 'credits', 80, 1, 1),
+(9, 4, 'required_credits', 'Kötelező kreditek', 'Required credits', 'required', NULL, 'credits', 100, 1, 2);
 
 -- --------------------------------------------------------
 
@@ -540,56 +556,57 @@ CREATE TABLE `progress` (
 --
 
 INSERT INTO `progress` (`id`, `user_id`, `course_id`, `completed_semester`, `status`, `points`) VALUES
-(5, 57, 79, 1, 'completed', 6),
-(6, 57, 80, 1, 'completed', 6),
-(7, 57, 64, 1, 'completed', 5),
-(8, 57, 65, 1, 'completed', 5),
-(9, 57, 70, 1, 'completed', 5),
-(10, 57, 71, 1, 'completed', 5),
-(11, 57, 134, 1, 'completed', 5),
-(12, 57, 135, 1, 'completed', 5),
-(13, 57, 104, 1, 'completed', 5),
-(14, 57, 121, 1, 'completed', 5),
-(15, 57, 147, 1, 'completed', 5),
-(16, 57, 78, 2, 'completed', 3),
-(17, 57, 115, 1, 'completed', 6),
-(18, 57, 116, 1, 'completed', 6),
-(20, 57, 66, 2, 'in_progress', 2),
-(21, 57, 67, 2, 'in_progress', 2),
-(22, 57, 136, 2, 'in_progress', 2),
-(23, 57, 137, 2, 'in_progress', 2),
-(24, 57, 117, 2, 'in_progress', 2),
-(25, 57, 118, 2, 'in_progress', 2),
-(26, 57, 82, 2, 'in_progress', 2),
-(27, 57, 107, 2, 'completed', 2),
-(28, 57, 108, 2, 'completed', 2),
-(29, 57, 74, 2, 'completed', 6),
-(30, 57, 75, 2, 'completed', 6),
-(31, 57, 128, 2, 'in_progress', 6),
-(32, 57, 129, 2, 'in_progress', 6),
-(33, 57, 142, 1, 'completed', 3),
-(34, 57, 143, 1, 'completed', 3),
-(35, 57, 138, 2, 'completed', 6),
-(36, 57, 139, 2, 'completed', 6),
-(37, 57, 107, 2, 'completed', 5),
-(38, 57, 108, 2, 'completed', 5),
-(39, 57, 172, 2, 'completed', 2),
-(40, 57, 173, 2, 'completed', 2),
-(41, 57, 208, 100, 'in_progress', 2),
-(42, 57, 211, 1, 'completed', 2),
-(43, 57, 209, 6, 'completed', 5),
-(236, 17, 93, 1, 'completed', 3),
-(237, 17, 135, 1, 'in_progress', 2),
-(238, 17, 104, 1, 'in_progress', 2),
-(239, 17, 121, 1, 'in_progress', 2),
-(240, 17, 147, 1, 'in_progress', 2),
-(241, 17, 138, 1, 'in_progress', 2),
-(242, 17, 139, 1, 'in_progress', 2),
-(243, 17, 107, 1, 'in_progress', 2),
-(244, 17, 108, 1, 'in_progress', 2),
-(245, 17, 151, 1, 'in_progress', 2),
-(246, 17, 150, 1, 'in_progress', 2),
-(247, 17, 127, 1, 'completed', 6);
+(252, 60, 204, 0, 'completed', 5),
+(253, 60, 74, 3, 'completed', 6),
+(254, 57, 172, 2, 'completed', 3),
+(255, 57, 173, 2, 'completed', 3),
+(256, 57, 142, 1, 'completed', 3),
+(257, 57, 143, 1, 'completed', 3),
+(258, 57, 211, 1, 'completed', 3),
+(259, 57, 208, 100, 'in_progress', 2),
+(260, 57, 134, 1, 'completed', 5),
+(261, 57, 135, 1, 'completed', 5),
+(262, 57, 104, 1, 'completed', 5),
+(263, 57, 121, 1, 'completed', 5),
+(264, 57, 147, 1, 'completed', 5),
+(265, 57, 138, 2, 'completed', 3),
+(266, 57, 139, 2, 'completed', 3),
+(267, 57, 107, 2, 'completed', 3),
+(268, 57, 108, 2, 'completed', 3),
+(269, 57, 78, 2, 'completed', 3),
+(270, 57, 70, 1, 'completed', 5),
+(271, 57, 71, 1, 'completed', 5),
+(272, 57, 64, 1, 'completed', 5),
+(273, 57, 65, 1, 'completed', 5),
+(274, 57, 136, 2, 'in_progress', 2),
+(275, 57, 137, 2, 'in_progress', 2),
+(276, 57, 117, 2, 'in_progress', 2),
+(277, 57, 118, 2, 'in_progress', 2),
+(278, 57, 79, 1, 'completed', 6),
+(279, 57, 80, 1, 'completed', 6),
+(280, 57, 82, 2, 'in_progress', 2),
+(281, 57, 66, 2, 'in_progress', 2),
+(282, 57, 67, 2, 'in_progress', 2),
+(283, 57, 115, 1, 'completed', 6),
+(284, 57, 116, 1, 'completed', 6),
+(285, 57, 74, 2, 'completed', 6),
+(286, 57, 75, 2, 'completed', 6),
+(287, 57, 128, 2, 'in_progress', 2),
+(288, 57, 129, 2, 'in_progress', 2),
+(289, 57, 209, 6, 'completed', 5),
+(290, 17, 93, 1, 'completed', 3),
+(291, 17, 135, 1, 'in_progress', 2),
+(292, 17, 104, 1, 'in_progress', 2),
+(293, 17, 121, 1, 'in_progress', 2),
+(294, 17, 147, 1, 'in_progress', 2),
+(295, 17, 138, 1, 'in_progress', 2),
+(296, 17, 139, 1, 'in_progress', 2),
+(297, 17, 107, 1, 'in_progress', 2),
+(298, 17, 108, 1, 'in_progress', 2),
+(299, 17, 151, 1, 'in_progress', 2),
+(300, 17, 150, 1, 'in_progress', 2),
+(301, 17, 126, 3, 'completed', 5),
+(302, 17, 127, 1, 'completed', 6);
 
 -- --------------------------------------------------------
 
@@ -608,7 +625,7 @@ CREATE TABLE `users` (
   `id_card_number` varchar(20) NOT NULL,
   `address_card_number` varchar(20) NOT NULL,
   `mothers_name` varchar(100) NOT NULL,
-  `major` enum('Gazdaságinformatikus','Mérnökinformatikus','Programtervező informatikus','Villamosmérnök','Üzemmérnök-informatikus') NOT NULL,
+  `major` varchar(255) NOT NULL,
   `verified` tinyint(1) NOT NULL DEFAULT 0,
   `role` enum('user','admin') NOT NULL DEFAULT 'user',
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
@@ -626,13 +643,113 @@ INSERT INTO `users` (`id`, `uid`, `email`, `password_hash`, `name`, `birth_date`
 (1, 'U001', 'student1@example.com', 'hashed_pw1', 'Kiss Anna', '2000-05-12', '123456AA', '654321BB', 'Nagy Mária', 'Programtervező informatikus', 1, 'user', '2024-06-01 10:00:00', NULL, NULL, NULL, NULL),
 (2, 'U002', 'student2@example.com', 'hashed_pw2', 'Nagy Béla', '1999-11-23', '234567BB', '765432CC', 'Kovács Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-06-02 11:00:00', NULL, NULL, NULL, NULL),
 (3, 'U003', 'admin@example.com', 'hashed_pw3', 'Admin János', '1985-01-01', '345678CC', '876543DD', 'Szabó Erzsébet', 'Programtervező informatikus', 1, 'admin', '2024-06-03 12:00:00', NULL, NULL, NULL, NULL),
-(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$gtV5BB2QxPRgy8J89LbfiuM0Q5ddq/MELLWg1Z9L2C.uwQfK3yINS', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, NULL, NULL, 'Anon#17245'),
+(17, 'HEZUGM', 'harkai.dominik0@gmail.com', '$2b$12$bUnc8Yf3LS.Mk72TUimTDuRoNDbmgRmPh4nLloC5scMFgS65NT17O', 'Harkai Dominik', '2001-11-11', '111111NE', '111111KE', 'Sári Erzsébet', 'Gazdaságinformatikus', 1, 'admin', '2025-06-23 13:00:23', NULL, NULL, NULL, 'Anon#17245'),
 (26, 'GBG15D', 'buskristof415@gmail.com', '$2b$12$LB44D11dm2AS9vviNAeJRuDi7OOFPIU8F2RJmmMOLU/z8RA1oZo8u', 'Bús Kristóf', '2010-06-11', '666666AD', '666666AD', 'Lakatos Máriané', 'Mérnökinformatikus', 1, 'user', '2025-06-24 22:42:08', NULL, 'c3222117-8329-4995-b740-114181a6545b', '2025-06-26 19:06:28', NULL),
 (52, 'ASDFGH', 'harkai.dominik69@gmail.com', '$2b$12$V0INM6eJi6K7iRVwURKAPOnKmaJcN.QuhBUDp6SVrUgRHgdlc7vqq', 'Pityi Palkó', '2001-11-11', '123456EE', '123456EE', 'Csereeps Virág', 'Gazdaságinformatikus', 1, 'user', '2025-07-06 11:52:49', NULL, NULL, NULL, NULL),
 (53, 'GBG16D', 'zsomle401@gmail.com', '$2b$12$uL0o.b9hHlo/XXnh6bMmveEw/oVEcFYIgCwoCrLlyDnSYCBQwlhKm', 'József Mária', '2003-06-04', '666666ZZ', '666666ZZ', 'Mária király', 'Programtervező informatikus', 1, 'user', '2025-07-06 22:58:11', NULL, NULL, NULL, NULL),
 (55, 'KUR013', 'racikaw@gmail.com', '$2b$12$rxqdS4vcvvHOVs0zFxo5T.XuKHOXC7qDQxS8/7yUPIyM2TPxEwfia', 'Szeret Elek', '1999-06-11', '123456AB', '123456AB', 'Arika Corba', 'Villamosmérnök', 1, 'user', '2025-07-11 21:10:24', NULL, NULL, NULL, NULL),
-(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyok', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 1, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, 'Anon#57875'),
-(60, 'ASDQWE', 'azulref2@gmail.com', '$2b$12$ES0MpqwrIw4SNMvhWl2FsOvgITbJN.BhZq.FaCQEJfE3WrXnl1wgi', 'Kiss Ágota', '2002-06-06', '456789TE', '216546ZE', 'Valami Anyuka', 'Gazdaságinformatikus', 1, 'user', '2025-10-18 00:10:19', NULL, NULL, NULL, NULL);
+(57, 'VALAKI', 'kiss.evelin2007@gmail.com', '$2b$12$lHg1SyXD.83Xq0I/kGyZ2ufX2Lkox7.Pf.CbziCyB9NxtiiAK7ivS', 'Valaki Vagyokk', '2001-11-11', '112233AE', '112233AE', 'Nemtudom Ki Ez Te', 'Gazdaságinformatikus', 1, 'user', '2025-07-11 22:13:44', '83c72b35-ddd1-4845-847b-8a33e8cba88c', NULL, NULL, 'Anon#57875'),
+(60, 'ASDQWE', 'azulref2@gmail.com', '$2b$12$ES0MpqwrIw4SNMvhWl2FsOvgITbJN.BhZq.FaCQEJfE3WrXnl1wgi', 'Kiss Ágota', '2002-06-06', '456789TE', '216546ZE', 'Valami Anyuka', 'Gazdaságinformatikus', 1, 'user', '2025-10-18 00:10:19', NULL, NULL, NULL, NULL),
+(62, 'U062', 'user62@example.com', 'hashed_pw62', 'Nagy Bence', '1999-07-01', 'ID062345', 'AC062345', 'Nagy Mária', 'Gazdaságinformatikus', 1, 'user', '2024-02-05 11:20:00', NULL, NULL, NULL, NULL),
+(63, 'U063', 'admin63@example.com', 'hashed_pw63', 'Szabó Csilla', '1988-03-22', 'ID063456', 'AC063456', 'Szabóné Ilona', 'Gazdaságinformatikus', 1, 'admin', '2024-03-12 14:30:00', NULL, NULL, NULL, NULL),
+(64, 'U064', 'user64@example.com', 'hashed_pw64', 'Tóth Dániel', '2001-11-05', 'ID064567', 'AC064567', 'Tóthné Erika', 'Mérnökinformatikus', 1, 'user', '2024-03-20 08:45:00', NULL, NULL, NULL, NULL),
+(65, 'U065', 'user65@example.com', 'hashed_pw65', 'Horváth Eszter', '2000-06-18', 'ID065678', 'AC065678', 'Horváthné Katalin', 'Programtervező informatikus', 1, 'user', '2024-04-01 10:00:00', NULL, NULL, NULL, NULL),
+(66, 'U066', 'user66@example.com', 'hashed_pw66', 'Balogh Fanni', '2002-09-09', 'ID066789', 'AC066789', 'Baloghnė Zsuzsa', 'Villamosmérnök', 0, 'user', '2024-04-15 12:10:00', NULL, NULL, NULL, NULL),
+(67, 'U067', 'user67@example.com', 'hashed_pw67', 'Kiss Gergő', '1998-12-30', 'ID067890', 'AC067890', 'Kiss Mária', 'Üzemmérnök-informatikus', 1, 'user', '2024-05-02 09:05:00', NULL, NULL, NULL, NULL),
+(68, 'U068', 'user68@example.com', 'hashed_pw68', 'Molnár Hanna', '2001-01-17', 'ID068901', 'AC068901', 'Molnárné Anikó', 'Gazdaságinformatikus', 1, 'user', '2024-05-18 16:25:00', NULL, NULL, NULL, NULL),
+(69, 'U069', 'user69@example.com', 'hashed_pw69', 'Farkas István', '1997-04-11', 'ID069012', 'AC069012', 'Farkasnė Ágnes', 'Mérnökinformatikus', 1, 'user', '2024-06-01 13:40:00', NULL, NULL, NULL, NULL),
+(70, 'U070', 'user70@example.com', 'hashed_pw70', 'Varga Júlia', '2000-08-23', 'ID070123', 'AC070123', 'Vargáné Olga', 'Programtervező informatikus', 0, 'user', '2024-06-10 11:11:00', NULL, NULL, NULL, NULL),
+(71, 'U071', 'user71@example.com', 'hashed_pw71', 'Papp Katalin', '1999-05-05', 'ID071234', 'AC071234', 'Pappné Mária', 'Villamosmérnök', 1, 'user', '2024-06-20 09:00:00', NULL, NULL, NULL, NULL),
+(72, 'U072', 'user72@example.com', 'hashed_pw72', 'Kerekes Levente', '2001-10-30', 'ID072345', 'AC072345', 'Kerekesné Ilona', 'Gazdaságinformatikus', 1, 'user', '2024-07-01 17:22:00', NULL, NULL, NULL, NULL),
+(73, 'U073', 'user73@example.com', 'hashed_pw73', 'Németh Réka', '2002-02-14', 'ID073456', 'AC073456', 'Némethné Zsuzsa', 'Programtervező informatikus', 1, 'user', '2024-07-10 08:30:00', NULL, NULL, NULL, NULL),
+(74, 'U074', 'user74@example.com', 'hashed_pw74', 'Sipos Tamás', '1996-09-12', 'ID074567', 'AC074567', 'Siposné Éva', 'Üzemmérnök-informatikus', 1, 'user', '2024-07-20 12:00:00', NULL, NULL, NULL, NULL),
+(75, 'U075', 'user75@example.com', 'hashed_pw75', 'Lakatos Réka', '2000-03-03', 'ID075678', 'AC075678', 'Lakatosné Anna', 'Mérnökinformatikus', 0, 'user', '2024-08-05 15:15:00', NULL, NULL, NULL, NULL),
+(76, 'U076', 'user76@example.com', 'hashed_pw76', 'Kovács Roland', '1998-07-07', 'ID076789', 'AC076789', 'Kovácsné Erika', 'Gazdaságinformatikus', 1, 'user', '2024-08-12 10:50:00', NULL, NULL, NULL, NULL),
+(77, 'U077', 'admin77@example.com', 'hashed_pw77', 'Fekete Zoltán', '1989-11-11', 'ID077890', 'AC077890', 'Feketéné Ilona', 'Villamosmérnök', 1, 'admin', '2024-08-30 09:09:00', NULL, NULL, NULL, NULL),
+(78, 'U078', 'user78@example.com', 'hashed_pw78', 'Rácz Dóra', '2001-12-01', 'ID078901', 'AC078901', 'Ráczné Katalin', 'Programtervező informatikus', 1, 'user', '2024-09-05 14:00:00', NULL, NULL, NULL, NULL),
+(79, 'U079', 'user79@example.com', 'hashed_pw79', 'Péter Gábor', '1997-01-20', 'ID079012', 'AC079012', 'Péterné Anna', 'Mérnökinformatikus', 1, 'user', '2024-09-15 18:30:00', NULL, NULL, NULL, NULL),
+(80, 'U080', 'user80@example.com', 'hashed_pw80', 'Lukács Emese', '2000-04-09', 'ID080123', 'AC080123', 'Lukácsné Erzsébet', 'Gazdaságinformatikus', 0, 'user', '2024-09-25 07:45:00', NULL, NULL, NULL, NULL),
+(81, 'U081', 'user81@example.com', 'hashed_pw81', 'Petőfi Máté', '1998-06-06', 'ID081234', 'AC081234', 'Petőfiné Mária', 'Üzemmérnök-informatikus', 1, 'user', '2024-10-01 13:13:00', NULL, NULL, NULL, NULL),
+(82, 'U082', 'user82@example.com', 'hashed_pw82', 'Soltész Noémi', '2002-08-18', 'ID082345', 'AC082345', 'Soltészné Erika', 'Programtervező informatikus', 1, 'user', '2024-10-10 09:40:00', NULL, NULL, NULL, NULL),
+(83, 'U083', 'user83@example.com', 'hashed_pw83', 'Csomor Lajos', '1995-05-25', 'ID083456', 'AC083456', 'Csomorné Ilona', 'Villamosmérnök', 1, 'user', '2024-10-18 16:00:00', NULL, NULL, NULL, NULL),
+(84, 'U084', 'user84@example.com', 'hashed_pw84', 'Bíró Ágnes', '1999-09-29', 'ID084567', 'AC084567', 'Bíróné Zsuzsa', 'Gazdaságinformatikus', 1, 'user', '2024-11-01 12:00:00', NULL, NULL, NULL, NULL),
+(85, 'U085', 'admin85@example.com', 'hashed_pw85', 'Székely Levente', '1987-02-02', 'ID085678', 'AC085678', 'Székelyné Mária', 'Mérnökinformatikus', 1, 'admin', '2024-11-15 08:20:00', NULL, NULL, NULL, NULL),
+(86, 'U086', 'user86@example.com', 'hashed_pw86', 'Máté Zsófia', '2001-03-27', 'ID086789', 'AC086789', 'Máténé Kata', 'Programtervező informatikus', 1, 'user', '2024-11-25 11:30:00', NULL, NULL, NULL, NULL),
+(87, 'U087', 'user87@example.com', 'hashed_pw87', 'Vámosi Péter', '1996-10-10', 'ID087890', 'AC087890', 'Vámosiné Éva', 'Üzemmérnök-informatikus', 0, 'user', '2024-12-01 15:45:00', NULL, NULL, NULL, NULL),
+(88, 'U088', 'user88@example.com', 'hashed_pw88', 'Kovácsné Rita', '1995-12-12', 'ID088901', 'AC088901', 'Némethné Ilona', 'Villamosmérnök', 1, 'user', '2024-12-10 09:55:00', NULL, NULL, NULL, NULL),
+(89, 'U089', 'user89@example.com', 'hashed_pw89', 'Bárány Roland', '2000-01-01', 'ID089012', 'AC089012', 'Bárányné Mária', 'Gazdaságinformatikus', 1, 'user', '2024-12-20 10:10:00', NULL, NULL, NULL, NULL),
+(90, 'U090', 'user90@example.com', 'hashed_pw90', 'Koltai Ivett', '2002-07-07', 'ID090123', 'AC090123', 'Koltainé Zsuzsa', 'Programtervező informatikus', 1, 'user', '2025-01-05 14:14:00', NULL, NULL, NULL, NULL),
+(91, 'U091', 'user91@example.com', 'hashed_pw91', 'Szalai Márk', '1999-11-11', 'ID091234', 'AC091234', 'Szalainé Ágnes', 'Mérnökinformatikus', 1, 'user', '2025-01-20 08:08:00', NULL, NULL, NULL, NULL),
+(92, 'U092', 'user92@example.com', 'hashed_pw92', 'Mészáros Eszter', '2000-05-30', 'ID092345', 'AC092345', 'Mészárosné Anna', 'Villamosmérnök', 1, 'user', '2025-02-01 12:00:00', NULL, NULL, NULL, NULL),
+(93, 'U093', 'user93@example.com', 'hashed_pw93', 'Bognár Zoltán', '1998-04-04', 'ID093456', 'AC093456', 'Bognárné Ilona', 'Gazdaságinformatikus', 0, 'user', '2025-02-14 09:09:00', NULL, NULL, NULL, NULL),
+(94, 'U094', 'user94@example.com', 'hashed_pw94', 'Barta Kinga', '2001-06-06', 'ID094567', 'AC094567', 'Bartáné Katalin', 'Programtervező informatikus', 1, 'user', '2025-02-28 16:16:00', NULL, NULL, NULL, NULL),
+(95, 'U095', 'user95@example.com', 'hashed_pw95', 'Takács Leila', '2000-10-10', 'ID095678', 'AC095678', 'Takácsné Mária', 'Üzemmérnök-informatikus', 1, 'user', '2025-03-10 10:00:00', NULL, NULL, NULL, NULL),
+(96, 'U096', 'user96@example.com', 'hashed_pw96', 'Király Norbert', '1997-08-08', 'ID096789', 'AC096789', 'Királynė Zsuzsa', 'Mérnökinformatikus', 1, 'user', '2025-03-20 11:11:00', NULL, NULL, NULL, NULL),
+(97, 'U097', 'user97@example.com', 'hashed_pw97', 'Fazekas Dóra', '2002-01-15', 'ID097890', 'AC097890', 'Fazekasné Éva', 'Gazdaságinformatikus', 1, 'user', '2025-04-01 09:30:00', NULL, NULL, NULL, NULL),
+(98, 'U098', 'user98@example.com', 'hashed_pw98', 'Gulyás Márta', '1996-03-03', 'ID098901', 'AC098901', 'Gulyásné Ágnes', 'Programtervező informatikus', 1, 'user', '2025-04-12 13:13:00', NULL, NULL, NULL, NULL),
+(99, 'U099', 'user99@example.com', 'hashed_pw99', 'Vincze Péter', '1998-09-09', 'ID099012', 'AC099012', 'Vinczené Mária', 'Villamosmérnök', 0, 'user', '2025-04-20 15:15:00', NULL, NULL, NULL, NULL),
+(100, 'U100', 'user100@example.com', 'hashed_pw100', 'Rudolf Anita', '2000-12-12', 'ID100123', 'AC100123', 'Rudolfné Ilona', 'Mérnökinformatikus', 1, 'user', '2025-05-01 08:08:00', NULL, NULL, NULL, NULL),
+(101, 'U101', 'user101@example.com', 'hashed_pw101', 'Hajdu Olivér', '1999-02-02', 'ID101234', 'AC101234', 'Hajduné Katalin', 'Gazdaságinformatikus', 1, 'user', '2025-05-10 10:10:00', NULL, NULL, NULL, NULL),
+(102, 'U102', 'user102@example.com', 'hashed_pw102', 'Szalay Ildikó', '2001-07-07', 'ID102345', 'AC102345', 'Szalaynė Erzsébet', 'Programtervező informatikus', 1, 'user', '2025-05-18 12:00:00', NULL, NULL, NULL, NULL),
+(103, 'U103', 'user103@example.com', 'hashed_pw103', 'Vörös Tamás', '1997-11-11', 'ID103456', 'AC103456', 'Vörösné Anna', 'Mérnökinformatikus', 1, 'user', '2025-05-25 14:14:00', NULL, NULL, NULL, NULL),
+(104, 'U104', 'user104@example.com', 'hashed_pw104', 'Szőke Petra', '2000-08-08', 'ID104567', 'AC104567', 'Szőkené Zsuzsa', 'Villamosmérnök', 1, 'user', '2025-06-01 09:00:00', NULL, NULL, NULL, NULL),
+(105, 'U105', 'user105@example.com', 'hashed_pw105', 'Takács Márton', '1996-05-05', 'ID105678', 'AC105678', 'Takácsné Éva', 'Gazdaságinformatikus', 0, 'user', '2025-06-08 11:11:00', NULL, NULL, NULL, NULL),
+(106, 'U106', 'user106@example.com', 'hashed_pw106', 'Orbán Kincső', '2002-10-10', 'ID106789', 'AC106789', 'Orbánné Mária', 'Programtervező informatikus', 1, 'user', '2025-06-15 16:16:00', NULL, NULL, NULL, NULL),
+(107, 'U107', 'user107@example.com', 'hashed_pw107', 'Illés Bence', '1998-01-21', 'ID107890', 'AC107890', 'Illésné Ilona', 'Mérnökinformatikus', 1, 'user', '2025-06-20 09:09:00', NULL, NULL, NULL, NULL),
+(108, 'U108', 'user108@example.com', 'hashed_pw108', 'Herczeg Réka', '2001-04-04', 'ID108901', 'AC108901', 'Herczegné Katalin', 'Villamosmérnök', 1, 'user', '2025-06-25 12:12:00', NULL, NULL, NULL, NULL),
+(109, 'U109', 'user109@example.com', 'hashed_pw109', 'Bálint Ákos', '1999-09-09', 'ID109012', 'AC109012', 'Bálintné Éva', 'Gazdaságinformatikus', 1, 'user', '2025-07-01 10:10:00', NULL, NULL, NULL, NULL),
+(110, 'U110', 'user110@example.com', 'hashed_pw110', 'Gál Dóra', '2000-03-03', 'ID110123', 'AC110123', 'Gálné Zsuzsa', 'Programtervező informatikus', 1, 'user', '2025-07-05 14:00:00', NULL, NULL, NULL, NULL),
+(111, 'U111', 'user111@example.com', 'hashed_pw111', 'Sári Roland', '1997-06-06', 'ID111234', 'AC111234', 'Sáriné Anna', 'Mérnökinformatikus', 1, 'user', '2025-07-10 09:00:00', NULL, NULL, NULL, NULL),
+(112, 'U112', 'user112@example.com', 'hashed_pw112', 'Bakos Helga', '1998-12-12', 'ID112345', 'AC112345', 'Bakosné Éva', 'Villamosmérnök', 0, 'user', '2025-07-12 11:11:00', NULL, NULL, NULL, NULL),
+(113, 'U113', 'user113@example.com', 'hashed_pw113', 'Fülöp Tamara', '2001-02-02', 'ID113456', 'AC113456', 'Fülöpné Mária', 'Gazdaságinformatikus', 1, 'user', '2025-07-15 13:13:00', NULL, NULL, NULL, NULL),
+(114, 'U114', 'user114@example.com', 'hashed_pw114', 'Major Levente', '1996-08-08', 'ID114567', 'AC114567', 'Majoré Katalin', 'Programtervező informatikus', 1, 'user', '2025-07-18 15:15:00', NULL, NULL, NULL, NULL),
+(115, 'U115', 'user115@example.com', 'hashed_pw115', 'Simon Edit', '1999-01-01', 'ID115678', 'AC115678', 'Simoné Ilona', 'Mérnökinformatikus', 1, 'user', '2025-07-20 10:10:00', NULL, NULL, NULL, NULL),
+(116, 'U116', 'user116@example.com', 'hashed_pw116', 'Bíró Tamás', '2000-11-11', 'ID116789', 'AC116789', 'Bíróné Erzsébet', 'Gazdaságinformatikus', 1, 'user', '2025-07-22 09:45:00', NULL, NULL, NULL, NULL),
+(117, 'U117', 'user117@example.com', 'hashed_pw117', 'Dudás Kata', '2002-05-05', 'ID117890', 'AC117890', 'Dudásné Zsuzsa', 'Programtervező informatikus', 0, 'user', '2025-07-24 11:11:00', NULL, NULL, NULL, NULL),
+(118, 'U118', 'user118@example.com', 'hashed_pw118', 'Vári Gergely', '1998-10-10', 'ID118901', 'AC118901', 'Váriné Mária', 'Villamosmérnök', 1, 'user', '2025-07-26 08:08:00', NULL, NULL, NULL, NULL),
+(119, 'U119', 'user119@example.com', 'hashed_pw119', 'Kovács Lilla', '2001-09-09', 'ID119012', 'AC119012', 'Kovácsné Anikó', 'Mérnökinformatikus', 1, 'user', '2025-07-28 14:14:00', NULL, NULL, NULL, NULL),
+(120, 'U120', 'user120@example.com', 'hashed_pw120', 'Nagy Róbert', '1997-03-03', 'ID120123', 'AC120123', 'Nagyné Ilona', 'Gazdaságinformatikus', 1, 'user', '2025-07-30 12:00:00', NULL, NULL, NULL, NULL),
+(121, 'U121', 'user121@example.com', 'hashed_pw121', 'Péterfy Zsóka', '2000-06-06', 'ID121234', 'AC121234', 'Péterfyné Katalin', 'Programtervező informatikus', 1, 'user', '2025-08-01 09:09:00', NULL, NULL, NULL, NULL),
+(122, 'U122', 'user122@example.com', 'hashed_pw122', 'Gulyás Tamás', '1999-12-12', 'ID122345', 'AC122345', 'Gulyásné Éva', 'Villamosmérnök', 1, 'user', '2025-08-03 10:10:00', NULL, NULL, NULL, NULL),
+(123, 'U123', 'user123@example.com', 'hashed_pw123', 'Réti Noémi', '2001-01-10', 'ID123456', 'AC123456', 'Rétiné Mária', 'Mérnökinformatikus', 1, 'user', '2025-08-05 13:13:00', NULL, NULL, NULL, NULL),
+(124, 'U124', 'user124@example.com', 'hashed_pw124', 'Császár Bence', '1996-04-04', 'ID124567', 'AC124567', 'Császárné Ilona', 'Gazdaságinformatikus', 1, 'user', '2025-08-07 11:11:00', NULL, NULL, NULL, NULL),
+(125, 'U125', 'user125@example.com', 'hashed_pw125', 'Füredi Kata', '2002-02-20', 'ID125678', 'AC125678', 'Fürediné Zsuzsa', 'Programtervező informatikus', 1, 'user', '2025-08-10 09:00:00', NULL, NULL, NULL, NULL),
+(126, 'U126', 'user126@example.com', 'hashed_pw126', 'Szántó Lajos', '1998-07-17', 'ID126789', 'AC126789', 'Szántóné Éva', 'Üzemmérnök-informatikus', 0, 'user', '2025-08-12 15:15:00', NULL, NULL, NULL, NULL),
+(127, 'U127', 'user127@example.com', 'hashed_pw127', 'Kovács Enikő', '2000-09-09', 'ID127890', 'AC127890', 'Kovácsné Anna', 'Gazdaságinformatikus', 1, 'user', '2025-08-15 10:10:00', NULL, NULL, NULL, NULL),
+(128, 'U128', 'user128@example.com', 'hashed_pw128', 'Pál Gergő', '1997-11-03', 'ID128901', 'AC128901', 'Pálné Katalin', 'Mérnökinformatikus', 1, 'user', '2025-08-18 09:09:00', NULL, NULL, NULL, NULL),
+(129, 'U129', 'user129@example.com', 'hashed_pw129', 'Boros Réka', '2001-05-05', 'ID129012', 'AC129012', 'Borosné Ilona', 'Programtervező informatikus', 1, 'user', '2025-08-20 13:13:00', NULL, NULL, NULL, NULL),
+(130, 'U130', 'user130@example.com', 'hashed_pw130', 'Jakab Miklós', '1996-02-02', 'ID130123', 'AC130123', 'Jakabné Zsuzsa', 'Villamosmérnök', 1, 'user', '2025-08-22 11:11:00', NULL, NULL, NULL, NULL),
+(131, 'U131', 'user131@example.com', 'hashed_pw131', 'Makrai Dóra', '2000-12-24', 'ID131234', 'AC131234', 'Makrainé Mária', 'Gazdaságinformatikus', 1, 'user', '2025-08-25 16:16:00', NULL, NULL, NULL, NULL),
+(132, 'U132', 'user132@example.com', 'hashed_pw132', 'Csemer Levente', '1999-03-03', 'ID132345', 'AC132345', 'Csemernė Ilona', 'Programtervező informatikus', 1, 'user', '2025-08-27 09:09:00', NULL, NULL, NULL, NULL),
+(133, 'U133', 'user133@example.com', 'hashed_pw133', 'Benedek Anna', '2002-06-06', 'ID133456', 'AC133456', 'Benedekné Éva', 'Mérnökinformatikus', 0, 'user', '2025-08-30 10:10:00', NULL, NULL, NULL, NULL),
+(134, 'U134', 'user134@example.com', 'hashed_pw134', 'Varga Zsolt', '1998-10-10', 'ID134567', 'AC134567', 'Vargáné Katalin', 'Villamosmérnök', 1, 'user', '2025-09-02 12:12:00', NULL, NULL, NULL, NULL),
+(135, 'U135', 'user135@example.com', 'hashed_pw135', 'Kovács Dóra', '2001-01-19', 'ID135678', 'AC135678', 'Kovácsné Mária', 'Gazdaságinformatikus', 1, 'user', '2025-09-05 14:14:00', NULL, NULL, NULL, NULL),
+(136, 'U136', 'user136@example.com', 'hashed_pw136', 'Pintér Balázs', '1997-07-07', 'ID136789', 'AC136789', 'Pintérné Ilona', 'Programtervező informatikus', 1, 'user', '2025-09-10 09:00:00', NULL, NULL, NULL, NULL),
+(137, 'U137', 'user137@example.com', 'hashed_pw137', 'Varga Petra', '2000-04-04', 'ID137890', 'AC137890', 'Vargáné Éva', 'Mérnökinformatikus', 1, 'user', '2025-09-15 11:11:00', NULL, NULL, NULL, NULL),
+(138, 'U138', 'user138@example.com', 'hashed_pw138', 'Szakács Bence', '1996-05-05', 'ID138901', 'AC138901', 'Szakácsné Katalin', 'Gazdaságinformatikus', 1, 'user', '2025-09-20 13:13:00', NULL, NULL, NULL, NULL),
+(139, 'U139', 'user139@example.com', 'hashed_pw139', 'Tóth Erika', '2002-09-09', 'ID139012', 'AC139012', 'Tóthné Ilona', 'Villamosmérnök', 1, 'user', '2025-09-25 09:09:00', NULL, NULL, NULL, NULL),
+(140, 'U140', 'user140@example.com', 'hashed_pw140', 'Kiss Gábor', '1999-11-11', 'ID140123', 'AC140123', 'Kissné Mária', 'Programtervező informatikus', 1, 'user', '2025-09-30 10:10:00', NULL, NULL, NULL, NULL),
+(141, 'U141', 'user141@example.com', 'hashed_pw141', 'Fekete Anikó', '2000-02-02', 'ID141234', 'AC141234', 'Feketéné Katalin', 'Gazdaságinformatikus', 0, 'user', '2025-10-05 12:12:00', NULL, NULL, NULL, NULL),
+(142, 'U142', 'user142@example.com', 'hashed_pw142', 'Szőke Levente', '1998-06-06', 'ID142345', 'AC142345', 'Szőkené Ilona', 'Mérnökinformatikus', 1, 'user', '2025-10-10 08:08:00', NULL, NULL, NULL, NULL),
+(143, 'U143', 'user143@example.com', 'hashed_pw143', 'Bodnár Réka', '2001-08-08', 'ID143456', 'AC143456', 'Bodnárné Mária', 'Villamosmérnök', 1, 'user', '2025-10-12 14:14:00', NULL, NULL, NULL, NULL),
+(144, 'U144', 'user144@example.com', 'hashed_pw144', 'Mészáros Lilla', '1999-03-03', 'ID144567', 'AC144567', 'Mészárosné Éva', 'Programtervező informatikus', 1, 'user', '2025-10-15 09:09:00', NULL, NULL, NULL, NULL),
+(145, 'U145', 'user145@example.com', 'hashed_pw145', 'Kövér Dávid', '1996-12-12', 'ID145678', 'AC145678', 'Kövérné Ilona', 'Gazdaságinformatikus', 1, 'user', '2025-10-17 16:16:00', NULL, NULL, NULL, NULL),
+(146, 'U146', 'user146@example.com', 'hashed_pw146', 'Barta Ilona', '2000-05-05', 'ID146789', 'AC146789', 'Bartané Katalin', 'Mérnökinformatikus', 1, 'user', '2025-10-18 08:00:00', NULL, NULL, NULL, NULL),
+(147, 'U147', 'user147@example.com', 'hashed_pw147', 'Szilágyi Ákos', '1998-01-01', 'ID147890', 'AC147890', 'Szilágyné Mária', 'Villamosmérnök', 1, 'user', '2025-10-18 09:00:00', NULL, NULL, NULL, NULL),
+(148, 'U148', 'user148@example.com', 'hashed_pw148', 'Gereben Nóra', '2001-09-09', 'ID148901', 'AC148901', 'Gerebenné Ilona', 'Programtervező informatikus', 1, 'user', '2025-10-18 10:00:00', NULL, NULL, NULL, NULL),
+(149, 'U149', 'user149@example.com', 'hashed_pw149', 'Vincze László', '1997-07-07', 'ID149012', 'AC149012', 'Vinczené Ágnes', 'Gazdaságinformatikus', 1, 'user', '2025-10-18 11:00:00', NULL, NULL, NULL, NULL),
+(150, 'U150', 'user150@example.com', 'hashed_pw150', 'Fülöp Orsolya', '2000-02-20', 'ID150123', 'AC150123', 'Fülöpné Mária', 'Mérnökinformatikus', 1, 'user', '2025-10-18 12:00:00', NULL, NULL, NULL, NULL),
+(151, 'U151', 'user151@example.com', 'hashed_pw151', 'Boros Gábor', '1998-04-04', 'ID151234', 'AC151234', 'Borosné Ilona', 'Villamosmérnök', 1, 'user', '2025-10-18 13:00:00', NULL, NULL, NULL, NULL),
+(152, 'U152', 'user152@example.com', 'hashed_pw152', 'Sárközi Éva', '2001-06-06', 'ID152345', 'AC152345', 'Sárköziné Katalin', 'Programtervező informatikus', 1, 'user', '2025-10-18 14:00:00', NULL, NULL, NULL, NULL),
+(153, 'U153', 'user153@example.com', 'hashed_pw153', 'Rácz Bence', '1999-08-08', 'ID153456', 'AC153456', 'Ráczné Mária', 'Gazdaságinformatikus', 0, 'user', '2025-10-18 15:00:00', NULL, NULL, NULL, NULL),
+(154, 'U154', 'user154@example.com', 'hashed_pw154', 'Móricz Anna', '2002-11-11', 'ID154567', 'AC154567', 'Móriczné Ilona', 'Mérnökinformatikus', 1, 'user', '2025-10-18 16:00:00', NULL, NULL, NULL, NULL),
+(155, 'U155', 'user155@example.com', 'hashed_pw155', 'Szabados Lilla', '2000-01-05', 'ID155678', 'AC155678', 'Szabadosné Éva', 'Programtervező informatikus', 1, 'user', '2025-10-18 17:00:00', NULL, NULL, NULL, NULL),
+(156, 'U156', 'user156@example.com', 'hashed_pw156', 'Kelemen Tamás', '1997-02-02', 'ID156789', 'AC156789', 'Kelemenéné Mária', 'Villamosmérnök', 1, 'user', '2025-10-18 18:00:00', NULL, NULL, NULL, NULL),
+(157, 'U157', 'user157@example.com', 'hashed_pw157', 'Huber Rita', '1999-03-03', 'ID157890', 'AC157890', 'Huberné Ilona', 'Gazdaságinformatikus', 1, 'user', '2025-10-18 19:00:00', NULL, NULL, NULL, NULL),
+(158, 'U158', 'user158@example.com', 'hashed_pw158', 'Takács Gábor', '1998-05-05', 'ID158901', 'AC158901', 'Takácsné Katalin', 'Mérnökinformatikus', 1, 'user', '2025-10-18 20:00:00', NULL, NULL, NULL, NULL),
+(159, 'U159', 'user159@example.com', 'hashed_pw159', 'Molnár Réka', '2001-07-07', 'ID159012', 'AC159012', 'Molnárné Éva', 'Programtervező informatikus', 1, 'user', '2025-10-18 21:00:00', NULL, NULL, NULL, NULL),
+(160, 'U160', 'user160@example.com', 'hashed_pw160', 'Kovács Bálint', '1996-09-09', 'ID160123', 'AC160123', 'Kovácsné Ilona', 'Üzemmérnök-informatikus', 1, 'user', '2025-10-18 22:00:00', NULL, NULL, NULL, NULL),
+(161, 'QAWSED', 'azulraidshadowlegends@gmail.com', '$2b$12$LTE5xrDwFQudFsFgEIAZFObSTHiQPv61jZJdHQ6PErBrFxinh.70K', 'Harkai Dominik', '2026-03-05', '123654RE', '123215RE', 'Azul Anyuka', 'Villamosmérnök', 1, 'user', '2026-03-24 08:50:23', NULL, NULL, NULL, NULL);
 
 --
 -- Indexek a kiírt táblákhoz
@@ -685,11 +802,11 @@ ALTER TABLE `majors`
   ADD PRIMARY KEY (`id`);
 
 --
--- A tábla indexei `major_requirements`
+-- A tábla indexei `major_requirement_rules`
 --
-ALTER TABLE `major_requirements`
+ALTER TABLE `major_requirement_rules`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `major_id` (`major_id`);
+  ADD KEY `idx_major_requirement_rules_major_id` (`major_id`);
 
 --
 -- A tábla indexei `progress`
@@ -715,19 +832,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT a táblához `chat_messages`
 --
 ALTER TABLE `chat_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT a táblához `chat_reaction`
 --
 ALTER TABLE `chat_reaction`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT a táblához `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=221;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=223;
 
 --
 -- AUTO_INCREMENT a táblához `course_equivalence`
@@ -739,31 +856,31 @@ ALTER TABLE `course_equivalence`
 -- AUTO_INCREMENT a táblához `course_major`
 --
 ALTER TABLE `course_major`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
 
 --
 -- AUTO_INCREMENT a táblához `majors`
 --
 ALTER TABLE `majors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT a táblához `major_requirements`
+-- AUTO_INCREMENT a táblához `major_requirement_rules`
 --
-ALTER TABLE `major_requirements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `major_requirement_rules`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT a táblához `progress`
 --
 ALTER TABLE `progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=303;
 
 --
 -- AUTO_INCREMENT a táblához `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=162;
 
 --
 -- Megkötések a kiírt táblákhoz
@@ -800,10 +917,10 @@ ALTER TABLE `course_major`
   ADD CONSTRAINT `fk_major` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`) ON DELETE CASCADE;
 
 --
--- Megkötések a táblához `major_requirements`
+-- Megkötések a táblához `major_requirement_rules`
 --
-ALTER TABLE `major_requirements`
-  ADD CONSTRAINT `major_requirements_ibfk_1` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`);
+ALTER TABLE `major_requirement_rules`
+  ADD CONSTRAINT `fk_major_requirement_rules_major` FOREIGN KEY (`major_id`) REFERENCES `majors` (`id`) ON DELETE CASCADE;
 
 --
 -- Megkötések a táblához `progress`

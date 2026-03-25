@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+import logging
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -155,7 +156,6 @@ def get_user_in_progress_courses(user_id: int, db: Session = Depends(get_db)):
     progress_service = ProgressService(db)
     return progress_service.get_user_in_progress_courses(user_id)
 
-
 @router.get("/{user_id}/full", response_model=list[schemas.ProgressFull], dependencies=[Depends(get_current_user)])
 def get_user_progress_full(user_id: int, lang: str = "hu", db: Session = Depends(get_db)):
     """
@@ -208,9 +208,12 @@ def requirements_endpoint(
     """
     return get_user_requirements(user_id, lang, db)
 
+logger = logging.getLogger(__name__)
+
 @router.get("/{user_id}/template-xlsx")
 def template_xlsx(
     user_id: int,
+    request: Request,
     lang: str = "hu",
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
@@ -218,8 +221,40 @@ def template_xlsx(
     """
     Szakhoz tartozó összes tárgyat tartalmazó XLSX sablon generálása.
     """
-    return generate_progress_template_xlsx(user_id, lang, db, current_user)
+    # debug: naplózzuk a current_user és a bejövő header-ek tartalmát
+    logger.debug("template_xlsx called; request.headers: %s", {k:v for k,v in request.headers.items()})
+    logger.debug("template_xlsx called; current_user: %r", current_user)
 
+    # kinyerés: támogassuk dict és objektum formátumot, valamint 'role' vagy 'roles'
+    current_role = None
+    current_id = -1
+    try:
+        if isinstance(current_user, dict):
+            current_role = current_user.get("role") or current_user.get("roles")
+            current_id = int(current_user.get("id") or current_user.get("user_id") or -1)
+        else:
+            current_role = getattr(current_user, "role", None) or getattr(current_user, "roles", None)
+            current_id = int(getattr(current_user, "id", getattr(current_user, "user_id", -1)))
+    except Exception as e:
+        logger.exception("Error parsing current_user: %s", e)
+        current_id = -1
+
+    # admin ellenőrzés: támogassuk string és lista formátumokat
+    def is_admin(role_val) -> bool:
+        if role_val is None:
+            return False
+        if isinstance(role_val, (list, tuple, set)):
+            return any(str(r).lower() == "admin" or "admin" in str(r).lower() for r in role_val)
+        s = str(role_val).lower()
+        return s == "admin" or "admin" in s
+
+    allowed = is_admin(current_role) or int(user_id) == int(current_id)
+    logger.debug("template_xlsx auth check: current_id=%s current_role=%s allowed=%s", current_id, repr(current_role), allowed)
+
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó sablonjához.")
+
+    return generate_progress_template_xlsx(user_id, lang, db, current_user)
 
 @router.get("/{user_id}/export-xlsx")
 def export_xlsx(
@@ -232,7 +267,6 @@ def export_xlsx(
     A felhasználó előrehaladásának exportja Excel (XLSX) formátumban.
     """
     return export_progress_xlsx(user_id, lang, db, current_user)
-
 
 @router.post("/{user_id}/import", dependencies=[Depends(get_current_user)])
 async def import_progress(

@@ -1,18 +1,9 @@
 from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy import Enum as SqlEnum
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy.sql import func
 from sqlalchemy import JSON
-
-MAJOR_ENUM = (
-    'Gazdaságinformatikus',
-    'Mérnökinformatikus',
-    'Programtervező informatikus',
-    'Villamosmérnök',
-    'Üzemmérnök-informatikus'
-)
 
 class User(Base):
     """
@@ -48,7 +39,8 @@ class User(Base):
     id_card_number = Column(String(20), nullable=False)
     address_card_number = Column(String(20), nullable=False)
     mothers_name = Column(String(100), nullable=False)
-    major = Column(SqlEnum(*MAJOR_ENUM, name="major_enum"), nullable=False)
+    # A korábbi enum hardcode helyett dinamikusan kezeljük (admin a `majors` táblán keresztül bővíti).
+    major = Column(String(255), nullable=False)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
     reset_token = Column(String(255), nullable=True)
@@ -76,7 +68,7 @@ class Course(Base):
     id = Column(Integer, primary_key=True, index=True)
     course_code = Column(String(50), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    name_en = Column(String(255), nullable=False)
+    name_en = Column(String(255), nullable=True)
 
     progress = relationship("Progress", back_populates="course")
 
@@ -86,29 +78,33 @@ class Major(Base):
 
     Attributes:
         id (int): Szak azonosító.
-        name (str): Szak neve.
+        name (str): Szak neve magyarul (belső/kulcs érték).
+        name_en (str): Szak neve angolul.
     """
     __tablename__ = "majors"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), unique=True, nullable=False)
+    name_en = Column(String(255), nullable=True)
 
-class MajorRequirement(Base):
+class MajorRequirementRule(Base):
     """
-    Szak követelmény adatbázis modell.
-
-    Attributes:
-        id (int): Követelmény azonosító.
-        major_id (int): Szak azonosító.
-        requirement_type (str): Követelmény típusa.
-        min_credits (int): Minimum kredit.
+    Dinamikus szak-követelmény szabály.
+    Egy szakhoz tetszőleges számú sor vehető fel (pl. info/matek/fizika bontás).
     """
-    __tablename__ = "majors_requirements"
+    __tablename__ = "major_requirement_rules"
 
     id = Column(Integer, primary_key=True, index=True)
-    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False)
-    requirement_type = Column(String(50), nullable=False)
-    min_credits = Column(Integer, nullable=False)
+    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False, index=True)
+    code = Column(String(80), nullable=False)
+    label_hu = Column(String(255), nullable=False)
+    label_en = Column(String(255), nullable=True)
+    requirement_type = Column(String(50), nullable=False)  # required/elective/optional/pe/practice
+    subgroup = Column(String(80), nullable=True)  # pl. elective_info_credits, physics_core, stb.
+    value_type = Column(String(20), nullable=False, default="credits")  # credits/count/hours
+    min_value = Column(Integer, nullable=False, default=0)
+    include_in_total = Column(Boolean, nullable=False, default=True)
+    sort_order = Column(Integer, nullable=False, default=0)
 
 class CourseMajor(Base):
     """
