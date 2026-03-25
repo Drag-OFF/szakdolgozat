@@ -78,7 +78,21 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <label style={{ fontWeight: 500 }}>
+      <label
+        style={{
+          background: "#1976d2",
+          color: "#fff",
+          border: "none",
+          borderRadius: "6px",
+          padding: "0.3rem 0.9rem",
+          fontWeight: 500,
+          fontSize: "1rem",
+          cursor: "pointer",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 8
+        }}
+      >
         {texts[lang]?.select || "Fájl kiválasztása"}
         <input
           type="file"

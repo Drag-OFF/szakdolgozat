@@ -29,6 +29,12 @@ export default function AuthSelect({
   const getText = (obj) =>
     typeof obj === "string" ? obj : obj?.[lang] || "";
 
+  const getOptionValue = (opt) => {
+    if (typeof opt === "string") return opt;
+    if (opt && Object.prototype.hasOwnProperty.call(opt, "value")) return opt.value;
+    return opt?.[lang] || "";
+  };
+
   return (
     <div>
       <label htmlFor={id} style={{ fontWeight: 500, marginBottom: 4, display: "block" }}>
@@ -50,7 +56,7 @@ export default function AuthSelect({
         {...props}
       >
         {options.map(opt =>
-          <option key={getText(opt)} value={typeof opt === "string" ? opt : opt?.[lang]}>
+          <option key={`${getOptionValue(opt)}_${getText(opt)}`} value={getOptionValue(opt)}>
             {getText(opt)}
           </option>
         )}

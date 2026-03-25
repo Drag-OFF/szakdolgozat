@@ -5,6 +5,7 @@ import ChatUsers from "../components/ChatUsers";
 import ChatMessagesList from "../components/ChatMessagesList";
 import ChatInputRow from "../components/ChatInputRow";
 import ChatLeaderboard from "../components/ChatLeaderboard";
+import { useLang } from "../context/LangContext";
 
 /**
  * Egyedi hook, amely figyeli az ablak méretét, és visszaadja, hogy mobil nézetben vagyunk-e.
@@ -36,6 +37,7 @@ function useIsMobile(breakpoint = 900) {
  * @returns {JSX.Element} A chat oldal teljes tartalma.
  */
 export default function Chat() {
+  const { lang } = useLang();
   const [messages, setMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [input, setInput] = useState("");
@@ -51,17 +53,12 @@ export default function Chat() {
   const currentUser = JSON.parse(localStorage.getItem("user")) || {};
   const [open, setOpen] = useState(false);
   const chatListRef = useRef(null);
-
-  // Dummy leaderboard, TODO: Fetch from API
-  const leaderboard = [
-    { name: "Kovács Béla", points: 120, neptun: "ABC123" },
-    { name: "Nagy Anna", points: 110, neptun: "DEF456" },
-    { name: "Kiss Péter", points: 90, neptun: "GHI789" }
-  ];
+  const [leaderboard, setLeaderboard] = useState([]);
 
   useEffect(() => {
     fetchMessages();
     fetchUsers();
+    fetchLeaderboard();
   }, []);
 
   async function fetchMessages() {
@@ -91,6 +88,19 @@ export default function Chat() {
       }
     } catch (e) {
       setUsers([]);
+    }
+  }
+
+  async function fetchLeaderboard() {
+    try {
+      const res = await authFetch("http://enaploproject.ddns.net:8000/api/users/chat-leaderboard", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json().catch(() => []);
+      setLeaderboard(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setLeaderboard([]);
     }
   }
 
@@ -176,7 +186,7 @@ export default function Chat() {
             <button
               className="chat-header-btn"
               onClick={() => setSidebarOpen(true)}
-              title="Bal sáv nyitása"
+              title={lang === "en" ? "Open users panel" : "Bal sáv nyitása"}
             >
               ☰
               <span />
@@ -190,7 +200,7 @@ export default function Chat() {
             <button
               className="chat-header-btn"
               onClick={toggleTheme}
-              title="Téma váltás"
+              title={lang === "en" ? "Toggle theme" : "Téma váltás"}
             >
               🌙 / ☀️
             </button>
@@ -200,7 +210,7 @@ export default function Chat() {
             <button
               className="chat-header-btn"
               onClick={() => setLeaderboardOpen(true)}
-              title="Jobb sáv nyitása"
+              title={lang === "en" ? "Open leaderboard panel" : "Jobb sáv nyitása"}
             >
               ⚙️
             </button>

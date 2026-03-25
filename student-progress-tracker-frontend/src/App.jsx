@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import ProgressTracker from "./pages/ProgressTracker";
+import CourseRecommender from "./pages/CourseRecommender";
 import { LangProvider } from "./context/LangContext";
 import "./App.css";
 
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/progress" element={<ProgressTracker />} />
+            <Route path="/recommendations" element={<CourseRecommender />} />
           </Routes>
         </main>
         {location.pathname !== "/chat" && <Footer />}

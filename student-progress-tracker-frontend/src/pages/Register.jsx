@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
@@ -6,6 +6,8 @@ import { authFetch, validateRegisterForm } from "../utils";
 import AuthInput from "../components/AuthInput";
 import AuthSelect from "../components/AuthSelect";
 import { useLang } from "../context/LangContext";
+
+const API_BASE = "http://enaploproject.ddns.net:8000";
 
 /**
  * Regisztrációs oldal komponens.
@@ -17,8 +19,10 @@ import { useLang } from "../context/LangContext";
 export default function Register() {
   const [form, setForm] = useState({
     uid: "", email: "", password: "", name: "", birth_date: "",
-    id_card_number: "", address_card_number: "", mothers_name: "", major: "Gazdaságinformatikus"
+    id_card_number: "", address_card_number: "", mothers_name: "", major: ""
   });
+  const [majorOptions, setMajorOptions] = useState([]);
+  const [loadingMajors, setLoadingMajors] = useState(true);
   const [msg, setMsg] = useState("");
   const [errors, setErrors] = useState({});
   const { lang } = useLang();
@@ -68,13 +72,37 @@ export default function Register() {
     }
   };
 
-  const majorOptions = [
-    { hu: "Gazdaságinformatikus", en: "Business IT" },
-    { hu: "Mérnökinformatikus", en: "Engineering IT" },
-    { hu: "Programtervező informatikus", en: "Software Engineer" },
-    { hu: "Villamosmérnök", en: "Electrical Engineer" },
-    { hu: "Üzemmérnök-informatikus", en: "Operational IT Engineer" }
-  ];
+  useEffect(() => {
+    let mounted = true;
+    setLoadingMajors(true);
+    fetch(`${API_BASE}/api/majors?limit=10000`)
+      .then(res => res.json().catch(() => []))
+      .then(data => {
+        if (!mounted) return;
+        const arr = Array.isArray(data) ? data : [];
+        const opts = arr
+          .filter(m => m && (m.name || m.title))
+          .map(m => {
+            const nameHu = m.name || m.title || "";
+            const nameEn = m.name_en || nameHu;
+            return { value: nameHu, hu: nameHu, en: nameEn };
+          });
+        setMajorOptions(opts);
+        if (!form.major && opts.length > 0) {
+          setForm(f => ({ ...f, major: opts[0].value }));
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setMajorOptions([]);
+      })
+      .finally(() => {
+        if (!mounted) return;
+        setLoadingMajors(false);
+      });
+    return () => { mounted = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleChange(e) {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -91,7 +119,7 @@ export default function Register() {
       return;
     }
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/", {
+      const resp = await fetch(`${API_BASE}/api/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

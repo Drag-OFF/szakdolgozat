@@ -1,7 +1,6 @@
 import React from "react";
 import { useLang } from "../context/LangContext";
 
-
 export default function ProgressTable({ progressFull }) {
   const { lang } = useLang();
 
@@ -21,7 +20,7 @@ export default function ProgressTable({ progressFull }) {
         {progressFull.map(p => (
           <tr key={p.id}>
             <td>{p.course_code || "?"}</td>
-            <td>{p.course_name || "?"}</td>
+            <td>{lang === "en" ? (p.course_name_en || p.course_name || "?") : (p.course_name || p.course_name_en || "?")}</td>
             <td>{p.category || "?"}</td>
             <td>
               {p.recommended_semester !== null && p.recommended_semester !== undefined

@@ -6,6 +6,7 @@ import FileUpload from "../components/FileUpload";
 import ProgressToolbar from "../components/ProgressToolbar";
 import { authFetch } from "../utils";
 import { useLang } from "../context/LangContext"; // <-- ezt add hozzá
+import { PROGRESS_TRACKER_LABELS } from "../translations";
 import "../styles/ProgressTable.css";
 
 export default function ProgressTracker() {
@@ -20,6 +21,7 @@ export default function ProgressTracker() {
   const [reqOpen, setReqOpen] = useState(false);
 
   const { lang } = useLang(); // <-- aktuális nyelv
+  const t = PROGRESS_TRACKER_LABELS[lang] || PROGRESS_TRACKER_LABELS.hu;
 
   useEffect(() => {
     if (!user.id) return;
@@ -31,7 +33,7 @@ export default function ProgressTracker() {
   }, [user.id, lang]);
 
   if (!user.id) {
-    return <div className="auth-msg">Jelentkezz be az előrehaladás megtekintéséhez!</div>;
+    return <div className="auth-msg">{t.loginRequired}</div>;
   }
 
   const filtered = progressFull.filter(p =>
@@ -47,8 +49,8 @@ export default function ProgressTracker() {
 
   return (
     <div className="progress-tracker-container">
-      <h2 style={{ cursor: "pointer" }} onClick={() => setOpen(o => !o)}>
-        Kurzusok és előrehaladás {open ? "▲" : "▼"}
+      <h2 className="panel-header-inline" onClick={() => setOpen(o => !o)} aria-expanded={open}>
+        {t.coursesTitle} <span className="toggle-icon">{open ? "▲" : "▼"}</span>
       </h2>
       {open && (
         <div style={{
@@ -62,59 +64,66 @@ export default function ProgressTracker() {
             margin: "0 auto",
             background: "#fff" 
         }}>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 10 }}>
-            <div className="progress-input-container">
-              <input
-                type="text"
-                placeholder="Keresés név vagy kód alapján..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="progress-input"
-              />
-            </div>
-            {/* Fájl feltöltő komponens */}
-            <FileUpload
-              userId={user.id}
-              lang={lang} // <-- add át a nyelvet
-              onUpload={async (file) => {
-                const formData = new FormData();
-                formData.append("file", file);
-                try {
-                  const res = await fetch(
-                    `http://enaploproject.ddns.net:8000/api/progress/${user.id}/import?lang=${lang}`,
-                    {
-                      method: "POST",
-                      headers: {
-                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                      },
-                      body: formData,
+          <div className="progress-toolbar">
+            <div className="progress-toolbar-left">
+              <div className="progress-input-wrap">
+                <input
+                  type="text"
+                  placeholder={t.searchPlaceholder}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="progress-input"
+                />
+              </div>
+              <div className="progress-filewrap">
+                <FileUpload
+                  userId={user.id}
+                  lang={lang}
+                  onUpload={async (file) => {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    try {
+                      const res = await fetch(
+                        `http://enaploproject.ddns.net:8000/api/progress/${user.id}/import?lang=${lang}`,
+                        {
+                          method: "POST",
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                          },
+                          body: formData,
+                        }
+                      );
+                      const data = await res.json();
+                      if (!res.ok) {
+                        console.error("Import failed:", data);
+                        alert(t.uploadFailed);
+                        return;
+                      }
+                      // sikeres import után újra lekérdezzük a teljes előrehaladást és frissítjük a state-et
+                      const fullRes = await authFetch(
+                        `http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
+                      );
+                      const fullData = await fullRes.json();
+                      setProgressFull(Array.isArray(fullData) ? fullData : []);
+                      alert(t.uploadSuccess);
+                    } catch (err) {
+                      console.error("Upload error:", err);
+                      alert(t.uploadFailed);
                     }
-                  );
-                  const data = await res.json();
-                  if (!res.ok) {
-                    console.error("Import failed:", data);
-                    alert(lang === "en" ? "Upload failed!" : "Hiba történt a feltöltés során!");
-                    return;
-                  }
-                  // sikeres import után újra lekérdezzük a teljes előrehaladást és frissítjük a state-et
-                  const fullRes = await authFetch(
-                    `http://enaploproject.ddns.net:8000/api/progress/${user.id}/full?lang=${lang}`,
-                    { headers: { Authorization: `Bearer ${localStorage.getItem("access_token")}` } }
-                  );
-                  const fullData = await fullRes.json();
-                  setProgressFull(Array.isArray(fullData) ? fullData : []);
-                  alert(lang === "en" ? "Upload successful!" : "Sikeres feltöltés!");
-                } catch (err) {
-                  console.error("Upload error:", err);
-                  alert(lang === "en" ? "Upload failed!" : "Hiba történt a feltöltés során!");
-                }
-              }}
-             />
-            {/* ...selectek, inputok... */}
-            <DownloadProgressButton userId={user.id} />
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="progress-toolbar-actions">
+              <div className="action-btn">
+                <DownloadProgressButton userId={user.id} />
+              </div>
+            </div>
           </div>
           {filtered.length === 0 ? (
-            <div>Nincs elmentett kurzusod.</div>
+            <div>{t.noSaved}</div>
           ) : (
             <ProgressTable progressFull={filtered} />
           )}
@@ -122,10 +131,11 @@ export default function ProgressTracker() {
       )}
       <div style={{ marginTop: 32 }}>
         <h2
-          style={{ cursor: "pointer", marginBottom: 0 }}
+          className="panel-header-inline"
           onClick={() => setReqOpen(o => !o)}
+          aria-expanded={reqOpen}
         >
-          Követelmények állapota {reqOpen ? "▲" : "▼"}
+          {t.requirementsTitle} <span className="toggle-icon">{reqOpen ? "▲" : "▼"}</span>
         </h2>
         {reqOpen && (
           <div style={{

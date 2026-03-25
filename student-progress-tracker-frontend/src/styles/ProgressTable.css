@@ -6,6 +6,7 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 12px #1976d222;
+  table-layout: auto;
 }
 
 .progress-table th, .progress-table td {
@@ -13,6 +14,10 @@
   text-align: left;
   border-bottom: 1px solid #e3eafc;
   font-size: 1.05rem;
+  padding: 8px 10px;
+  border-top: 1px solid #f1f6fb;
+  vertical-align: middle;
+  box-sizing: border-box;
 }
 
 .progress-table th {
@@ -91,9 +96,239 @@
   border-radius: 0;
 }
 
+/* Kisebb, önálló háttér a két lenyíló fejléthez (kurzusok / követelmények) */
+.panel-header-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #f7fbff, #eef6ff);
+  color: #0b66c3;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #e6f6ff;
+  box-shadow: 0 2px 6px rgba(10,60,120,0.04);
+  user-select: none;
+  margin: 0 0 12px 0;
+}
+
+.panel-header-inline .toggle-icon { font-weight: 600; color: #0b66c3; }
+
+/* védelem: ha mindkét panel nyitva van, legyen elég hely a footer fölött (nem a teljes boxra vonatkozik) */
+.progress-tracker-container { padding-bottom: 220px; }
+
+/* oszlopok szélessége (procent alapú, finomhangolható) */
+/* 1: Kód, 2: Név, 3: Kategória, 4: Ajánlott félév, 5: Kredit, 6: Teljesítés féléve, 7: Státusz, 8: Pontszám */
+.progress-tracker-container .progress-table th:nth-child(1),
+.progress-tracker-container .progress-table td:nth-child(1) {
+  width: 10%;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+  font-weight: 600;
+  color: #0b66c3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+.progress-tracker-container .progress-table th:nth-child(2),
+.progress-tracker-container .progress-table td:nth-child(2) {
+  width: 36%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* kategória viszonylagos szélesség */
+.progress-tracker-container .progress-table th:nth-child(3),
+.progress-tracker-container .progress-table td:nth-child(3) {
+  width: 14%;
+}
+
+/* ajánlott félév kisebb */
+.progress-tracker-container .progress-table th:nth-child(4),
+.progress-tracker-container .progress-table td:nth-child(4) {
+  width: 8%;
+  text-align: center;
+}
+
+/* kredit kisebb, jobbra zárt */
+.progress-tracker-container .progress-table th:nth-child(5),
+.progress-tracker-container .progress-table td:nth-child(5) {
+  width: 6%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* teljesítés szemesztere keskeny, középre rendezve */
+.progress-tracker-container .progress-table th:nth-child(6),
+.progress-tracker-container .progress-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* státusz és pontszám */
+.progress-tracker-container .progress-table th:nth-child(7),
+.progress-tracker-container .progress-table td:nth-child(7) {
+  width: 10%;
+}
+.progress-tracker-container .progress-table th:nth-child(8),
+.progress-tracker-container .progress-table td:nth-child(8) {
+  width: 8%;
+  text-align: right;
+}
+
+/* ha nagyon kis képernyőn, engedjük a vízszintes görgetést */
 @media (max-width: 900px) {
-  .progress-table th, .progress-table td {
-    padding: 0.5rem 0.4rem;
-    font-size: 0.98rem;
+  .progress-table {
+    table-layout: auto;
+  }
+  .progress-table td:nth-child(2) { white-space: normal; }
+}
+
+/* ha a táblázat a konténeren belül túl széles, görgethetővé tesszük */
+.progress-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Toolbar: rendezett, vizuálisan kellemes vezérlősáv */
+.progress-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border: 1px solid #e6f6ff;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(10,60,120,0.03);
+}
+
+/* bal oldal: kereső + feltöltés */
+.progress-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0; /* lehetővé teszi a flex-gyermekek zsugorodását */
+}
+
+/* finomított kereső megjelenés (kissebbre vett és laposabb) */
+.progress-input-wrap {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px;
+  box-shadow: 0 1px 4px rgba(10,60,120,0.03);
+  border: 1px solid #e9f3ff;
+}
+
+.progress-input {
+  width: 340px;
+  height: 36px;
+  padding: 6px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #112;
+  box-sizing: border-box;
+}
+
+/* jobb oldali rögzítés az akciógomboknak */
+.progress-toolbar-actions {
+  margin-left: auto; /* tolja a művelet gombokat a sor jobb szélére */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* fájl feltöltő wrapper */
+.progress-filewrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: linear-gradient(180deg,#ffffff,#f6fbff);
+  border: 1px solid #e6f6ff;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(10,60,120,0.03);
+  color: #0b66c3;
+  font-weight: 600;
+}
+
+/* kiegészítések a fájl kiválasztó kinézetéhez */
+.progress-filewrap input[type="file"] { display: none; }
+
+/* ha nincs még ilyen, biztosítsunk erősebb gomb hátteret */
+.progress-filewrap .file-btn {
+  background: linear-gradient(180deg,#1976d2,#1565c0);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(10,60,120,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+/* megjelenítjük a kiválasztott fájl nevét, rövidebbre vágva */
+.progress-filewrap .file-name {
+  margin-left: 10px;
+  color: #234;
+  font-size: 0.95rem;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* biztosítsuk, hogy gomb és a többi toolbar gomb egy magasságban legyen */
+.progress-toolbar .file-btn,
+.progress-filewrap .file-btn,
+.progress-toolbar .btn-compact {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* mobil: ha túl szűk, a gombok sorba törnek, de jobb szélre törekednek */
+@media (max-width: 980px) {
+  .progress-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .progress-toolbar-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .progress-input { width: 60%; min-width: 180px; }
+  .progress-toolbar-actions { margin-left: 0; justify-content: flex-end; width: 100%; }
+  .progress-filewrap { width: 100%; justify-content: flex-start; }
+}
+
+/* felső hely a navbar miatt, hogy a panelek ne lógjanak rá */
+.progress-tracker-container {
+  /* ha van CSS változó a navbar magasságára, állítsd be --app-navbar-height-et (pl. 64px) a root-on */
+  padding-top: calc(var(--app-navbar-height, 72px) + 12px);
+  box-sizing: border-box;
+}
+
+/* mobilon kisebb navbar, kisebb padding */
+@media (max-width: 720px) {
+  .progress-tracker-container {
+    padding-top: calc(var(--app-navbar-height, 56px) + 8px);
   }
 }
