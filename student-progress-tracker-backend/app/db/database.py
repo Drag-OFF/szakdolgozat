@@ -2,8 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Adatbázis csatlakozásának URL-je
-DATABASE_URL = "mysql+pymysql://root:@localhost/database"
+from app.config import DATABASE_URL
 
 # SQLAlchemy engine létrehozása
 engine = create_engine(DATABASE_URL)

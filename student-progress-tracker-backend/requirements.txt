@@ -1,6 +1,8 @@
 FastAPI
 SQLAlchemy
 pydantic
+python-dotenv
+pymysql
 bcrypt
 python-jose
 uvicorn
@@ -10,3 +12,8 @@ websockets
 alembic
 pytest
 httpx
+pymysql
+email-validator
+passlib
+python-multipart
+mailjet-rest

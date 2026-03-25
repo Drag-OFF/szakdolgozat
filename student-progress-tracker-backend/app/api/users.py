@@ -1,4 +1,3 @@
-import os
 import uuid
 from typing import List, Tuple
 from datetime import datetime
@@ -11,6 +10,13 @@ from mailjet_rest import Client
 from app.db import models, schemas
 from app.db.database import get_db
 from app.db.schemas import EmailRequest
+from app.config import (
+    MAILJET_API_KEY,
+    MAILJET_API_SECRET,
+    PUBLIC_SITE_URL,
+    MAIL_FROM_EMAIL,
+    MAIL_FROM_NAME,
+)
 from app.services.users_service import UsersService
 from app.utils.utils import create_access_token, admin_required, get_current_user
 from app.utils.utils import verify_password, hash_password
@@ -29,18 +35,22 @@ def send_verification_email(to_email: str, verify_token: str) -> Tuple[int, dict
     Returns:
         tuple: (HTTP státuszkód, Mailjet válasz JSON)
     """
-    api_key = os.getenv("MAILJET_API_KEY", "8500664c47d6156ee0ba18594fdd88c6")
-    api_secret = os.getenv("MAILJET_API_SECRET", "c9327b1703b7e2eb1ab59ebea33cad27")
-    mailjet = Client(auth=(api_key, api_secret), version="v3.1")
+    if not MAILJET_API_KEY or not MAILJET_API_SECRET:
+        raise HTTPException(
+            status_code=503,
+            detail="E-mail küldés nincs konfigurálva. Állítsd be a MAILJET_API_KEY és MAILJET_API_SECRET értékeket a .env-ben.",
+        )
+    mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version="v3.1")
+    verify_url = f"{PUBLIC_SITE_URL}/verify.html?token={verify_token}"
     data = {
         "Messages": [
             {
-                "From": {"Email": "enaploproject@gmail.com", "Name": "Enaplo Project"},
+                "From": {"Email": MAIL_FROM_EMAIL, "Name": MAIL_FROM_NAME},
                 "To": [{"Email": to_email, "Name": to_email}],
                 "Subject": "E-mail verifikáció",
-                "TextPart": f"Kérjük, erősítsd meg a regisztrációdat: http://enaploproject.ddns.net/verify.html?token={verify_token}",
+                "TextPart": f"Kérjük, erősítsd meg a regisztrációdat: {verify_url}",
                 "HTMLPart": f"<h3>Kérjük, erősítsd meg a regisztrációdat:</h3>"
-                            f"<a href='http://enaploproject.ddns.net/verify.html?token={verify_token}'>Kattints ide a megerősítéshez.</a>"
+                            f"<a href='{verify_url}'>Kattints ide a megerősítéshez.</a>"
             }
         ]
     }
