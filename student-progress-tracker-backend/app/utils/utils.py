@@ -3,7 +3,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from app.utils.translations import STATUS_MAP, ERROR_MESSAGES
+from .translations import STATUS_MAP, ERROR_MESSAGES
 
 
 SECRET_KEY = "nagyon-titkos-jelszo"

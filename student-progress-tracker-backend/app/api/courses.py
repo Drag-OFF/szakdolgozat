@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
+from typing import List
+
 from app.db import schemas
 from app.db.database import get_db
 from app.services.courses_service import CoursesService
@@ -7,20 +9,15 @@ from app.utils.utils import get_current_user
 
 router = APIRouter()
 
-@router.post("/", response_model=schemas.Course, dependencies=[Depends(get_current_user)])
-def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
+
+@router.post("", response_model=schemas.Course)
+def create_course(
+    course: schemas.CourseCreate,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
     """
-    Új kurzus létrehozása.
-
-    Args:
-        course (schemas.CourseCreate): Az új kurzus adatai.
-        db (Session): Az adatbázis kapcsolat.
-
-    Returns:
-        schemas.Course: A létrehozott kurzus.
-
-    Raises:
-        HTTPException: Ha a kurzus létrehozása nem sikerül.
+    Új kurzus létrehozása (csak hitelesített user).
     """
     courses_service = CoursesService(db)
     try:
@@ -28,82 +25,69 @@ def create_course(course: schemas.CourseCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/", response_model=list[schemas.Course], dependencies=[Depends(get_current_user)])
-def get_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+
+@router.get("", response_model=List[schemas.Course])
+def get_courses(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
     """
-    Kurzusok lekérdezése.
-
-    Args:
-        skip (int): A kihagyandó kurzusok száma.
-        limit (int): A visszaadandó kurzusok maximális száma.
-        db (Session): Az adatbázis kapcsolat.
-
-    Returns:
-        list[schemas.Course]: A kurzusok listája.
+    Kurzusok lekérdezése (csak hitelesített user).
     """
     courses_service = CoursesService(db)
     return courses_service.get_courses(skip=skip, limit=limit)
 
+
 @router.get("/{course_id}", response_model=schemas.Course)
-def get_course(course_id: int, db: Session = Depends(get_db)):
+def get_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
     """
-    Egy adott kurzus lekérdezése azonosító alapján.
-
-    Args:
-        course_id (int): A lekérdezni kívánt kurzus azonosítója.
-        db (Session): Az adatbázis kapcsolat.
-
-    Returns:
-        schemas.Course: A lekérdezett kurzus.
-
-    Raises:
-        HTTPException: Ha a kurzus nem található.
+    Egy adott kurzus lekérdezése azonosító alapján (csak hitelesített user).
     """
     courses_service = CoursesService(db)
-    course = courses_service.get_course(course_id)
-    if course is None:
-        raise HTTPException(status_code=404, detail="Course not found")
-    return course
+    try:
+        return courses_service.get_course(course_id)
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.put("/{course_id}", response_model=schemas.Course)
-def update_course(course_id: int, course: schemas.CourseUpdate, db: Session = Depends(get_db)):
+def update_course(
+    course_id: int,
+    course: schemas.CourseUpdate,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
     """
-    Egy kurzus frissítése azonosító alapján.
-
-    Args:
-        course_id (int): A frissítendő kurzus azonosítója.
-        course (schemas.CourseUpdate): A frissített kurzus adatai.
-        db (Session): Az adatbázis kapcsolat.
-
-    Returns:
-        schemas.Course: A frissített kurzus.
-
-    Raises:
-        HTTPException: Ha a kurzus nem található vagy a frissítés nem sikerül.
+    Egy kurzus frissítése azonosító alapján (csak hitelesített user).
     """
     courses_service = CoursesService(db)
-    updated_course = courses_service.update_course(course_id, course)
-    if updated_course is None:
-        raise HTTPException(status_code=404, detail="Course not found")
-    return updated_course
+    try:
+        updated_course = courses_service.update_course(course_id, course)
+        return updated_course
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.delete("/{course_id}", response_model=dict)
-def delete_course(course_id: int, db: Session = Depends(get_db)):
+def delete_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    user = Depends(get_current_user),
+):
     """
-    Egy kurzus törlése azonosító alapján.
-
-    Args:
-        course_id (int): A törlendő kurzus azonosítója.
-        db (Session): Az adatbázis kapcsolat.
-
-    Returns:
-        dict: A törlés sikerességéről szóló üzenet.
-
-    Raises:
-        HTTPException: Ha a kurzus nem található.
+    Egy kurzus törlése azonosító alapján (csak hitelesített user).
     """
     courses_service = CoursesService(db)
-    success = courses_service.delete_course(course_id)
+    try:
+        success = courses_service.delete_course(course_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if not success:
         raise HTTPException(status_code=404, detail="Course not found")
     return {"detail": "Course deleted successfully"}

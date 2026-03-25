@@ -1,16 +1,8 @@
-from pydantic import BaseModel, validator, EmailStr, Field
-import re
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict, validator, EmailStr, Field
 from typing import Optional, List
+import re
 from datetime import date, datetime
 from enum import Enum
-
-class MajorEnum(str, Enum):
-    gazdasag = "Gazdaságinformatikus"
-    mernoki = "Mérnökinformatikus"
-    programtervezo = "Programtervező informatikus"
-    villamos = "Villamosmérnök"
-    uzemmernok = "Üzemmérnök-informatikus"
 
 class UserBase(BaseModel):
     """
@@ -24,7 +16,7 @@ class UserBase(BaseModel):
         id_card_number (str): Személyi igazolvány szám.
         address_card_number (str): Lakcímkártya szám.
         mothers_name (str): Anyja neve.
-        major (MajorEnum): Szak.
+        major (str): Szak (dinamikusan a `majors` táblából).
         verified (bool): E-mail verifikáció.
         role (str): Szerepkör.
         created_at (datetime): Létrehozás ideje.
@@ -37,7 +29,7 @@ class UserBase(BaseModel):
     id_card_number: str
     address_card_number: str
     mothers_name: str
-    major: MajorEnum
+    major: str
     verified: bool
     role: str
     created_at: datetime
@@ -56,7 +48,7 @@ class UserCreate(BaseModel):
         id_card_number (str): Személyi igazolvány szám.
         address_card_number (str): Lakcímkártya szám.
         mothers_name (str): Anyja neve.
-        major (MajorEnum): Szak.
+        major (str): Szak (dinamikusan a `majors` táblából).
     """
     uid: str
     email: str
@@ -66,7 +58,7 @@ class UserCreate(BaseModel):
     id_card_number: str
     address_card_number: str
     mothers_name: str
-    major: MajorEnum
+    major: str
 
     @validator('uid')
     def validate_uid(cls, v):
@@ -112,7 +104,7 @@ class UserUpdate(BaseModel):
         id_card_number (Optional[str]): Személyi igazolvány szám.
         address_card_number (Optional[str]): Lakcímkártya szám.
         mothers_name (Optional[str]): Anyja neve.
-        major (Optional[MajorEnum]): Szak.
+        major (Optional[str]): Szak.
         verified (Optional[bool]): E-mail verifikáció.
         role (Optional[str]): Szerepkör.
         created_at (Optional[datetime]): Létrehozás ideje.
@@ -126,7 +118,7 @@ class UserUpdate(BaseModel):
     id_card_number: Optional[str] = None
     address_card_number: Optional[str] = None
     mothers_name: Optional[str] = None
-    major: Optional[MajorEnum] = None
+    major: Optional[str] = None
     verified: Optional[bool] = None
     role: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -169,6 +161,13 @@ class ResetPasswordRequest(BaseModel):
 class EmailRequest(BaseModel):
     email: str
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str = Field(..., min_length=8)
+
+class DeleteProfileRequest(BaseModel):
+    password: str
+
 class User(UserBase):
     """
     Felhasználó séma (adatbázisból visszaadott).
@@ -189,9 +188,11 @@ class CourseBase(BaseModel):
     Attributes:
         course_code (str): A kurzus kódja.
         name (str): A kurzus neve.
+        name_en (str): A kurzus neve angolul.
     """
     course_code: str
-    name: str
+    name: Optional[str] = None
+    name_en: Optional[str] = None
 
 class CourseCreate(CourseBase):
     """
@@ -202,7 +203,8 @@ class CourseCreate(CourseBase):
         name (str): A kurzus neve.
     """
     course_code: str
-    name: str
+    name: Optional[str] = None
+    name_en: Optional[str] = None
 
 class CourseUpdate(BaseModel):
     """
@@ -211,9 +213,11 @@ class CourseUpdate(BaseModel):
     Attributes:
         course_code (Optional[str]): A kurzus kódja.
         name (Optional[str]): A kurzus neve.
+        name_en (Optional[str]): A kurzus neve angolul.
     """
     course_code: Optional[str] = None
     name: Optional[str] = None
+    name_en: Optional[str] = None
 
 class Course(CourseBase):
     """
@@ -224,29 +228,36 @@ class Course(CourseBase):
         (A többi mező a CourseBase-ből öröklődik.)
     """
     id: int
+    name_en: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
-
+    model_config = ConfigDict(from_attributes=True)
 
 class MajorBase(BaseModel):
     """
     Szak alap séma.
 
     Attributes:
-        name (str): Szak neve.
+        name (str): Szak neve magyarul (belső/kulcs érték).
+        name_en (Optional[str]): Szak neve angolul.
     """
     name: str
+    name_en: Optional[str] = None
 
 class MajorCreate(MajorBase):
     """
     Szak létrehozási séma.
-
-    Attributes:
-        name (str): Szak neve.
     """
     pass
+
+class MajorUpdate(BaseModel):
+    """
+    Szak frissítési séma. Opcionális mezők: csak a módosítandó mezőket küldd.
+    """
+    name: Optional[str] = None
+    name_en: Optional[str] = None
+
+    # pydantic v2: ORM-objektumokból történő modellezés
+    model_config = ConfigDict(from_attributes=True)
 
 class Major(MajorBase):
     """
@@ -254,11 +265,11 @@ class Major(MajorBase):
 
     Attributes:
         id (int): Szak azonosító.
-        name (str): Szak neve.
+        name (str): Szak neve magyarul.
+        name_en (Optional[str]): Szak neve angolul.
     """
     id: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class MajorRequirementBase(BaseModel):
     """
@@ -266,12 +277,32 @@ class MajorRequirementBase(BaseModel):
 
     Attributes:
         major_id (int): Szak azonosító.
-        requirement_type (str): Követelmény típusa.
-        min_credits (int): Minimum kredit.
+        total_credits (int): Összes kredit.
+        required_credits (int): Kötelező kredit.
+        elective_credits (int): Kötelezően választható kredit.
+        optional_credits (int): Szabadon választható kredit.
+        elective_info_credits (int): Informatikai törzsanyag kredit.
+        elective_math_credits (int): Matematikai törzsanyag kredit.
+        pe_semesters (int): Testnevelés félévek.
+        practice_hours (int): Szakmai gyakorlat órák.
+        elective_non_core_credits (int): Kötelezően választható nem-törzs kredit.
+        elective_core_credits (int): Kötelezően választható törzs kredit.
+        thesis_credits (int): Szakdolgozat kreditek.
     """
     major_id: int
-    requirement_type: str
-    min_credits: int
+    total_credits: int
+    required_credits: int
+    elective_credits: int
+    optional_credits: int
+
+    elective_info_credits: int = 0
+    elective_math_credits: int = 0
+    pe_semesters: int = 0
+    practice_hours: int = 0
+
+    elective_non_core_credits: int = 0
+    elective_core_credits: int = 0
+    thesis_credits: int = 0
 
 class MajorRequirementCreate(MajorRequirementBase):
     """
@@ -279,8 +310,6 @@ class MajorRequirementCreate(MajorRequirementBase):
 
     Attributes:
         major_id (int): Szak azonosító.
-        requirement_type (str): Követelmény típusa.
-        min_credits (int): Minimum kredit.
     """
     pass
 
@@ -291,12 +320,40 @@ class MajorRequirement(MajorRequirementBase):
     Attributes:
         id (int): Követelmény azonosító.
         major_id (int): Szak azonosító.
-        requirement_type (str): Követelmény típusa.
-        min_credits (int): Minimum kredit.
     """
     id: int
     class Config:
         from_attributes = True
+
+class MajorRequirementRuleBase(BaseModel):
+    major_id: int
+    code: str
+    label_hu: str
+    label_en: Optional[str] = None
+    requirement_type: str
+    subgroup: Optional[str] = None
+    value_type: str = "credits"  # credits | count | hours
+    min_value: int = 0
+    include_in_total: bool = True
+    sort_order: int = 0
+
+class MajorRequirementRuleCreate(MajorRequirementRuleBase):
+    pass
+
+class MajorRequirementRuleUpdate(BaseModel):
+    code: Optional[str] = None
+    label_hu: Optional[str] = None
+    label_en: Optional[str] = None
+    requirement_type: Optional[str] = None
+    subgroup: Optional[str] = None
+    value_type: Optional[str] = None
+    min_value: Optional[int] = None
+    include_in_total: Optional[bool] = None
+    sort_order: Optional[int] = None
+
+class MajorRequirementRule(MajorRequirementRuleBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
 
 class CourseMajorBase(BaseModel):
     """
@@ -349,8 +406,20 @@ class CourseMajor(CourseMajorBase):
         prerequisites (Optional[str]): Előfeltételek.
     """
     id: int
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+class CourseMajorUpdate(BaseModel):
+    """
+    Kurzus–szak kapcsolat frissítési séma.
+    Minden mező opcionális, csak a módosítani kívánt mezőket küldd.
+    """
+    course_id: Optional[int] = None
+    major_id: Optional[int] = None
+    credit: Optional[int] = None
+    semester: Optional[int] = None
+    type: Optional[str] = None
+    subgroup: Optional[str] = None
+    prerequisites: Optional[str] = None
 
 class CourseEquivalenceBase(BaseModel):
     """
@@ -451,8 +520,7 @@ class Progress(ProgressBase):
     """
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ProgressFull(BaseModel):
     id: int
@@ -465,8 +533,7 @@ class ProgressFull(BaseModel):
     points: int | None = None
     category: str | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ChatMessageBase(BaseModel):
     """
@@ -492,6 +559,12 @@ class ChatUser(BaseModel):
     name: str
     neptun: str
     role: str
+
+class ChatLeaderboardUser(BaseModel):
+    id: int
+    name: str
+    neptun: str
+    points: int
 
 class ChatMessageCreate(ChatMessageBase):
     """
@@ -541,8 +614,7 @@ class ChatMessage(ChatMessageBase):
     """
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ChatReactionBase(BaseModel):
     emoji: str
@@ -555,8 +627,7 @@ class ChatReactionOut(ChatReactionBase):
     message_id: int
     user_id: int
     created_at: datetime
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ChatMessageOut(BaseModel):
     """
@@ -585,8 +656,7 @@ class ChatMessageOut(BaseModel):
     reply_to_id: Optional[int] = None
     reactions: List[ChatReactionOut] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class Token(BaseModel):
     """
