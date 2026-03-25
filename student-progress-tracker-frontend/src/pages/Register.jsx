@@ -6,8 +6,7 @@ import { authFetch, validateRegisterForm } from "../utils";
 import AuthInput from "../components/AuthInput";
 import AuthSelect from "../components/AuthSelect";
 import { useLang } from "../context/LangContext";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../config";
 
 /**
  * Regisztrációs oldal komponens.

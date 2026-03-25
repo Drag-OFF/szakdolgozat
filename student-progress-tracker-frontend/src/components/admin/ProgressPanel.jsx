@@ -4,8 +4,8 @@ import useFileDownload from "../../hooks/useFileDownload";
 import "../../styles/ProgressTable.css";
 import { useLang } from "../../context/LangContext";
 import { PROGRESS_LABELS } from "../../translations";
-
-const API_BASE = "http://enaploproject.ddns.net:8000";
+import { API_BASE } from "../../config";
+import { getAccessToken } from "../../authStorage";
 
 export default function ProgressPanel() {
   const { fetchJson, authFetch } = useAuthFetch();
@@ -90,7 +90,7 @@ export default function ProgressPanel() {
     if (!userId) return alert(t.chooseUser);
     setLoadingTemplate(true);
     try {
-      const token = localStorage.getItem("access_token");
+      const token = getAccessToken();
       const headers = {};
       if (token) headers.Authorization = `Bearer ${token}`;
       headers.Accept = "application/octet-stream";

@@ -5,11 +5,13 @@ import "../styles/GlobalBackground.css";
 import { authFetch, isValidEmail, isValidNeptun } from "../utils";
 import AuthInput from "../components/AuthInput";
 import { useLang } from "../context/LangContext";
+import { apiUrl } from "../config";
+import { setAccessToken, setUserJson } from "../authStorage";
 
 /**
  * Bejelentkezési oldal komponens.
  * Lehetővé teszi a felhasználók számára, hogy e-mail vagy Neptun kód és jelszó megadásával bejelentkezzenek.
- * Sikeres bejelentkezéskor JWT tokent tárol a localStorage-ben, és átirányít a főoldalra.
+ * Sikeres bejelentkezéskor JWT + user a sessionStorage-ban (vagy localStorage, ha VITE_AUTH_PERSIST=local).
  *
  * @returns {JSX.Element} A bejelentkezési űrlap és kapcsolódó UI elemek.
  */
@@ -64,7 +66,7 @@ export default function Login() {
     }
     const data = uid.includes("@") ? { email: uid, password } : { uid, password };
     try {
-      const resp = await fetch("http://enaploproject.ddns.net:8000/api/users/login", {
+      const resp = await fetch(apiUrl("/api/users/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -72,8 +74,8 @@ export default function Login() {
       if (!resp) return;
       const result = await resp.json();
       if (resp.ok && result.access_token) {
-        localStorage.setItem("access_token", result.access_token);
-        localStorage.setItem("user", JSON.stringify(result.user));
+        setAccessToken(result.access_token);
+        setUserJson(result.user);
         window.dispatchEvent(new Event("user-login"));
         setMsg(texts[lang].success);
         setTimeout(() => {

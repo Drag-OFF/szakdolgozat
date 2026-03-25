@@ -11,6 +11,9 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.local
+.env.*.local
 student-progress-tracker-backend/
 
 # Editor directories and files
