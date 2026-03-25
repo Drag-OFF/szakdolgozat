@@ -1,9 +1,20 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from app.db import schemas
+from sqlalchemy import text
+from app.db import schemas, models
 from app.db.database import get_db
 from app.services.progress_service import ProgressService
-from app.utils import get_current_user
+from app.utils.utils import get_current_user
+from app.utils.translations import EXPORT_HEADER, STATUS_MAP, CATEGORY_MAP, TEMPLATE_HEADER
+from app.services.progress_export import export_progress_xlsx, generate_progress_template_xlsx
+from app.services.requirements_service import get_user_requirements
+from app.services.progress_service import ProgressService
+from app.services.progress_import import ProgressImportService
+
+import csv
+import io
+import openpyxl
 
 router = APIRouter()
 
@@ -107,3 +118,130 @@ def delete_progress(progress_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Progress not found")
     return {"detail": "Progress deleted successfully"}
+
+@router.get("/{user_id}/completed", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
+def get_user_completed_courses(user_id: int, db: Session = Depends(get_db)):
+    """
+    Egy adott felhasználó teljesített kurzusainak lekérése.
+
+    Args:
+        user_id (int): A felhasználó azonosítója.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        list[schemas.Progress]: A felhasználó összes 'completed' státuszú kurzusa.
+
+    Raises:
+        HTTPException: Ha a lekérdezés sikertelen.
+    """
+    progress_service = ProgressService(db)
+    return progress_service.get_user_completed_courses(user_id)
+
+@router.get("/{user_id}/in-progress", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
+def get_user_in_progress_courses(user_id: int, db: Session = Depends(get_db)):
+    """
+    Egy adott felhasználó folyamatban lévő kurzusainak lekérése.
+
+    Args:
+        user_id (int): A felhasználó azonosítója.
+        db (Session): Az adatbázis kapcsolat.
+
+    Returns:
+        list[schemas.Progress]: A felhasználó összes 'in_progress' státuszú kurzusa.
+
+    Raises:
+        HTTPException: Ha a lekérdezés sikertelen.
+    """
+    progress_service = ProgressService(db)
+    return progress_service.get_user_in_progress_courses(user_id)
+
+
+@router.get("/{user_id}/full", response_model=list[schemas.ProgressFull], dependencies=[Depends(get_current_user)])
+def get_user_progress_full(user_id: int, lang: str = "hu", db: Session = Depends(get_db)):
+    """
+    Egy felhasználó összes haladását adja vissza, minden kapcsolódó kurzus, szak, ajánlott félév, kredit adattal együtt.
+    """
+    results = (
+        db.query(
+            models.Progress,
+            models.Course,
+            models.CourseMajor
+        )
+        .join(models.Course, models.Progress.course_id == models.Course.id)
+        .join(models.User, models.Progress.user_id == models.User.id)
+        .join(models.Major, models.User.major == models.Major.name)
+        .join(models.CourseMajor, (models.CourseMajor.course_id == models.Course.id) & (models.CourseMajor.major_id == models.Major.id))
+        .filter(models.Progress.user_id == user_id)
+        .all()
+    )
+    return [
+        schemas.ProgressFull(
+            id=p.Progress.id,
+            course_code=p.Course.course_code,
+            course_name=p.Course.name_en if lang == "en" and p.Course.name_en else p.Course.name,
+            recommended_semester=p.CourseMajor.semester,
+            credit=p.CourseMajor.credit,
+            completed_semester=p.Progress.completed_semester,
+            status=STATUS_MAP[lang].get(p.Progress.status, p.Progress.status),
+            points=p.Progress.points,
+            category=CATEGORY_MAP[lang].get(getattr(p.CourseMajor, "type", None), getattr(p.CourseMajor, "type", None))
+        )
+        for p in results
+    ]
+
+@router.get("/{user_id}/requirements")
+def requirements_endpoint(
+    user_id: int,
+    lang: str = "hu",
+    db: Session = Depends(get_db)
+):
+    """
+    Egy felhasználó szakos követelményeinek, teljesített és hiányzó kreditjeinek, elérhető kurzusainak lekérdezése.
+
+    Args:
+        user_id (int): A felhasználó azonosítója.
+        lang (str): Nyelv ('hu' vagy 'en').
+        db (Session): SQLAlchemy adatbázis kapcsolat.
+
+    Returns:
+        dict: A követelmények, teljesített kreditek, elérhető kurzusok, stb.
+    """
+    return get_user_requirements(user_id, lang, db)
+
+@router.get("/{user_id}/template-xlsx")
+def template_xlsx(
+    user_id: int,
+    lang: str = "hu",
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Szakhoz tartozó összes tárgyat tartalmazó XLSX sablon generálása.
+    """
+    return generate_progress_template_xlsx(user_id, lang, db, current_user)
+
+
+@router.get("/{user_id}/export-xlsx")
+def export_xlsx(
+    user_id: int,
+    lang: str = "hu",
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    A felhasználó előrehaladásának exportja Excel (XLSX) formátumban.
+    """
+    return export_progress_xlsx(user_id, lang, db, current_user)
+
+
+@router.post("/{user_id}/import", dependencies=[Depends(get_current_user)])
+async def import_progress(
+    user_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Felhasználó előrehaladásának importálása XLSX-ből.
+    """
+    import_service = ProgressImportService(db)
+    return await import_service.import_progress(user_id, file)

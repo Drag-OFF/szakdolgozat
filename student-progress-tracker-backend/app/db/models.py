@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy import Enum as SqlEnum
+from datetime import datetime
 from sqlalchemy.orm import relationship
 from .database import Base
 from sqlalchemy.sql import func
@@ -34,6 +35,7 @@ class User(Base):
         reset_token_expires (datetime): Jelszó-visszaállító token lejárati ideje.
         role (str): Szerepkör (user/admin).
         created_at (datetime): Létrehozás ideje.
+        anonymous_name (str): Névtelen üzenetekhez használt név.
     """
     __tablename__ = "users"
 
@@ -49,10 +51,11 @@ class User(Base):
     major = Column(SqlEnum(*MAJOR_ENUM, name="major_enum"), nullable=False)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
-    reset_token = Column(String(255), nullable=True)  # ÚJ
-    reset_token_expires = Column(DateTime, nullable=True)  # ÚJ
+    reset_token = Column(String(255), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     role = Column(Enum('user', 'admin'), default='user')
     created_at = Column(DateTime, nullable=False, default=func.now())
+    anonymous_name = Column(String(32), unique=True, nullable=True)
 
     progress = relationship("Progress", back_populates="user")
     chat_messages = relationship("ChatMessage", back_populates="user")
@@ -65,22 +68,89 @@ class Course(Base):
         id (int): Kurzus azonosító.
         course_code (str): Kurzus kódja.
         name (str): Kurzus neve.
-        credit (int): Kredit érték.
-        recommended_semester (int): Ajánlott félév.
-        prerequisites (list[str]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (bool): Engedélyezett-e a párhuzamos teljesítés.
+        name_en (str): Kurzus neve angolul.
+
     """
     __tablename__ = "courses"
 
     id = Column(Integer, primary_key=True, index=True)
     course_code = Column(String(50), unique=True, nullable=False)
     name = Column(String(255), nullable=False)
-    credit = Column(Integer, nullable=False)
-    recommended_semester = Column(Integer, nullable=False)
-    prerequisites = Column(JSON, nullable=True)
-    allow_parallel_prerequisite = Column(Boolean, default=False)
+    name_en = Column(String(255), nullable=False)
 
     progress = relationship("Progress", back_populates="course")
+
+class Major(Base):
+    """
+    Szak adatbázis modell.
+
+    Attributes:
+        id (int): Szak azonosító.
+        name (str): Szak neve.
+    """
+    __tablename__ = "majors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), unique=True, nullable=False)
+
+class MajorRequirement(Base):
+    """
+    Szak követelmény adatbázis modell.
+
+    Attributes:
+        id (int): Követelmény azonosító.
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    __tablename__ = "majors_requirements"
+
+    id = Column(Integer, primary_key=True, index=True)
+    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False)
+    requirement_type = Column(String(50), nullable=False)
+    min_credits = Column(Integer, nullable=False)
+
+class CourseMajor(Base):
+    """
+    Kurzus-szak kapcsolat modell.
+
+    Attributes:
+        id (int): Kapcsolat azonosító.
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit.
+        semester (int): Ajánlott félév.
+        type (str): Típus (pl. kötelező/választható).
+        subgroup (str): Alcsoport (lehet NULL).
+        prerequisites (str): Előfeltételek (JSON vagy szöveg).
+    """
+    __tablename__ = "course_major"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    major_id = Column(Integer, ForeignKey("majors.id"), nullable=False)
+    credit = Column(Integer, nullable=False)
+    semester = Column(Integer, nullable=False)
+    type = Column(String(50), nullable=False)
+    subgroup = Column(String(50), nullable=True)
+    prerequisites = Column(Text, nullable=True)
+
+class CourseEquivalence(Base):
+    """
+    Kurzus ekvivalencia modell.
+
+    Attributes:
+        id (int): Ekvivalencia azonosító.
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    __tablename__ = "course_equivalence"
+
+    id = Column(Integer, primary_key=True, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    equivalent_course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    major_id = Column(Integer, ForeignKey("majors.id", ondelete="CASCADE"), nullable=False)
 
 class Progress(Base):
     """
@@ -117,6 +187,11 @@ class ChatMessage(Base):
         message (str): Üzenet szövege.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e az üzenet.
+        anonymous_name (str): Névtelen üzenetnél megjelenő név.
+        reply_to_id (int): Az azonosítója annak az üzenetnek, amire válaszol (ha van).
+        reply_to (ChatMessage): Az üzenet, amire válaszol (ha van).
+        user (User): Az üzenet szerzője.
+        reactions (List[ChatReaction]): Az üzenethez tartozó reakciók.
     """
     __tablename__ = "chat_messages"
 
@@ -126,5 +201,29 @@ class ChatMessage(Base):
     message = Column(Text, nullable=False)
     timestamp = Column(DateTime)
     anonymous = Column(Boolean, default=False)
-
+    anonymous_name = Column(String(32), nullable=True)
+    reply_to_id = Column(Integer, ForeignKey("chat_messages.id"), nullable=True)
+    reply_to = relationship("ChatMessage", remote_side=[id], uselist=False)
     user = relationship("User", back_populates="chat_messages")
+    reactions = relationship("ChatReaction", back_populates="message", cascade="all, delete-orphan")
+
+class ChatReaction(Base):
+    """
+    Egy reakció egy üzenethez. Egy felhasználó csak egy reakciót adhat egy üzenetre.
+
+    Attributes:
+        id (int): Reakció azonosító.
+        message_id (int): Az üzenet azonosítója, amelyhez a reakció tartozik.
+        user_id (int): A reakciót adó felhasználó azonosítója.
+        emoji (str): Az emoji karakter.
+        created_at (datetime): A reakció létrehozásának ideje.
+    """
+    __tablename__ = "chat_reaction"
+    id = Column(Integer, primary_key=True, index=True)
+    message_id = Column(Integer, ForeignKey("chat_messages.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    emoji = Column(String(32), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    __table_args__ = (UniqueConstraint("message_id", "user_id", name="unique_reaction_per_user_per_message"),)
+
+    message = relationship("ChatMessage", back_populates="reactions")

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, validator, EmailStr, Field
 import re
+from datetime import datetime
 from typing import Optional, List
 from datetime import date, datetime
 from enum import Enum
@@ -27,6 +28,7 @@ class UserBase(BaseModel):
         verified (bool): E-mail verifikáció.
         role (str): Szerepkör.
         created_at (datetime): Létrehozás ideje.
+        anonymous_name (Optional[str]): Anonim név, ha van.
     """
     uid: str
     email: str
@@ -39,6 +41,7 @@ class UserBase(BaseModel):
     verified: bool
     role: str
     created_at: datetime
+    anonymous_name: Optional[str] = None
 
 class UserCreate(BaseModel):
     """
@@ -114,6 +117,7 @@ class UserUpdate(BaseModel):
         role (Optional[str]): Szerepkör.
         created_at (Optional[datetime]): Létrehozás ideje.
         password_hash (Optional[str]): Jelszó hash.
+        anonymous_name (Optional[str]): Anonim név, ha van.
     """
     uid: Optional[str] = None
     email: Optional[str] = None
@@ -127,6 +131,7 @@ class UserUpdate(BaseModel):
     role: Optional[str] = None
     created_at: Optional[datetime] = None
     password_hash: Optional[str] = None
+    anonymous_name: Optional[str] = None
 
 class UserLogin(BaseModel):
     """
@@ -184,17 +189,9 @@ class CourseBase(BaseModel):
     Attributes:
         course_code (str): A kurzus kódja.
         name (str): A kurzus neve.
-        credit (int): A kredit érték.
-        recommended_semester (int): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: str
     name: str
-    credit: int
-    recommended_semester: int
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = False
 
 class CourseCreate(CourseBase):
     """
@@ -203,17 +200,9 @@ class CourseCreate(CourseBase):
     Attributes:
         course_code (str): A kurzus kódja.
         name (str): A kurzus neve.
-        credit (int): A kredit érték.
-        recommended_semester (int): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: str
     name: str
-    credit: int
-    recommended_semester: int
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = False
 
 class CourseUpdate(BaseModel):
     """
@@ -222,17 +211,9 @@ class CourseUpdate(BaseModel):
     Attributes:
         course_code (Optional[str]): A kurzus kódja.
         name (Optional[str]): A kurzus neve.
-        credit (Optional[int]): A kredit érték.
-        recommended_semester (Optional[int]): Az ajánlott félév.
-        prerequisites (Optional[List[str]]): Előfeltétel(ek) kurzuskód(ok) listája.
-        allow_parallel_prerequisite (Optional[bool]): Engedélyezett-e a párhuzamos teljesítés.
     """
     course_code: Optional[str] = None
     name: Optional[str] = None
-    credit: Optional[int] = None
-    recommended_semester: Optional[int] = None
-    prerequisites: Optional[List[str]] = None
-    allow_parallel_prerequisite: Optional[bool] = None
 
 class Course(CourseBase):
     """
@@ -244,6 +225,168 @@ class Course(CourseBase):
     """
     id: int
 
+    class Config:
+        from_attributes = True
+
+
+
+class MajorBase(BaseModel):
+    """
+    Szak alap séma.
+
+    Attributes:
+        name (str): Szak neve.
+    """
+    name: str
+
+class MajorCreate(MajorBase):
+    """
+    Szak létrehozási séma.
+
+    Attributes:
+        name (str): Szak neve.
+    """
+    pass
+
+class Major(MajorBase):
+    """
+    Szak séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Szak azonosító.
+        name (str): Szak neve.
+    """
+    id: int
+    class Config:
+        from_attributes = True
+
+class MajorRequirementBase(BaseModel):
+    """
+    Szak követelmény alap séma.
+
+    Attributes:
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    major_id: int
+    requirement_type: str
+    min_credits: int
+
+class MajorRequirementCreate(MajorRequirementBase):
+    """
+    Szak követelmény létrehozási séma.
+
+    Attributes:
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    pass
+
+class MajorRequirement(MajorRequirementBase):
+    """
+    Szak követelmény séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Követelmény azonosító.
+        major_id (int): Szak azonosító.
+        requirement_type (str): Követelmény típusa.
+        min_credits (int): Minimum kredit.
+    """
+    id: int
+    class Config:
+        from_attributes = True
+
+class CourseMajorBase(BaseModel):
+    """
+    Kurzus-szak kapcsolat alap séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus (pl. kötelező/választható).
+        subgroup (Optional[str]): Alcsoport (lehet None).
+        prerequisites (Optional[str]): Előfeltételek (JSON vagy szöveg, lehet None).
+    """
+    course_id: int
+    major_id: int
+    credit: int
+    semester: int
+    type: str
+    subgroup: Optional[str] = None
+    prerequisites: Optional[str] = None
+
+class CourseMajorCreate(CourseMajorBase):
+    """
+    Kurzus-szak kapcsolat létrehozási séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus.
+        subgroup (Optional[str]): Alcsoport.
+        prerequisites (Optional[str]): Előfeltételek.
+    """
+    pass
+
+class CourseMajor(CourseMajorBase):
+    """
+    Kurzus-szak kapcsolat séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Kapcsolat azonosító.
+        course_id (int): Kurzus azonosító.
+        major_id (int): Szak azonosító.
+        credit (int): Kredit érték.
+        semester (int): Ajánlott félév.
+        type (str): Típus.
+        subgroup (Optional[str]): Alcsoport.
+        prerequisites (Optional[str]): Előfeltételek.
+    """
+    id: int
+    class Config:
+        from_attributes = True
+
+class CourseEquivalenceBase(BaseModel):
+    """
+    Kurzus ekvivalencia alap séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    course_id: int
+    equivalent_course_id: int
+    major_id: int
+
+class CourseEquivalenceCreate(CourseEquivalenceBase):
+    """
+    Kurzus ekvivalencia létrehozási séma.
+
+    Attributes:
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    pass
+
+class CourseEquivalence(CourseEquivalenceBase):
+    """
+    Kurzus ekvivalencia séma (adatbázisból visszaadott).
+
+    Attributes:
+        id (int): Ekvivalencia azonosító.
+        course_id (int): Kurzus azonosító.
+        equivalent_course_id (int): Ekvivalens kurzus azonosító.
+        major_id (int): Szak azonosító.
+    """
+    id: int
     class Config:
         from_attributes = True
 
@@ -311,6 +454,20 @@ class Progress(ProgressBase):
     class Config:
         from_attributes = True
 
+class ProgressFull(BaseModel):
+    id: int
+    course_code: str
+    course_name: str
+    recommended_semester: int | None = None
+    credit: int | None = None
+    completed_semester: int | None = None
+    status: str
+    points: int | None = None
+    category: str | None = None
+
+    class Config:
+        from_attributes = True
+
 class ChatMessageBase(BaseModel):
     """
     Chat üzenet alap séma.
@@ -321,12 +478,20 @@ class ChatMessageBase(BaseModel):
         message (str): Üzenet.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: str
     user_id: Optional[int]
     message: str
     timestamp: datetime
     anonymous: bool
+    reply_to_id: Optional[int] = None
+
+class ChatUser(BaseModel):
+    id: int
+    name: str
+    neptun: str
+    role: str
 
 class ChatMessageCreate(ChatMessageBase):
     """
@@ -338,12 +503,14 @@ class ChatMessageCreate(ChatMessageBase):
         message (str): Üzenet.
         timestamp (datetime): Időbélyeg.
         anonymous (bool): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: str
     user_id: Optional[int]
     message: str
     timestamp: datetime
     anonymous: bool
+    reply_to_id: Optional[int] = None
 
 class ChatMessageUpdate(BaseModel):
     """
@@ -355,12 +522,14 @@ class ChatMessageUpdate(BaseModel):
         message (Optional[str]): Üzenet.
         timestamp (Optional[datetime]): Időbélyeg.
         anonymous (Optional[bool]): Névtelen-e.
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
     """
     major: Optional[str] = None
     user_id: Optional[int] = None
     message: Optional[str] = None
     timestamp: Optional[datetime] = None
     anonymous: Optional[bool] = None
+    reply_to_id: Optional[int] = None
 
 class ChatMessage(ChatMessageBase):
     """
@@ -371,6 +540,50 @@ class ChatMessage(ChatMessageBase):
         (A többi mező a ChatMessageBase-ből öröklődik.)
     """
     id: int
+
+    class Config:
+        from_attributes = True
+
+class ChatReactionBase(BaseModel):
+    emoji: str
+
+class ChatReactionCreate(ChatReactionBase):
+    message_id: int
+
+class ChatReactionOut(ChatReactionBase):
+    id: int
+    message_id: int
+    user_id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class ChatMessageOut(BaseModel):
+    """
+    Chat üzenet válasz séma (megjelenítéshez).
+
+    Attributes:
+        id (int): Üzenet azonosító.
+        major (str): Szak.
+        user_id (Optional[int]): Felhasználó ID.
+        message (str): Üzenet.
+        timestamp (datetime): Időbélyeg.
+        anonymous (bool): Névtelen-e.
+        display_name (str): Megjelenítendő név (név vagy anonymous_name).
+        display_neptun (Optional[str]): Megjelenítendő neptun kód (ha nem anonim).
+        reply_to_id (Optional[int]): Az üzenet, amire válaszol (ha van).
+        reactions (List[ChatReactionOut]): Reakciók.
+    """
+    id: int
+    major: str
+    user_id: Optional[int]
+    message: str
+    timestamp: datetime
+    anonymous: bool
+    display_name: str
+    display_neptun: Optional[str]
+    reply_to_id: Optional[int] = None
+    reactions: List[ChatReactionOut] = []
 
     class Config:
         from_attributes = True

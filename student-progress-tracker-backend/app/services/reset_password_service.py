@@ -10,6 +10,8 @@ def reset_password(db: Session, token: str, new_password: str):
     Megkeresi a felhasználót a reset_token alapján, ellenőrzi a lejáratot,
     majd beállítja az új hash-elt jelszót, törli a reset_token-t.
     """
+    if not token or len(token) < 16:
+        return False, "Hiányzó vagy érvénytelen token."
     user = db.query(UserModel).filter(UserModel.reset_token == token).first()
     if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
         return False, "Érvénytelen vagy lejárt token."
