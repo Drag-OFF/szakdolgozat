@@ -1,6 +1,13 @@
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 
+
+def _schema_to_dict(obj, exclude_unset: bool = False):
+    if hasattr(obj, "model_dump"):
+        return obj.model_dump(exclude_unset=exclude_unset)
+    return obj.dict(exclude_unset=exclude_unset)
+
+
 class CourseEquivalenceService:
     """
     Kurzus ekvivalenciákhoz tartozó adatbázis műveletek szolgáltatása.
@@ -53,7 +60,7 @@ class CourseEquivalenceService:
         Returns:
             CourseEquivalence: Létrehozott ekvivalencia.
         """
-        db_eq = models.CourseEquivalence(**eq.dict())
+        db_eq = models.CourseEquivalence(**_schema_to_dict(eq))
         self.db.add(db_eq)
         self.db.commit()
         self.db.refresh(db_eq)
@@ -73,7 +80,7 @@ class CourseEquivalenceService:
         db_eq = self.get_by_id(eq_id)
         if not db_eq:
             return None
-        for key, value in eq.dict(exclude_unset=True).items():
+        for key, value in _schema_to_dict(eq, exclude_unset=True).items():
             setattr(db_eq, key, value)
         self.db.commit()
         self.db.refresh(db_eq)

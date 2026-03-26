@@ -10,8 +10,48 @@ export default function UsersPanel() {
   const { authFetch } = useAuthFetch();
   const { lang } = useLang();
   const t = lang === "en"
-    ? { search: "Search...", prev: "Prev", page: "Page", next: "Next", total: "records total", yes: "Yes", no: "No" }
-    : { search: "Keresés...", prev: "Előző", page: "Oldal", next: "Következő", total: "rekord összesen", yes: "Igen", no: "Nem" };
+    ? {
+        search: "Search...",
+        prev: "Prev",
+        page: "Page",
+        next: "Next",
+        total: "records total",
+        yes: "Yes",
+        no: "No",
+        lfEmail: "Email",
+        lhEmail: "Maps to table column “Email”.",
+        lfName: "Display name",
+        lhName: "Maps to table column “Name”.",
+        lfAdmin: "Administrator",
+        lhAdmin: "Maps to table column “Admin” (role).",
+        phEmail: "user@example.com",
+        phName: "Name shown in the app",
+        tiEmail: "Login email address. Must stay unique. Shown in the “Email” column.",
+        tiName: "Display name for this user. Shown in the “Name” column.",
+        tiAdmin: "Check to grant admin rights (full access). Reflected in the “Admin” column.",
+        grantAdmin: "Grant admin role"
+      }
+    : {
+        search: "Keresés...",
+        prev: "Előző",
+        page: "Oldal",
+        next: "Következő",
+        total: "rekord összesen",
+        yes: "Igen",
+        no: "Nem",
+        lfEmail: "E-mail",
+        lhEmail: "A táblázat „Email” oszlopába kerül.",
+        lfName: "Megjelenő név",
+        lhName: "A táblázat „Név” oszlopába kerül.",
+        lfAdmin: "Adminisztrátor",
+        lhAdmin: "A táblázat „Admin” (szerepkör) oszlopába kerül.",
+        phEmail: "pelda@email.hu",
+        phName: "A felületen megjelenő név",
+        tiEmail: "Bejelentkezési e-mail; egyedinek kell maradnia. Az „Email” oszlopban látszik.",
+        tiName: "Felhasználó megjelenő neve. A „Név” oszlopban látszik.",
+        tiAdmin: "Pipáld be, ha a felhasználónak admin jogosultság kell (teljes hozzáférés). Az „Admin” oszlopban látszik.",
+        grantAdmin: "Admin jogosultság"
+      };
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -54,7 +94,7 @@ export default function UsersPanel() {
     if (!u) return alert("Nincs ilyen felhasználó");
     const isAdmin = Boolean(u.is_admin) || String(u.role || "").toLowerCase() === "admin";
     setForm({ id: u.id, email: u.email||"", name: u.name||"", is_admin: isAdmin });
-    setShowForm(true); window.scrollTo({top:0});
+    setShowForm(true);
   };
 
   const submit = async (e) => {
@@ -89,15 +129,37 @@ export default function UsersPanel() {
       </div>
 
       {showForm && form.id && (  // csak meglévő user szerkesztésekor jelenjen meg az űrlap
-        <form onSubmit={submit} style={{display:"flex", gap:8, marginBottom:8, flexWrap:"wrap"}}>
-          <input placeholder="Email" value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />
-          <input placeholder="Név" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} />
-          <label style={{display:"flex",alignItems:"center",gap:6}}>
-            <input type="checkbox" checked={form.is_admin} onChange={e=>setForm(f=>({...f,is_admin:e.target.checked}))} /> Admin
-          </label>
-          <div style={{display:"flex",gap:8}}>
-            <button type="submit">Módosít</button>
-            <button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,email:"",name:"",is_admin:false}); }}>Mégse</button>
+        <form onSubmit={submit} className="admin-form-grid admin-form-grid--align-start admin-form-grid--fit">
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.lfEmail}</div>
+            <div className="admin-form-control-wrap">
+              <input className="progress-input" placeholder={t.phEmail} title={t.tiEmail} value={form.email} onChange={e=>setForm(f=>({...f,email:e.target.value}))} />
+            </div>
+            <div className="admin-form-col-hint">{t.lhEmail}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.lfName}</div>
+            <div className="admin-form-control-wrap">
+              <input className="progress-input" placeholder={t.phName} title={t.tiName} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} />
+            </div>
+            <div className="admin-form-col-hint">{t.lhName}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.lfAdmin}</div>
+            <div className="admin-form-control-wrap" title={t.tiAdmin}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, minHeight: 36 }}>
+                <input type="checkbox" checked={form.is_admin} onChange={e=>setForm(f=>({...f,is_admin:e.target.checked}))} />
+                {t.grantAdmin}
+              </label>
+            </div>
+            <div className="admin-form-col-hint">{t.lhAdmin}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
+            <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
+              <button type="submit">Módosít</button>
+              <button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,email:"",name:"",is_admin:false}); }}>Mégse</button>
+            </div>
+            <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
         </form>
       )}

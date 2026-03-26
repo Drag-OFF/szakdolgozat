@@ -104,7 +104,6 @@ class MajorRequirementRule(Base):
     value_type = Column(String(20), nullable=False, default="credits")  # credits/count/hours
     min_value = Column(Integer, nullable=False, default=0)
     include_in_total = Column(Boolean, nullable=False, default=True)
-    sort_order = Column(Integer, nullable=False, default=0)
 
 class CourseMajor(Base):
     """

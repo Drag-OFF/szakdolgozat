@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.db import models, schemas
+from app.services.major_requirement_rule_order import major_requirement_rule_sort_key
 
 
 class MajorRequirementRulesService:
@@ -13,12 +14,12 @@ class MajorRequirementRulesService:
         return self.db.query(models.MajorRequirementRule).filter(models.MajorRequirementRule.id == rule_id).first()
 
     def get_by_major_id(self, major_id: int):
-        return (
+        items = (
             self.db.query(models.MajorRequirementRule)
             .filter(models.MajorRequirementRule.major_id == major_id)
-            .order_by(models.MajorRequirementRule.sort_order.asc(), models.MajorRequirementRule.id.asc())
             .all()
         )
+        return sorted(items, key=major_requirement_rule_sort_key)
 
     def create(self, payload: schemas.MajorRequirementRuleCreate):
         obj = models.MajorRequirementRule(**payload.dict())

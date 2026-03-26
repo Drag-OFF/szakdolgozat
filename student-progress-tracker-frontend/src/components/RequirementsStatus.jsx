@@ -99,6 +99,166 @@ function SummaryTable({ data, lang }) {
   );
 }
 
+function hasNamedSubgroup(sg) {
+  const s = String(sg ?? "").trim();
+  return s.length > 0 && s !== "__NULL__";
+}
+
+function excessForRow(r) {
+  if (r.excess != null && !Number.isNaN(Number(r.excess))) return Math.max(0, Number(r.excess));
+  const c = Number(r.completed ?? 0);
+  const req = Number(r.required ?? 0);
+  return Math.max(0, c - req);
+}
+
+/** Fő csoport a táblázat sorrendjéhez (backend logikával egyezően). */
+function displayBucket(r) {
+  const rt = String(r.requirement_type || "").trim();
+  const sg = String(r.subgroup ?? "").trim();
+  if (rt === "practice" || sg === "practice_hours") return "practice";
+  return rt || "other";
+}
+
+function groupRequirementsBySection(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const groups = [];
+  let cur = null;
+  for (const r of list) {
+    const typeKey = displayBucket(r);
+    if (!cur || cur.type !== typeKey) {
+      cur = { type: typeKey, rows: [] };
+      groups.push(cur);
+    }
+    cur.rows.push(r);
+  }
+  return groups;
+}
+
+function sectionTitleForType(typeKey, lang) {
+  const m = {
+    required: { hu: "Kötelező", en: "Required" },
+    elective: { hu: "Kötelezően választható", en: "Compulsory elective" },
+    optional: { hu: "Szabadon választható", en: "Free elective" },
+    pe: { hu: "Testnevelés", en: "Physical education" },
+    practice: { hu: "Szakmai gyakorlat", en: "Internship / practice" },
+    other: { hu: "Egyéb", en: "Other" }
+  };
+  const x = m[typeKey] || m.other;
+  return lang === "en" ? x.en : x.hu;
+}
+
+/** Egy csoporton belüli szabályokhoz: ha mind ugyanaz a mérték, megjeleníthető utótag. */
+function unitLabelForGroup(groupRows, lang) {
+  if (!groupRows.length) return "";
+  const types = [...new Set(groupRows.map(r => String(r.value_type || "credits").toLowerCase()))];
+  if (types.length !== 1) return lang === "en" ? " (mixed units)" : " (vegyes mérték)";
+  const v = types[0];
+  if (v === "hours") return lang === "en" ? " h" : " ó";
+  if (v === "count") return lang === "en" ? " (count)" : " db";
+  return lang === "en" ? " cr" : " kr";
+}
+
+function DynamicGroupSummaryTotals({ rows, lang }) {
+  const groups = groupRequirementsBySection(rows);
+  const t = lang === "en"
+    ? {
+        title: "At a glance — main categories",
+        missing: "Missing (total)",
+        over: "Over (total)",
+        noneShort: "Nothing missing",
+        foot: "Per-rule breakdown is in the table below."
+      }
+    : {
+        title: "Gyors összesítés — fő kategóriák",
+        missing: "Hiány összesen",
+        over: "Túlteljesítés összesen",
+        noneShort: "Nincs hiány",
+        foot: "Szabályonkénti részletek lent a táblázatban."
+      };
+
+  const renderRowNums = (r, unit) => {
+    const sumMissing = Number(r.missing ?? 0);
+    const sumExcess = excessForRow(r);
+    return (
+      <span className="req-group-totals-nums">
+        {sumMissing > 0 ? (
+          <span className="req-group-totals-miss">
+            {t.missing}: {sumMissing}
+            {unit}
+          </span>
+        ) : (
+          <span className="req-group-totals-ok">{t.noneShort}</span>
+        )}
+        {sumExcess > 0 ? (
+          <span className="req-group-totals-over">
+            {" · "}
+            {t.over}: +{sumExcess}
+            {unit}
+          </span>
+        ) : null}
+      </span>
+    );
+  };
+
+  return (
+    <div className="req-group-totals" role="region" aria-label={t.title}>
+      <h3 className="req-group-totals-title">{t.title}</h3>
+      <ul className="req-group-totals-list">
+        {groups.map(g => {
+          const sectionLabel = sectionTitleForType(g.type, lang);
+          const multi = g.rows.length > 1;
+
+          if (multi) {
+            return (
+              <li key={g.type} className="req-group-totals-item req-group-totals-item--group">
+                <div className="req-group-totals-group-head">{sectionLabel}</div>
+                <ul className="req-group-totals-sublist">
+                  {g.rows.map(r => {
+                    const unit = unitLabelForGroup([r], lang);
+                    const rowKey = r.id ?? r.code ?? `${g.type}-${r.label}`;
+                    const rowTitle = (r.label || r.code || "").trim() || sectionLabel;
+                    return (
+                      <li key={rowKey} className="req-group-totals-subitem">
+                        <span className="req-group-totals-cat req-group-totals-cat--sub">{rowTitle}</span>
+                        {renderRowNums(r, unit)}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </li>
+            );
+          }
+
+          const r = g.rows[0];
+          const unit = unitLabelForGroup(g.rows, lang);
+          const rowTitle =
+            (r.label || r.code || "").trim() || sectionLabel;
+          return (
+            <li key={g.type} className="req-group-totals-item">
+              <span className="req-group-totals-cat">{rowTitle}</span>
+              {renderRowNums(r, unit)}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="req-group-totals-foot">{t.foot}</p>
+    </div>
+  );
+}
+
+/** Rövid alcím csak kötvál sorokhoz — mi számít bele. */
+function electiveRowHint(r, lang) {
+  if (r.requirement_type !== "elective") return null;
+  const raw = r.subgroup;
+  if (raw == null || String(raw).trim() === "") {
+    return lang === "en" ? "All compulsory-elective courses (no subgroup filter)" : "Minden kötvál kurzus (nincs alcsoport-szűrés)";
+  }
+  if (String(raw).trim() === "__NULL__") {
+    return lang === "en" ? "Only courses with no subgroup tag" : "Csak alcsoport nélküli kötvál kurzusok";
+  }
+  return lang === "en" ? `Block: ${raw}` : `Blokk: ${raw}`;
+}
+
 function DynamicSummaryTable({ rows, lang }) {
   const t = lang === "en"
     ? {
@@ -106,19 +266,21 @@ function DynamicSummaryTable({ rows, lang }) {
         category: "Category",
         completed: "Completed",
         required: "Required",
-        missing: "Missing"
+        missing: "Missing",
+        overFulfillment: "over target"
       }
     : {
         aria: "Dinamikus követelmények összegzés",
         category: "Kategória",
         completed: "Teljesített",
         required: "Szükséges",
-        missing: "Hiányzik"
+        missing: "Hiányzik",
+        overFulfillment: "túlteljesítés"
       };
-  const safeRows = Array.isArray(rows) ? rows : [];
+  const groups = groupRequirementsBySection(rows);
   return (
     <div className="req-summary">
-      <table className="req-summary-table" role="table" aria-label={t.aria}>
+      <table className="req-summary-table req-summary-table--grouped" role="table" aria-label={t.aria}>
         <thead>
           <tr>
             <th>{t.category}</th>
@@ -128,13 +290,47 @@ function DynamicSummaryTable({ rows, lang }) {
           </tr>
         </thead>
         <tbody>
-          {safeRows.map(r => (
-            <tr key={r.id || r.code || r.label}>
-              <td className="cat">{r.label || r.code}</td>
-              <td className="num">{r.completed ?? 0}</td>
-              <td className="num">{r.required ?? 0}</td>
-              <td className="num missing">{r.missing ?? 0}</td>
-            </tr>
+          {groups.map(g => (
+            <React.Fragment key={g.type}>
+              <tr className="req-section-header-row">
+                <td colSpan={4}>{sectionTitleForType(g.type, lang)}</td>
+              </tr>
+              {g.rows.map(r => {
+                const namedSg = hasNamedSubgroup(r.subgroup);
+                const elective = r.requirement_type === "elective";
+                const ex = excessForRow(r);
+                const hint = electiveRowHint(r, lang);
+                const rowClass = [
+                  "req-data-row",
+                  namedSg ? "req-rule-subgroup-row" : "",
+                  elective && namedSg ? "req-rule-elective-block" : "",
+                  elective && !namedSg ? "req-rule-elective-inner" : ""
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+                return (
+                  <tr key={r.id || r.code || r.label} className={rowClass}>
+                    <td className={`cat${namedSg ? " req-cat-indent" : ""}${elective && namedSg ? " req-cat-indent--deep" : ""}`}>
+                      <div className="req-cat-title">{r.label || r.code}</div>
+                      {hint ? <div className="req-cat-hint">{hint}</div> : null}
+                    </td>
+                    <td className="num">{r.completed ?? 0}</td>
+                    <td className="num">{r.required ?? 0}</td>
+                    <td className="num">
+                      {ex > 0 ? (
+                        <span className="req-over-fulfill" title={t.overFulfillment}>
+                          +{ex}
+                        </span>
+                      ) : (
+                        <span className={(r.missing ?? 0) > 0 ? "req-missing-short" : "req-missing-ok"}>
+                          {r.missing ?? 0}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </React.Fragment>
           ))}
         </tbody>
       </table>
@@ -142,8 +338,11 @@ function DynamicSummaryTable({ rows, lang }) {
   );
 }
 
-export default function RequirementsStatus() {
+export default function RequirementsStatus({ embedded = false }) {
   const user = getUserObject();
+  const statusRootClass = embedded
+    ? "requirements-status requirements-status--embedded"
+    : "requirements-status";
   const [req, setReq] = useState(null);
   const [loading, setLoading] = useState(true);
   const { lang } = useLang();
@@ -218,8 +417,9 @@ export default function RequirementsStatus() {
   if (req.mode === "dynamic" && Array.isArray(req.requirements)) {
     const dynRows = req.requirements;
     return (
-      <div className="requirements-status">
-        <h2>{t.title}</h2>
+      <div className={statusRootClass}>
+        {!embedded && <h2>{t.title}</h2>}
+        <DynamicGroupSummaryTotals rows={dynRows} lang={lang} />
         <DynamicSummaryTable rows={dynRows} lang={lang} />
 
         {dynRows.map(r => (
@@ -295,8 +495,8 @@ export default function RequirementsStatus() {
   };
 
   return (
-    <div className="requirements-status">
-      <h2>{t.title}</h2>
+    <div className={statusRootClass}>
+      {!embedded && <h2>{t.title}</h2>}
       {/* összegző táblázat — használd a backend által visszaadott req.summary vagy a fő req objektumot */}
       <SummaryTable data={req?.summary || summaryData} lang={lang} />
 

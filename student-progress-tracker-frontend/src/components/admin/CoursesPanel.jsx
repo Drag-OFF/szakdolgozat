@@ -14,14 +14,38 @@ export default function CoursesPanel() {
         prev: "Prev",
         page: "Page",
         next: "Next",
-        total: "records total"
+        total: "records total",
+        fCourseCode: "Course code",
+        hCourseCode: "Maps to table column “Course code”.",
+        fNameHu: "Name (HU)",
+        hNameHu: "Maps to table column “Name (HU)”.",
+        fNameEn: "Name (EN)",
+        hNameEn: "Maps to table column “Name (EN)”.",
+        phCode: "e.g. ABC123 — unique code",
+        phNameHu: "Course title in Hungarian",
+        phNameEn: "Course title in English (optional)",
+        tiCode: "Short unique identifier for the course. Shown in the “Course code” column.",
+        tiNameHu: "Official Hungarian name. Shown in the “Name (HU)” column.",
+        tiNameEn: "English name if available. Shown in the “Name (EN)” column."
       }
     : {
         search: "Keresés kurzus kód / név...",
         prev: "Előző",
         page: "Oldal",
         next: "Következő",
-        total: "rekord összesen"
+        total: "rekord összesen",
+        fCourseCode: "Kurzus kód",
+        hCourseCode: "A táblázat „Kurzus kód” oszlopába kerül.",
+        fNameHu: "Név (magyar)",
+        hNameHu: "A táblázat „Név (HU)” oszlopába kerül.",
+        fNameEn: "Név (angol)",
+        hNameEn: "A táblázat „Név (EN)” oszlopába kerül.",
+        phCode: "pl. ABC123 — egyedi azonosító",
+        phNameHu: "A kurzus megnevezése magyarul",
+        phNameEn: "Angol megnevezés (ha van)",
+        tiCode: "Rövid, egyedi kurzuskód. A „Kurzus kód” oszlopban jelenik meg.",
+        tiNameHu: "A kurzus hivatalos magyar neve. A „Név (HU)” oszlopban látszik.",
+        tiNameEn: "Angol név, ha van. A „Név (EN)” oszlopban látszik."
       };
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,13 +78,13 @@ export default function CoursesPanel() {
   useEffect(()=>{ if (page >= totalPages) setPage(Math.max(0,totalPages-1)); }, [filtered.length, totalPages]);
   const displayed = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  const openCreate = () => { setForm({id:null, course_code:"", name:"", name_en:""}); setShowForm(true); window.scrollTo({top:0}); };
+  const openCreate = () => { setForm({id:null, course_code:"", name:"", name_en:""}); setShowForm(true); };
   const openEdit = () => {
     if (!selectedId) return alert("Válassz kurzust");
     const c = items.find(x=>String(x.id)===String(selectedId));
     if (!c) return alert("Nincs ilyen kurzus");
     setForm({ id:c.id, course_code:c.course_code||"", name:c.name||"", name_en:c.name_en||"" });
-    setShowForm(true); window.scrollTo({top:0});
+    setShowForm(true);
   };
 
   const submit = async (e) => {
@@ -94,13 +118,34 @@ export default function CoursesPanel() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} style={{display:"flex", gap:8, marginBottom:8, flexWrap:"wrap"}}>
-          <input placeholder="Kurzus kód" value={form.course_code} onChange={e=>setForm(f=>({...f,course_code:e.target.value}))} />
-          <input placeholder="Név (HU)" value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} />
-          <input placeholder="Név (EN)" value={form.name_en} onChange={e=>setForm(f=>({...f,name_en:e.target.value}))} />
-          <div style={{display:"flex",gap:8}}>
-            <button type="submit">{form.id ? "Módosít" : "Létrehoz"}</button>
-            <button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,course_code:"",name:"",name_en:""}); }}>Mégse</button>
+        <form onSubmit={submit} className="admin-form-grid admin-form-grid--align-start admin-form-grid--fit">
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.fCourseCode}</div>
+            <div className="admin-form-control-wrap">
+              <input className="progress-input" placeholder={t.phCode} title={t.tiCode} value={form.course_code} onChange={e=>setForm(f=>({...f,course_code:e.target.value}))} />
+            </div>
+            <div className="admin-form-col-hint">{t.hCourseCode}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.fNameHu}</div>
+            <div className="admin-form-control-wrap">
+              <input className="progress-input" placeholder={t.phNameHu} title={t.tiNameHu} value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} />
+            </div>
+            <div className="admin-form-col-hint">{t.hNameHu}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.fNameEn}</div>
+            <div className="admin-form-control-wrap">
+              <input className="progress-input" placeholder={t.phNameEn} title={t.tiNameEn} value={form.name_en} onChange={e=>setForm(f=>({...f,name_en:e.target.value}))} />
+            </div>
+            <div className="admin-form-col-hint">{t.hNameEn}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
+            <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
+              <button type="submit">{form.id ? "Módosít" : "Létrehoz"}</button>
+              <button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,course_code:"",name:"",name_en:""}); }}>Mégse</button>
+            </div>
+            <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
         </form>
       )}

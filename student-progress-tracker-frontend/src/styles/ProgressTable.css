@@ -118,6 +118,47 @@
 /* védelem: ha mindkét panel nyitva van, legyen elég hely a footer fölött (nem a teljes boxra vonatkozik) */
 .progress-tracker-container { padding-bottom: 220px; }
 
+/* Előrehaladás oldal: ugyanaz a vízszintes margó és teljes szélesség, mint az Admin oldalon */
+.progress-tracker-layout {
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 48px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
+.progress-tracker-layout .admin-card {
+  margin-bottom: 12px;
+}
+
+/* Statikus szekciócím (nem lenyíló): admin-fejléchez hasonló megjelenés */
+.progress-section-title {
+  margin: 0 0 12px 0;
+  padding: 10px 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-dark, #155a9a);
+  background: linear-gradient(180deg, #f7fbff, #eef6ff);
+  border: 1px solid #e6f6ff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(10, 60, 120, 0.04);
+  line-height: 1.25;
+}
+
+/* Kurzus táblázat lapozás — ugyanaz a sorrend mint az admin Kurzusok panelen */
+.progress-courses-pagination {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.progress-courses-pagination-total {
+  margin-left: auto;
+}
+
 /* oszlopok szélessége (procent alapú, finomhangolható) */
 /* 1: Kód, 2: Név, 3: Kategória, 4: Ajánlott félév, 5: Kredit, 6: Teljesítés féléve, 7: Státusz, 8: Pontszám */
 .progress-tracker-container .progress-table th:nth-child(1),

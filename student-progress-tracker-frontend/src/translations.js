@@ -72,7 +72,9 @@ export const PROGRESS_LABELS = {
     noResults: "Nincs találat",
     loadErrorPrefix: "Hiba a betöltéskor:",
     templateDownloadFailed: "Sablon letöltése sikertelen.",
-    assignButtonTitle: "Hozzárendelés a kijelölt felhasználóhoz"
+    assignButtonTitle: "Hozzárendelés a kijelölt felhasználóhoz",
+    searchLabel: "Keresés a felhasználói táblázatban",
+    searchHint: "Szűrés ugyanazokon az adatokon, mint az oszlopok: #, név, Neptun, szak, email"
   },
   en: {
     title: "Upload progress template",
@@ -98,6 +100,8 @@ export const PROGRESS_LABELS = {
     noResults: "No results",
     loadErrorPrefix: "Error loading users:",
     templateDownloadFailed: "Template download failed.",
+    searchLabel: "Search in user table",
+    searchHint: "Filters the same fields as columns: #, name, Neptun, major, email",
     assignButtonTitle: "Assign to selected user"
   }
 };
@@ -369,7 +373,11 @@ export const PROGRESS_TRACKER_LABELS = {
     uploadFailed: "Hiba történt a feltöltés során!",
     uploadSuccess: "Sikeres feltöltés!",
     noSaved: "Nincs elmentett kurzusod.",
-    requirementsTitle: "Követelmények állapota"
+    requirementsTitle: "Követelmények állapota",
+    prev: "Előző",
+    page: "Oldal",
+    next: "Következő",
+    total: "rekord összesen"
   },
   en: {
     loginRequired: "Sign in to view your progress!",
@@ -378,6 +386,10 @@ export const PROGRESS_TRACKER_LABELS = {
     uploadFailed: "Upload failed!",
     uploadSuccess: "Upload successful!",
     noSaved: "No saved courses.",
-    requirementsTitle: "Requirements status"
+    requirementsTitle: "Requirements status",
+    prev: "Prev",
+    page: "Page",
+    next: "Next",
+    total: "records total"
   }
 };

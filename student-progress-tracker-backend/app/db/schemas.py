@@ -335,7 +335,6 @@ class MajorRequirementRuleBase(BaseModel):
     value_type: str = "credits"  # credits | count | hours
     min_value: int = 0
     include_in_total: bool = True
-    sort_order: int = 0
 
 class MajorRequirementRuleCreate(MajorRequirementRuleBase):
     pass
@@ -349,7 +348,6 @@ class MajorRequirementRuleUpdate(BaseModel):
     value_type: Optional[str] = None
     min_value: Optional[int] = None
     include_in_total: Optional[bool] = None
-    sort_order: Optional[int] = None
 
 class MajorRequirementRule(MajorRequirementRuleBase):
     id: int

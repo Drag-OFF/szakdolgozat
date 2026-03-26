@@ -16,7 +16,13 @@ const ADMIN_MAJORS_TEXTS = {
     cancel: "Mégse",
     loading: "Szakok betöltése...",
     name: "Szak megnevezése (HU)",
+    nameColHint: "A táblázat szaknév (HU) oszlopába kerül.",
     nameEn: "Szak megnevezése (EN)",
+    nameEnColHint: "A táblázat angol név oszlopába kerül (ha kitöltöd).",
+    phName: "pl. Informatika BSc",
+    phNameEn: "pl. Computer Science BSc",
+    tiName: "A szak megnevezése magyarul — a táblázat első név oszlopa.",
+    tiNameEn: "Angol megnevezés; a táblázat angol oszlopában jelenik meg.",
     save: "Mentés",
     update: "Frissítés",
     reload: "↻",
@@ -36,7 +42,13 @@ const ADMIN_MAJORS_TEXTS = {
     cancel: "Cancel",
     loading: "Loading majors...",
     name: "Major name (HU)",
+    nameColHint: "Maps to the table’s Hungarian name column.",
     nameEn: "Major name (EN)",
+    nameEnColHint: "Maps to the English name column when provided.",
+    phName: "e.g. Computer Science BSc",
+    phNameEn: "e.g. Computer Science BSc",
+    tiName: "Hungarian name of the major — shown in the first name column.",
+    tiNameEn: "English name; shown in the English column.",
     save: "Save",
     update: "Update",
     reload: "↻",
@@ -103,7 +115,6 @@ export default function MajorsPanel() {
   const openCreate = () => {
     setForm({ id: null, name: "", name_en: "" });
     setShowForm(true);
-    window.scrollTo({ top: 0 });
   };
 
   const openEdit = () => {
@@ -112,7 +123,6 @@ export default function MajorsPanel() {
     if (!m) return alert(lang === "en" ? "No such row." : "Nincs ilyen rekord");
     setForm({ id: m.id, name: m.name || "", name_en: m.name_en || "" });
     setShowForm(true);
-    window.scrollTo({ top: 0 });
   };
 
   const submit = async (e) => {
@@ -182,22 +192,41 @@ export default function MajorsPanel() {
       </div>
 
       {showForm && (
-        <form onSubmit={submit} style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-          <input
-            placeholder={t.name}
-            value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-            style={{ flex: 1, minWidth: 220 }}
-          />
-          <input
-            placeholder={t.nameEn}
-            value={form.name_en}
-            onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))}
-            style={{ flex: 1, minWidth: 220 }}
-          />
-          <div style={{ display: "flex", gap: 8 }}>
-            <button type="submit">{form.id ? t.update : t.save}</button>
-            <button type="button" onClick={() => setShowForm(false)}>{t.cancel}</button>
+        <form onSubmit={submit} className="admin-form-grid admin-form-grid--align-start admin-form-grid--fit">
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.name}</div>
+            <div className="admin-form-control-wrap">
+              <input
+                className="progress-input"
+                placeholder={t.phName}
+                title={t.tiName}
+                value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                style={{ width: "100%" }}
+              />
+            </div>
+            <div className="admin-form-col-hint">{t.nameColHint}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.nameEn}</div>
+            <div className="admin-form-control-wrap">
+              <input
+                className="progress-input"
+                placeholder={t.phNameEn}
+                title={t.tiNameEn}
+                value={form.name_en}
+                onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))}
+                style={{ width: "100%" }}
+              />
+            </div>
+            <div className="admin-form-col-hint">{t.nameEnColHint}</div>
+          </div>
+          <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
+            <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
+              <button type="submit">{form.id ? t.update : t.save}</button>
+              <button type="button" onClick={() => setShowForm(false)}>{t.cancel}</button>
+            </div>
+            <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
         </form>
       )}

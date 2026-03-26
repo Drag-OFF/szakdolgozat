@@ -17,3 +17,4 @@ email-validator
 passlib
 python-multipart
 mailjet-rest
+cryptography

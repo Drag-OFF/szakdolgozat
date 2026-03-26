@@ -7,14 +7,16 @@ elérhető kurzusainak kiszámításához szükséges segédfüggvényeket és a
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+from app.services.major_requirement_rule_order import major_requirement_rule_sort_key
+
 
 def get_dynamic_rules(major_id: int, db: Session):
-    return db.execute(text("""
-        SELECT id, major_id, code, label_hu, label_en, requirement_type, subgroup, value_type, min_value, include_in_total, sort_order
+    rows = db.execute(text("""
+        SELECT id, major_id, code, label_hu, label_en, requirement_type, subgroup, value_type, min_value, include_in_total
         FROM major_requirement_rules
         WHERE major_id = :mid
-        ORDER BY sort_order ASC, id ASC
     """), {"mid": major_id}).fetchall()
+    return sorted(rows, key=major_requirement_rule_sort_key)
 
 def get_major_and_requirements(user_id: int, db: Session):
     """
@@ -70,6 +72,26 @@ def get_completed_courses(user_id: int, db: Session) -> set:
         """), {"uid": user_id}).fetchall()
     )
 
+def _pe_course_major_where(subgroup) -> tuple[str, dict]:
+    """
+    Testnevelés (PE) sorok szűrése a course_major táblán — összhangban a get_pe_semesters logikájával:
+    (type = 'pe' OR subgroup = 'pe'). Ha a szabály subgroupja 'pe', de a kurzus csak type='pe'
+    üres subgroupbal van felvéve, az is ide tartozik (tipikus admin-beállítás).
+    """
+    base = "(cm.type = 'pe' OR cm.subgroup = 'pe')"
+    if subgroup == "__NULL__":
+        return base + " AND cm.subgroup IS NULL", {}
+    if subgroup:
+        sg = str(subgroup).strip()
+        if sg == "pe":
+            return (
+                base + " AND (cm.subgroup = :sg OR (cm.subgroup IS NULL AND cm.type = 'pe'))",
+                {"sg": sg},
+            )
+        return base + " AND cm.subgroup = :sg", {"sg": sg}
+    return base, {}
+
+
 def is_group_completed(course_ids: set, completed_courses: set) -> bool:
     """
     Megmondja, hogy egy ekvivalens kurzuscsoportból legalább egy teljesítve van-e.
@@ -101,8 +123,13 @@ def get_group_credit(course_ids: set, type_: str, db: Session, major_id: int, su
         sql = "SELECT credit FROM course_major WHERE course_id = :cid AND major_id = :mid AND type = :type"
         params = {"cid": cid, "mid": major_id, "type": type_}
         if subgroup:
-            sql += " AND subgroup = :sg"
-            params["sg"] = subgroup
+            sg = str(subgroup).strip()
+            if type_ == "pe" and sg == "pe":
+                sql += " AND (subgroup = :sg OR (subgroup IS NULL AND type = 'pe'))"
+                params["sg"] = sg
+            else:
+                sql += " AND subgroup = :sg"
+                params["sg"] = subgroup
         credit = db.execute(text(sql), params).scalar()
         if credit:
             return credit
@@ -123,19 +150,28 @@ def get_credits_with_equiv(type_: str, db: Session, major_id: int, completed_cou
     Returns:
         int: Teljesített kreditek száma.
     """
-    sql = """
-        SELECT cm.course_id
-        FROM course_major cm
-        WHERE cm.major_id = :mid AND cm.type = :type
-    """
-    params = {"mid": major_id, "type": type_}
-    if subgroup == "__NULL__":
-        sql += " AND cm.subgroup IS NULL"
-    elif subgroup == "elective_non_core_credits":
-        sql += " AND cm.subgroup IS NULL"
-    elif subgroup:
-        sql += " AND cm.subgroup = :sg"
-        params["sg"] = subgroup
+    if type_ == "pe":
+        frag, extra = _pe_course_major_where(subgroup)
+        sql = f"""
+            SELECT cm.course_id
+            FROM course_major cm
+            WHERE cm.major_id = :mid AND {frag}
+        """
+        params = {"mid": major_id, **extra}
+    else:
+        sql = """
+            SELECT cm.course_id
+            FROM course_major cm
+            WHERE cm.major_id = :mid AND cm.type = :type
+        """
+        params = {"mid": major_id, "type": type_}
+        if subgroup == "__NULL__":
+            sql += " AND cm.subgroup IS NULL"
+        elif subgroup == "elective_non_core_credits":
+            sql += " AND cm.subgroup IS NULL"
+        elif subgroup:
+            sql += " AND cm.subgroup = :sg"
+            params["sg"] = subgroup
     if exclude_subgroup:
         sql += " AND (cm.subgroup IS NULL OR cm.subgroup != :exsg)"
         params["exsg"] = exclude_subgroup
@@ -168,20 +204,30 @@ def get_available_with_equiv(type_: str, db: Session, major_id: int, completed_c
     Returns:
         list: Elérhető kurzusok listája.
     """
-    sql = """
-        SELECT cm.course_id, c.course_code, c.name, c.name_en, cm.semester, cm.credit
-        FROM course_major cm
-        JOIN courses c ON cm.course_id = c.id
-        WHERE cm.major_id = :mid AND cm.type = :type
-    """
-    params = {"mid": major_id, "type": type_}
-    if subgroup == "__NULL__":
-        sql += " AND cm.subgroup IS NULL"
-    elif subgroup == "elective_non_core_credits":
-        sql += " AND cm.subgroup IS NULL"
-    elif subgroup:
-        sql += " AND cm.subgroup = :sg"
-        params["sg"] = subgroup
+    if type_ == "pe":
+        frag, extra = _pe_course_major_where(subgroup)
+        sql = f"""
+            SELECT cm.course_id, c.course_code, c.name, c.name_en, cm.semester, cm.credit
+            FROM course_major cm
+            JOIN courses c ON cm.course_id = c.id
+            WHERE cm.major_id = :mid AND {frag}
+        """
+        params = {"mid": major_id, **extra}
+    else:
+        sql = """
+            SELECT cm.course_id, c.course_code, c.name, c.name_en, cm.semester, cm.credit
+            FROM course_major cm
+            JOIN courses c ON cm.course_id = c.id
+            WHERE cm.major_id = :mid AND cm.type = :type
+        """
+        params = {"mid": major_id, "type": type_}
+        if subgroup == "__NULL__":
+            sql += " AND cm.subgroup IS NULL"
+        elif subgroup == "elective_non_core_credits":
+            sql += " AND cm.subgroup IS NULL"
+        elif subgroup:
+            sql += " AND cm.subgroup = :sg"
+            params["sg"] = subgroup
     if name_like:
         sql += " AND c.name LIKE :name_like"
         params["name_like"] = name_like
@@ -207,17 +253,26 @@ def get_completed_count(type_: str, db: Session, major_id: int, completed_course
     """
     Teljesített kurzusok darabszáma ekvivalencia nélkül (egyszerű számolás).
     """
-    sql = """
-        SELECT cm.course_id
-        FROM course_major cm
-        WHERE cm.major_id = :mid AND cm.type = :type
-    """
-    params = {"mid": major_id, "type": type_}
-    if subgroup == "__NULL__":
-        sql += " AND cm.subgroup IS NULL"
-    elif subgroup:
-        sql += " AND cm.subgroup = :sg"
-        params["sg"] = subgroup
+    if type_ == "pe":
+        frag, extra = _pe_course_major_where(subgroup)
+        sql = f"""
+            SELECT cm.course_id
+            FROM course_major cm
+            WHERE cm.major_id = :mid AND {frag}
+        """
+        params = {"mid": major_id, **extra}
+    else:
+        sql = """
+            SELECT cm.course_id
+            FROM course_major cm
+            WHERE cm.major_id = :mid AND cm.type = :type
+        """
+        params = {"mid": major_id, "type": type_}
+        if subgroup == "__NULL__":
+            sql += " AND cm.subgroup IS NULL"
+        elif subgroup:
+            sql += " AND cm.subgroup = :sg"
+            params["sg"] = subgroup
     ids = [row[0] for row in db.execute(text(sql), params).fetchall()]
     return len([cid for cid in ids if cid in completed_courses])
 
@@ -252,6 +307,9 @@ def build_dynamic_requirements(user_id: int, major: str, major_id: int, lang: st
         rule_type = r.requirement_type
         subgroup = r.subgroup
         value_type = (r.value_type or "credits").lower()
+        # Testnevelés: a course_major.credit általában 0; a teljesítést darabszámmal mérjük (hány TN tárgy / félév).
+        if rule_type == "pe":
+            value_type = "count"
 
         if value_type == "hours":
             completed = get_completed_hours(rule_type, db, major_id, user_id, subgroup=subgroup)
@@ -264,10 +322,14 @@ def build_dynamic_requirements(user_id: int, major: str, major_id: int, lang: st
             available_courses = get_available_with_equiv(rule_type, db, major_id, completed_courses, lang, subgroup=subgroup)
 
         required = int(r.min_value or 0)
-        missing = max(0, required - int(completed or 0))
+        completed_int = int(completed or 0)
+        # Túlteljesítés: a diplomaösszesítőben csak a követelményig számít bele (felesleg nem)
+        counted_for_total = min(completed_int, required) if required >= 0 else completed_int
+        excess = max(0, completed_int - required)
+        missing = max(0, required - completed_int)
 
         if int(r.include_in_total or 0) == 1:
-            completed_total += int(completed or 0)
+            completed_total += counted_for_total
             required_total += required
 
         rows.append({
@@ -279,9 +341,10 @@ def build_dynamic_requirements(user_id: int, major: str, major_id: int, lang: st
             "requirement_type": rule_type,
             "subgroup": subgroup,
             "value_type": value_type,
-            "completed": int(completed or 0),
+            "completed": completed_int,
             "required": required,
             "missing": missing,
+            "excess": excess,
             "include_in_total": bool(r.include_in_total),
             "available_courses": available_courses
         })

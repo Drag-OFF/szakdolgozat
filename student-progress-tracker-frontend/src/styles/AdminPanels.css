@@ -280,3 +280,222 @@
   .desktop-content { display: none; }
   .mobile-accordion { display:block; }
 }
+
+/* Admin CRUD űrlapok: látható címke + melyik táblázatoszlopnak felel meg */
+.admin-form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.admin-form-grid--align-start {
+  align-items: flex-start;
+}
+
+/* Mezők ne nyúljanak szét teljes szélességre: a mentés / mégse gombok a utolsó mező után jönnek */
+.admin-form-grid--fit {
+  justify-content: flex-start;
+}
+.admin-form-grid--fit > .admin-form-field:not(.admin-form-field--actions) {
+  flex: 0 1 260px;
+  max-width: 300px;
+  min-width: 140px;
+}
+.admin-form-grid--fit > .admin-form-field--actions {
+  flex: 0 0 auto;
+  min-width: auto;
+}
+
+/* Egy vízszintes sor: minden mező alja egy vonalban; keskeny képernyőn vízszintes görgetés */
+.admin-form-row-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  margin-bottom: 10px;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+.admin-form-inline-row {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  width: max-content;
+  max-width: none;
+  min-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 2px;
+}
+.admin-form-inline-row .admin-form-field {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+/* Görgetős sor (más panelek): keskeny címkeoszlop + vezérlő */
+.admin-form-inline-row .admin-form-field--h {
+  grid-template-columns: minmax(0, 5.75rem) minmax(0, 1fr);
+  column-gap: 6px;
+}
+.admin-form-inline-row .admin-form-field--h .admin-form-label-text {
+  max-width: 5.75rem;
+  font-size: 12px;
+  align-self: center;
+  line-height: 1.25;
+}
+.admin-form-inline-row .admin-form-field--h .admin-form-col-hint {
+  font-size: 11px;
+}
+
+/* Kurzus–szak űrlap: egy sorban ne zsugorodjon 2 cm-re az input — függőleges mezők, tördelés */
+.course-major-form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 18px;
+  width: 100%;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+.course-major-form-grid > .admin-form-field {
+  margin: 0;
+  min-width: 0;
+}
+.course-major-form-grid .course-major-field--wide {
+  flex: 1 1 300px;
+  min-width: min(100%, 280px);
+  max-width: 520px;
+}
+.course-major-form-grid .course-major-field--num {
+  flex: 0 0 116px;
+  min-width: 108px;
+  max-width: 132px;
+}
+.course-major-form-grid .course-major-field--type {
+  flex: 1 1 240px;
+  min-width: min(100%, 220px);
+  max-width: 340px;
+}
+.course-major-form-grid .course-major-field--subgroup {
+  flex: 1 1 200px;
+  min-width: min(100%, 200px);
+  max-width: 300px;
+}
+.course-major-form-grid .course-major-field--prereq {
+  flex: 2 1 320px;
+  min-width: min(100%, 280px);
+}
+
+/* Autocomplete belső inputja nem kapja a .progress-input osztályt — egységes méret */
+.admin-form-inline-row input[type="text"] {
+  font-size: 13px;
+  min-height: 36px;
+  padding: 8px 10px;
+  box-sizing: border-box;
+}
+
+.admin-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+  flex: 1 1 160px;
+}
+.admin-form-field--grow {
+  flex: 2 1 220px;
+}
+
+/* Ha --fit van használva, a grow ne írja felül a fenti fixet */
+.admin-form-grid--fit > .admin-form-field--grow {
+  flex: 0 1 260px;
+  max-width: 300px;
+}
+/* Egységes olvasható méretek (ne legyen túl kicsi a segédszöveg) */
+.admin-form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-dark, #155a9a);
+  line-height: 1.35;
+}
+.admin-form-col-hint {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5a6b7a;
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* Címke és vezérlő egy sorban; „Táblázat oszlop…” a második sorban (gombok az inputokkal egy vonalban) */
+.admin-form-field--h {
+  display: grid;
+  grid-template-columns: minmax(0, max-content) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 4px;
+  align-items: center;
+}
+.admin-form-field--h .admin-form-label-text {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-dark, #155a9a);
+  line-height: 1.35;
+  max-width: min(38vw, 200px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-form-field--h .admin-form-control-wrap {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  width: 100%;
+}
+.admin-form-field--h .admin-form-col-hint {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 0;
+}
+
+.admin-form-field--actions.admin-form-field--h-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  row-gap: 4px;
+  align-items: center;
+}
+.admin-form-field--h-actions .admin-form-actions-inner {
+  grid-row: 1;
+  align-self: center;
+}
+.admin-form-field--h-actions .admin-form-hint-spacer {
+  grid-row: 2;
+  min-height: 1.35em;
+  font-size: 12px;
+  line-height: 1.35;
+  visibility: hidden;
+  user-select: none;
+}
+.admin-form-field .progress-input,
+.admin-form-field input:not([type="checkbox"]):not([type="radio"]),
+.admin-form-field select {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+  min-height: 36px;
+}
+
+/* Admin oldal főcím: ne örökölje a böngésző h1 óriás méretét */
+h1.admin-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  line-height: 1.3;
+}
+
+/* Szak szabályok űrlap: Autocomplete legördülő ne legyen levágva */
+.major-rules-form {
+  overflow: visible;
+}

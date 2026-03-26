@@ -1,13 +1,17 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from app.db import schemas
 from app.db.database import get_db
 from app.services.course_equivalence_service import CourseEquivalenceService
-from app.utils.utils import get_current_user
+from app.utils.utils import get_current_user, admin_required
 
 router = APIRouter()
 
-@router.get("/", response_model=list[schemas.CourseEquivalence], dependencies=[Depends(get_current_user)])
+
+@router.get("", response_model=List[schemas.CourseEquivalence], dependencies=[Depends(get_current_user)])
 def get_course_equivalences(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Kurzus ekvivalenciák lekérdezése.
@@ -44,7 +48,7 @@ def get_course_equivalence(eq_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="CourseEquivalence not found")
     return eq
 
-@router.post("/", response_model=schemas.CourseEquivalence, dependencies=[Depends(get_current_user)])
+@router.post("", response_model=schemas.CourseEquivalence, dependencies=[Depends(admin_required)])
 def create_course_equivalence(eq: schemas.CourseEquivalenceCreate, db: Session = Depends(get_db)):
     """
     Új kurzus ekvivalencia létrehozása.
@@ -57,9 +61,13 @@ def create_course_equivalence(eq: schemas.CourseEquivalenceCreate, db: Session =
         schemas.CourseEquivalence: Létrehozott ekvivalencia.
     """
     service = CourseEquivalenceService(db)
-    return service.create(eq)
+    try:
+        return service.create(eq)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.put("/{eq_id}", response_model=schemas.CourseEquivalence, dependencies=[Depends(get_current_user)])
+
+@router.put("/{eq_id}", response_model=schemas.CourseEquivalence, dependencies=[Depends(admin_required)])
 def update_course_equivalence(eq_id: int, eq: schemas.CourseEquivalenceBase, db: Session = Depends(get_db)):
     """
     Ekvivalencia frissítése.
@@ -76,12 +84,15 @@ def update_course_equivalence(eq_id: int, eq: schemas.CourseEquivalenceBase, db:
         HTTPException: Ha az ekvivalencia nem található.
     """
     service = CourseEquivalenceService(db)
-    updated = service.update(eq_id, eq)
+    try:
+        updated = service.update(eq_id, eq)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if not updated:
         raise HTTPException(status_code=404, detail="CourseEquivalence not found")
     return updated
 
-@router.delete("/{eq_id}", response_model=schemas.CourseEquivalence, dependencies=[Depends(get_current_user)])
+@router.delete("/{eq_id}", response_model=schemas.CourseEquivalence, dependencies=[Depends(admin_required)])
 def delete_course_equivalence(eq_id: int, db: Session = Depends(get_db)):
     """
     Ekvivalencia törlése.

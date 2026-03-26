@@ -11,7 +11,12 @@ export default function Autocomplete({
   maxResults = 50,
   allowCreate = false,           // új: engedélyezi az "Create" opciót
   createLabelFn = (q) => `Create "${q}"`, // felirat a create opciónak
-  onCreate = null                // (q) => Promise<createdObject|createdId>
+  onCreate = null,               // (q) => Promise<createdObject|createdId>
+  className = "",
+  style: outerStyle = {},
+  title = "",
+  /** Keskeny input mellett is olvasható legyen a lista: legalább ennyi px széles a legördülő */
+  dropdownMinWidth = 280
 }) {
   const [input, setInput] = useState(() => {
     const sel = items.find(x => String(x[idKey]) === String(value));
@@ -95,22 +100,38 @@ export default function Autocomplete({
   };
 
   return (
-    <div ref={ref} style={{ position: "relative", minWidth: 160 }}>
+    <div ref={ref} className={className} style={{ position: "relative", minWidth: 0, width: "100%", ...outerStyle }}>
       <input
         type="text"
+        title={title || undefined}
         placeholder={placeholder}
         value={input}
         onChange={e => onInput(e.target.value)}
         onKeyDown={onKey}
         onFocus={() => { if (input.length >= minChars) doFilter(input); }}
-        style={{ width: "100%", padding: "6px 8px", boxSizing: "border-box" }}
+        style={{ width: "100%", padding: "8px 10px", boxSizing: "border-box", fontSize: 13, minHeight: 36 }}
         aria-autocomplete="list"
       />
       {open && filtered.length > 0 && (
-        <div style={{
-          position: "absolute", zIndex: 40, left: 0, right: 0,
-          maxHeight: 260, overflowY: "auto", background: "#fff", border: "1px solid #ddd", boxShadow: "0 2px 6px rgba(0,0,0,0.08)"
-        }}>
+        <div
+          className="autocomplete-dropdown"
+          style={{
+            position: "absolute",
+            zIndex: 40,
+            left: 0,
+            top: "100%",
+            marginTop: 2,
+            /* Szélesebb, mint a keskeny input — ne vágja el a szöveget */
+            width: `min(max(100%, ${Number(dropdownMinWidth) || 280}px), min(560px, calc(100vw - 16px)))`,
+            maxHeight: 260,
+            overflowY: "auto",
+            overflowX: "hidden",
+            background: "#fff",
+            border: "1px solid #ddd",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            boxSizing: "border-box"
+          }}
+        >
           {filtered.map((it, idx) => {
             const label = it.__create ? it.__label : labelFn(it);
             return (
@@ -124,10 +145,12 @@ export default function Autocomplete({
                   background: idx === active ? "#eef" : "transparent",
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center"
+                  alignItems: "center",
+                  wordBreak: "break-word",
+                  overflowWrap: "anywhere"
                 }}
               >
-                <span>{label}</span>
+                <span style={{ minWidth: 0 }}>{label}</span>
                 {it.__create && isCreating && <span style={{ fontSize: 12, color: "#666" }}>…</span>}
               </div>
             );

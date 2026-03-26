@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import useAuthFetch from "../../hooks/useAuthFetch";
 import useFileDownload from "../../hooks/useFileDownload";
 import "../../styles/ProgressTable.css";
+import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { PROGRESS_LABELS } from "../../translations";
 import { API_BASE } from "../../config";
@@ -171,13 +172,20 @@ export default function ProgressPanel() {
     <div className="admin-panel" style={{ padding: 12 }}>
       <h3>{t.title}</h3>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
-        <input
-          placeholder={t.searchPlaceholder}
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          style={{ flex: 1, padding: 8, minWidth: 240 }}
-        />
+      <div style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 12, flexWrap: "wrap" }}>
+        <div className="admin-form-field" style={{ flex: 1, minWidth: 240 }}>
+          <label className="admin-form-label">
+            {t.searchLabel}
+            <span className="admin-form-col-hint">{t.searchHint}</span>
+          </label>
+          <input
+            className="progress-input"
+            placeholder={t.searchPlaceholder}
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
+          />
+        </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={() => { if (!selectedId) return alert(t.chooseUser); downloadTemplateFor(selectedId); }} disabled={!selectedId || loadingTemplate}>
             {loadingTemplate ? t.downloading : t.downloadTemplate}

@@ -3,13 +3,15 @@ import RequirementsStatus from "../components/RequirementsStatus";
 import ProgressTable from "../components/ProgressTable";
 import DownloadProgressButton from "../components/DownloadProgressButton";
 import FileUpload from "../components/FileUpload";
-import ProgressToolbar from "../components/ProgressToolbar";
 import { authFetch } from "../utils";
 import { useLang } from "../context/LangContext"; // <-- ezt add hozzá
 import { PROGRESS_TRACKER_LABELS } from "../translations";
 import "../styles/ProgressTable.css";
+import "../styles/AdminPanels.css";
 import { apiUrl } from "../config";
 import { getUserObject, getAccessToken } from "../authStorage";
+
+const COURSES_PAGE_SIZE = 10;
 
 export default function ProgressTracker() {
   const user = getUserObject();
@@ -19,9 +21,7 @@ export default function ProgressTracker() {
   const [status, setStatus] = useState("");
   const [semester, setSemester] = useState("");
   const [points, setPoints] = useState("");
-  const [open, setOpen] = useState(false);
-  const [reqOpen, setReqOpen] = useState(false);
-
+  const [coursesPage, setCoursesPage] = useState(0);
   const { lang } = useLang(); // <-- aktuális nyelv
   const t = PROGRESS_TRACKER_LABELS[lang] || PROGRESS_TRACKER_LABELS.hu;
 
@@ -49,23 +49,27 @@ export default function ProgressTracker() {
     (points ? String(p.points || "") === points : true)
   );
 
+  const coursesTotalPages = Math.max(1, Math.ceil(filtered.length / COURSES_PAGE_SIZE));
+  const coursesDisplayed = filtered.slice(
+    coursesPage * COURSES_PAGE_SIZE,
+    (coursesPage + 1) * COURSES_PAGE_SIZE
+  );
+
+  useEffect(() => {
+    setCoursesPage(0);
+  }, [search, category, status, semester, points]);
+
+  useEffect(() => {
+    setCoursesPage(p =>
+      p >= coursesTotalPages ? Math.max(0, coursesTotalPages - 1) : p
+    );
+  }, [filtered.length, coursesTotalPages]);
+
   return (
-    <div className="progress-tracker-container">
-      <h2 className="panel-header-inline" onClick={() => setOpen(o => !o)} aria-expanded={open}>
-        {t.coursesTitle} <span className="toggle-icon">{open ? "▲" : "▼"}</span>
-      </h2>
-      {open && (
-        <div style={{
-            maxHeight: 600,
-            overflowY: "auto",
-            border: "1px solid #ccc",
-            borderRadius: 6,
-            padding: 8,
-            width: "90%",
-            maxWidth: 1800, 
-            margin: "0 auto",
-            background: "#fff" 
-        }}>
+    <div className="progress-tracker-container progress-tracker-layout">
+      <section className="admin-card">
+        <div className="admin-card-body admin-panel">
+          <h2 className="progress-section-title">{t.coursesTitle}</h2>
           <div className="progress-toolbar">
             <div className="progress-toolbar-left">
               <div className="progress-input-wrap">
@@ -101,7 +105,6 @@ export default function ProgressTracker() {
                         alert(t.uploadFailed);
                         return;
                       }
-                      // sikeres import után újra lekérdezzük a teljes előrehaladást és frissítjük a state-et
                       const fullRes = await authFetch(
                         apiUrl(`/api/progress/${user.id}/full?lang=${lang}`),
                         { headers: { Authorization: `Bearer ${getAccessToken()}` } }
@@ -127,34 +130,43 @@ export default function ProgressTracker() {
           {filtered.length === 0 ? (
             <div>{t.noSaved}</div>
           ) : (
-            <ProgressTable progressFull={filtered} />
+            <>
+              <div className="progress-table-wrapper">
+                <ProgressTable progressFull={coursesDisplayed} />
+              </div>
+              <div className="progress-courses-pagination">
+                <button
+                  type="button"
+                  onClick={() => setCoursesPage(p => Math.max(0, p - 1))}
+                  disabled={coursesPage === 0}
+                >
+                  {t.prev}
+                </button>
+                <div>{`${t.page} ${coursesPage + 1} / ${coursesTotalPages}`}</div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCoursesPage(p => Math.min(coursesTotalPages - 1, p + 1))
+                  }
+                  disabled={coursesPage >= coursesTotalPages - 1}
+                >
+                  {t.next}
+                </button>
+                <div className="progress-courses-pagination-total">
+                  {`${filtered.length} ${t.total}`}
+                </div>
+              </div>
+            </>
           )}
         </div>
-      )}
-      <div style={{ marginTop: 32 }}>
-        <h2
-          className="panel-header-inline"
-          onClick={() => setReqOpen(o => !o)}
-          aria-expanded={reqOpen}
-        >
-          {t.requirementsTitle} <span className="toggle-icon">{reqOpen ? "▲" : "▼"}</span>
-        </h2>
-        {reqOpen && (
-          <div style={{
-            maxHeight: 600,
-            overflowY: "auto",
-            border: "1px solid #ccc",
-            borderRadius: 6,
-            padding: 8,
-            width: "90%",
-            maxWidth: 1800, 
-            margin: "0 auto",
-            background: "#fff" 
-          }}>
-            <RequirementsStatus />
-          </div>
-        )}
-      </div>
+      </section>
+
+      <section className="admin-card">
+        <div className="admin-card-body">
+          <h2 className="progress-section-title">{t.requirementsTitle}</h2>
+          <RequirementsStatus embedded />
+        </div>
+      </section>
     </div>
   );
 }

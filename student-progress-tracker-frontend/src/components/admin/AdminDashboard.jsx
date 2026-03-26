@@ -13,7 +13,7 @@ import { useLang } from "../../context/LangContext";
 export default function AdminDashboard() {
   const { lang } = useLang();
   const [open, setOpen] = useState({
-    users: true,
+    users: false,
     courses: false,
     majors: false,
     courseMajor: false,

@@ -516,24 +516,23 @@ CREATE TABLE `major_requirement_rules` (
   `subgroup` varchar(80) DEFAULT NULL,
   `value_type` varchar(20) NOT NULL DEFAULT 'credits',
   `min_value` int(11) NOT NULL DEFAULT 0,
-  `include_in_total` tinyint(1) NOT NULL DEFAULT 1,
-  `sort_order` int(11) NOT NULL DEFAULT 0
+  `include_in_total` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `major_requirement_rules`
 --
 
-INSERT INTO `major_requirement_rules` (`id`, `major_id`, `code`, `label_hu`, `label_en`, `requirement_type`, `subgroup`, `value_type`, `min_value`, `include_in_total`, `sort_order`) VALUES
-(1, 1, 'required_credits', 'Kotelezo kreditek', 'Required credits', 'required', NULL, 'credits', 69, 1, 10),
-(2, 1, 'elective_core_credits', 'Kotelezoen valaszthato torzs', 'Core elective credits', 'elective', 'elective_core_credits', 'credits', 80, 1, 20),
-(3, 1, 'elective_info_credits', 'Informatikai torzs', 'IT core credits', 'elective', 'elective_info_credits', 'credits', 44, 1, 30),
-(4, 1, 'elective_non_core_credits', 'Kotelezoen valaszthato nem torzs', 'Non-core elective credits', 'elective', '__NULL__', 'credits', 36, 1, 40),
-(5, 1, 'optional_credits', 'Szabadon valaszthato kreditek', 'Optional credits', 'optional', NULL, 'credits', 10, 1, 50),
-(6, 1, 'pe_semesters', 'Testneveles felevek', 'PE semesters', 'pe', 'pe', 'count', 2, 0, 60),
-(7, 1, 'practice_hours', 'Szakmai gyakorlat orak', 'Practice hours', 'required', 'practice_hours', 'hours', 320, 0, 70),
-(8, 5, 'required_credits', 'Kötelező kreditek', 'Elective Creditss', 'elective', NULL, 'credits', 80, 1, 1),
-(9, 4, 'required_credits', 'Kötelező kreditek', 'Required credits', 'required', NULL, 'credits', 100, 1, 2);
+INSERT INTO `major_requirement_rules` (`id`, `major_id`, `code`, `label_hu`, `label_en`, `requirement_type`, `subgroup`, `value_type`, `min_value`, `include_in_total`) VALUES
+(1, 1, 'required_credits', 'Kotelezo kreditek', 'Required credits', 'required', NULL, 'credits', 69, 1),
+(2, 1, 'elective_core_credits', 'Kotelezoen valaszthato torzs', 'Core elective credits', 'elective', 'elective_core_credits', 'credits', 80, 1),
+(3, 1, 'elective_info_credits', 'Informatikai torzs', 'IT core credits', 'elective', 'elective_info_credits', 'credits', 44, 1),
+(4, 1, 'elective_non_core_credits', 'Kotelezoen valaszthato nem torzs', 'Non-core elective credits', 'elective', '__NULL__', 'credits', 36, 1),
+(5, 1, 'optional_credits', 'Szabadon valaszthato kreditek', 'Optional credits', 'optional', NULL, 'credits', 10, 1),
+(6, 1, 'pe_semesters', 'Testneveles felevek', 'PE semesters', 'pe', 'pe', 'count', 2, 0),
+(7, 1, 'practice_hours', 'Szakmai gyakorlat orak', 'Practice hours', 'required', 'practice_hours', 'hours', 320, 0),
+(8, 5, 'required_credits', 'Kötelező kreditek', 'Elective Creditss', 'elective', NULL, 'credits', 80, 1),
+(9, 4, 'required_credits', 'Kötelező kreditek', 'Required credits', 'required', NULL, 'credits', 100, 1);
 
 -- --------------------------------------------------------
 

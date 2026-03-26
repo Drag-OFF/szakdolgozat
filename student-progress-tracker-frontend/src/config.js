@@ -1,16 +1,13 @@
 /**
- * Környezetfüggő beállítások (Vite: .env fájlban VITE_* prefix).
- * API_BASE: backend origin perjel nélkül — pl. http://localhost:8000 vagy https://api.example.com
+ * Környezetfüggő beállítások — változók a repó gyökerében lévő `.env`-ből (Vite: VITE_*).
  *
- * Figyelem: VITE_API_BASE_URL=http://localhost:8000 a .env-ben + `npm run build` = a localhost beég
- * a bundle-be; az éles (DDNS) oldal minden látogatónál a saját gépére hív — login elromlik.
- *
- * Ha nincs VITE_API_BASE_URL:
- * - npm run dev → üres (relatív /api/... URL) — a Vite proxy továbbítja :8000-ra
- * - éles build, böngészőben nem localhost host → ugyanaz a host + :8000 (DDNS + XAMPP)
+ * VITE_API_PORT: backend HTTP port (ugyanaz, mint uvicorn --port).
+ * VITE_API_BASE_URL: teljes API origin; ha meg van adva, felülírja a portos automatikát.
  */
 
 const trimEndSlash = (s) => String(s || "").replace(/\/+$/, "");
+
+const apiPort = String(import.meta.env.VITE_API_PORT ?? "8000").trim() || "8000";
 
 function resolveApiBase() {
   const fromEnv = import.meta.env.VITE_API_BASE_URL;
@@ -23,17 +20,17 @@ function resolveApiBase() {
   if (typeof window !== "undefined" && window.location?.hostname) {
     const h = window.location.hostname;
     if (h && h !== "localhost" && h !== "127.0.0.1") {
-      return trimEndSlash(`${window.location.protocol}//${h}:8000`);
+      return trimEndSlash(`${window.location.protocol}//${h}:${apiPort}`);
     }
   }
-  return "http://localhost:8000";
+  return `http://localhost:${apiPort}`;
 }
 
-/** Backend API alap URL (perjel nélkül). */
+/** Backend API alap URL (perjel nélkül). Devben üres → relatív /api (Vite proxy). */
 export const API_BASE = resolveApiBase();
 
 /**
- * Teljes API URL összerakása. path "/" jellel kezdődjön (pl. "/api/users/login").
+ * Teljes API URL. path "/" jellel kezdődjön (pl. "/api/users/login").
  * @param {string} path
  */
 export function apiUrl(path) {
@@ -44,6 +41,5 @@ export function apiUrl(path) {
 
 /**
  * Opcionális: phpMyAdmin vagy más admin URL (üres string ha nincs beállítva).
- * Pl. http://localhost/phpmyadmin — később linkelhető admin/debug felületről.
  */
 export const PHPMYADMIN_URL = trimEndSlash(import.meta.env.VITE_PHPMYADMIN_URL ?? "");
