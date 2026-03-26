@@ -25,6 +25,7 @@ export default function CourseRecommender() {
   const [courseCodesRaw, setCourseCodesRaw] = useState("");
   const [parity, setParity] = useState("any"); // any | even | odd
   const [overdueOnly, setOverdueOnly] = useState(false);
+  const [courseTypeFilter, setCourseTypeFilter] = useState("all"); // all | required | elective | optional
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -40,10 +41,6 @@ export default function CourseRecommender() {
     setResult(null);
 
     const course_codes = splitCodes(courseCodesRaw);
-    if (!course_codes.length) {
-      setErrorMsg(lang === "en" ? "Enter at least one course code." : "Add meg legalább egy kurzuskódot.");
-      return;
-    }
 
     setLoading(true);
     try {
@@ -52,7 +49,12 @@ export default function CourseRecommender() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ course_codes, semester_parity: parity })
+          body: JSON.stringify({
+            course_codes,
+            semester_parity: parity,
+            due_scope: overdueOnly ? "due_only" : "all",
+            course_type_filter: courseTypeFilter
+          })
         }
       );
 
@@ -71,7 +73,7 @@ export default function CourseRecommender() {
   };
 
   const recommendedRows = Array.isArray(result?.recommended) ? result.recommended : [];
-  const visibleRows = overdueOnly ? recommendedRows.filter(r => r?.is_overdue) : recommendedRows;
+  const visibleRows = recommendedRows;
 
   const reasonLabel = (reasonKey) => {
     const map = {
@@ -80,9 +82,19 @@ export default function CourseRecommender() {
       matches_completed_prerequisites: lang === "en" ? "Builds on your completed subjects" : "A teljesített tárgyaidra épít",
       name_similarity: lang === "en" ? "Similar topic by name" : "Név alapján hasonló témakör",
       category_similarity: lang === "en" ? "Similar category/subgroup" : "Hasonló kategória/alcsoport",
+      prerequisites_almost_satisfied: lang === "en" ? "Most prerequisites already completed" : "Az előfeltételek nagy része már teljesült",
+      high_prerequisite_impact: lang === "en" ? "Unlocks many later subjects" : "Sok további tárgy előfeltétele",
       major_curriculum_candidate: lang === "en" ? "Fits your curriculum" : "Illeszkedik a szakod mintatantervéhez"
     };
     return map[reasonKey] || reasonKey;
+  };
+
+  const typeLabel = (typeKey) => {
+    const key = String(typeKey || "").toLowerCase();
+    if (key === "required") return t.requiredLabel;
+    if (key === "elective") return t.electiveLabel;
+    if (key === "optional") return t.optionalLabel;
+    return typeKey || "-";
   };
 
   return (
@@ -101,6 +113,7 @@ export default function CourseRecommender() {
             placeholder={t.inputPlaceholder}
             className="course-rec-textarea"
           />
+          <div className="course-rec-hint">{t.inputHint}</div>
         </div>
 
         <div className="course-rec-filters">
@@ -119,6 +132,15 @@ export default function CourseRecommender() {
           <label className="course-rec-choice">
             <input type="checkbox" checked={overdueOnly} onChange={e => setOverdueOnly(e.target.checked)} />
             {t.overdueOnly}
+          </label>
+          <label className="course-rec-choice">
+            <span>{t.typeFilterLabel}</span>
+            <select value={courseTypeFilter} onChange={e => setCourseTypeFilter(e.target.value)} className="course-rec-select">
+              <option value="all">{t.typeAll}</option>
+              <option value="required">{t.typeRequired}</option>
+              <option value="elective">{t.typeElective}</option>
+              <option value="optional">{t.typeOptional}</option>
+            </select>
           </label>
         </div>
 
@@ -152,7 +174,7 @@ export default function CourseRecommender() {
             <div>{t.noRecommendations}</div>
           ) : (
             <div className="course-rec-table-wrap">
-            <table className="progress-table" style={{ marginTop: 8, minWidth: 1320 }}>
+            <table className="progress-table course-rec-table" style={{ marginTop: 8 }}>
               <thead>
                 <tr>
                   <th>{t.kód}</th>
@@ -160,9 +182,10 @@ export default function CourseRecommender() {
                   <th>{t.semester}</th>
                   <th>{t.credit}</th>
                   <th>{t.category}</th>
+                  <th>{t.prereqProgress}</th>
+                  <th>{t.unlockImpact}</th>
                   <th>{t.urgency}</th>
                   <th>{t.similarity}</th>
-                  <th>{t.score}</th>
                   <th>{t.why}</th>
                 </tr>
               </thead>
@@ -180,10 +203,11 @@ export default function CourseRecommender() {
                     </td>
                     <td>{r.semester ?? "-"}</td>
                     <td>{r.credit ?? "-"}</td>
-                    <td>{r.category || "-"}</td>
+                    <td>{typeLabel(r.normalized_type || r.category)}</td>
+                    <td>{r.prerequisite_progress_score ?? 0}</td>
+                    <td>{r.unlock_impact_score ?? 0}</td>
                     <td>{r.urgency_score ?? 0}</td>
-                    <td>{r.similarity_score ?? 0}</td>
-                    <td>{r.score ?? 0}</td>
+                    <td className="course-rec-cell-right">{r.similarity_score ?? 0}</td>
                     <td>{Array.isArray(r.reasons) ? r.reasons.map(reasonLabel).join(", ") : "-"}</td>
                   </tr>
                 ))}
