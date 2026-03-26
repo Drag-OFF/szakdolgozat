@@ -3,7 +3,7 @@ SQLAlchemy
 pydantic
 python-dotenv
 pymysql
-bcrypt
+bcrypt==4.3.0
 python-jose
 uvicorn
 pandas
