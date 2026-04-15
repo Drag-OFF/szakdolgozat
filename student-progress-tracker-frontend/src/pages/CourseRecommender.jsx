@@ -6,7 +6,9 @@ import "../styles/CourseRecommender.css";
 import { COURSE_RECOMMENDER_LABELS } from "../translations";
 import { API_BASE } from "../config";
 import { getUserObject } from "../authStorage";
+import Button from "../components/Button";
 
+/** Szabad szövegben megadott tárgykódok normalizálása tömbbé. */
 function splitCodes(raw) {
   return String(raw || "")
     .split(/[,;\n]/g)
@@ -15,6 +17,7 @@ function splitCodes(raw) {
     .map(s => s.toUpperCase());
 }
 
+/** Kurzusajánló oldal: inputkódok és szűrők alapján rangsorolt ajánlás kérés. */
 export default function CourseRecommender() {
   const user = useMemo(() => getUserObject(), []);
   const userId = user?.id;
@@ -75,15 +78,12 @@ export default function CourseRecommender() {
   const recommendedRows = Array.isArray(result?.recommended) ? result.recommended : [];
   const visibleRows = recommendedRows;
 
+  // Backend reason kulcsok lokalizált, felhasználóbarát címkéi.
   const reasonLabel = (reasonKey) => {
     const map = {
       overdue_by_recommended_semester: lang === "en" ? "Recommended semester is due" : "Ajánlott félév alapján esedékes",
-      matches_input_prerequisites: lang === "en" ? "Matches your selected course prerequisites" : "Egyezik a megadott tárgyak előfeltételeivel",
-      matches_completed_prerequisites: lang === "en" ? "Builds on your completed subjects" : "A teljesített tárgyaidra épít",
       name_similarity: lang === "en" ? "Similar topic by name" : "Név alapján hasonló témakör",
       category_similarity: lang === "en" ? "Similar category/subgroup" : "Hasonló kategória/alcsoport",
-      prerequisites_almost_satisfied: lang === "en" ? "Most prerequisites already completed" : "Az előfeltételek nagy része már teljesült",
-      high_prerequisite_impact: lang === "en" ? "Unlocks many later subjects" : "Sok további tárgy előfeltétele",
       major_curriculum_candidate: lang === "en" ? "Fits your curriculum" : "Illeszkedik a szakod mintatantervéhez"
     };
     return map[reasonKey] || reasonKey;
@@ -145,12 +145,12 @@ export default function CourseRecommender() {
         </div>
 
         <div className="course-rec-actions">
-          <button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading} variant="success" size="md">
             {loading ? t.recommending : t.submit}
-          </button>
-          <button type="button" disabled={loading} onClick={() => { setCourseCodesRaw(""); setResult(null); setErrorMsg(""); }}>
+          </Button>
+          <Button type="button" disabled={loading} onClick={() => { setCourseCodesRaw(""); setResult(null); setErrorMsg(""); }} variant="ghost" size="md">
             {t.clear}
-          </button>
+          </Button>
         </div>
 
         {errorMsg && <div style={{ color: "#b00020", fontWeight: 700 }}>{errorMsg}</div>}
@@ -182,8 +182,6 @@ export default function CourseRecommender() {
                   <th>{t.semester}</th>
                   <th>{t.credit}</th>
                   <th>{t.category}</th>
-                  <th>{t.prereqProgress}</th>
-                  <th>{t.unlockImpact}</th>
                   <th>{t.urgency}</th>
                   <th>{t.similarity}</th>
                   <th>{t.why}</th>
@@ -204,8 +202,6 @@ export default function CourseRecommender() {
                     <td>{r.semester ?? "-"}</td>
                     <td>{r.credit ?? "-"}</td>
                     <td>{typeLabel(r.normalized_type || r.category)}</td>
-                    <td>{r.prerequisite_progress_score ?? 0}</td>
-                    <td>{r.unlock_impact_score ?? 0}</td>
                     <td>{r.urgency_score ?? 0}</td>
                     <td className="course-rec-cell-right">{r.similarity_score ?? 0}</td>
                     <td>{Array.isArray(r.reasons) ? r.reasons.map(reasonLabel).join(", ") : "-"}</td>

@@ -3,6 +3,7 @@ import useAuthFetch from "../../hooks/useAuthFetch";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { API_BASE } from "../../config";
+import Button from "../Button";
 const PAGE_SIZE = 10;
 
 export default function CoursesPanel() {
@@ -16,17 +17,17 @@ export default function CoursesPanel() {
         next: "Next",
         total: "records total",
         fCourseCode: "Course code",
-        hCourseCode: "Maps to table column “Course code”.",
+        hCourseCode: "Unique course identifier.",
         fNameHu: "Name (HU)",
-        hNameHu: "Maps to table column “Name (HU)”.",
+        hNameHu: "Hungarian course name.",
         fNameEn: "Name (EN)",
-        hNameEn: "Maps to table column “Name (EN)”.",
+        hNameEn: "English course name (optional).",
         phCode: "e.g. ABC123 — unique code",
         phNameHu: "Course title in Hungarian",
         phNameEn: "Course title in English (optional)",
-        tiCode: "Short unique identifier for the course. Shown in the “Course code” column.",
-        tiNameHu: "Official Hungarian name. Shown in the “Name (HU)” column.",
-        tiNameEn: "English name if available. Shown in the “Name (EN)” column."
+        tiCode: "Short unique identifier for the course.",
+        tiNameHu: "Official Hungarian course name.",
+        tiNameEn: "English name if available."
       }
     : {
         search: "Keresés kurzus kód / név...",
@@ -35,17 +36,17 @@ export default function CoursesPanel() {
         next: "Következő",
         total: "rekord összesen",
         fCourseCode: "Kurzus kód",
-        hCourseCode: "A táblázat „Kurzus kód” oszlopába kerül.",
+        hCourseCode: "Egyedi kurzusazonosító.",
         fNameHu: "Név (magyar)",
-        hNameHu: "A táblázat „Név (HU)” oszlopába kerül.",
+        hNameHu: "A kurzus magyar neve.",
         fNameEn: "Név (angol)",
-        hNameEn: "A táblázat „Név (EN)” oszlopába kerül.",
+        hNameEn: "A kurzus angol neve (ha van).",
         phCode: "pl. ABC123 — egyedi azonosító",
         phNameHu: "A kurzus megnevezése magyarul",
         phNameEn: "Angol megnevezés (ha van)",
-        tiCode: "Rövid, egyedi kurzuskód. A „Kurzus kód” oszlopban jelenik meg.",
-        tiNameHu: "A kurzus hivatalos magyar neve. A „Név (HU)” oszlopban látszik.",
-        tiNameEn: "Angol név, ha van. A „Név (EN)” oszlopban látszik."
+        tiCode: "Rövid, egyedi kurzuskód.",
+        tiNameHu: "A kurzus hivatalos magyar neve.",
+        tiNameEn: "A kurzus angol neve, ha van."
       };
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,10 +112,10 @@ export default function CoursesPanel() {
     <div className="admin-panel">
       <div style={{display:"flex", gap:8, alignItems:"center", marginBottom:8}}>
         <input className="progress-input" placeholder={t.search} value={query} onChange={e=>setQuery(e.target.value)} style={{flex:1}} />
-        <button onClick={openCreate} disabled={showForm}>Létrehoz</button>
-        <button onClick={openEdit} disabled={showForm || !selectedId}>Szerkeszt</button>
-        <button onClick={remove} disabled={showForm || !selectedId}>Töröl</button>
-        <button onClick={load} disabled={showForm}>↻</button>
+        <Button onClick={openCreate} disabled={showForm} variant="success" size="sm">Létrehoz</Button>
+        <Button onClick={openEdit} disabled={showForm || !selectedId} variant="warning" size="sm">Szerkeszt</Button>
+        <Button onClick={remove} disabled={showForm || !selectedId} variant="danger" size="sm">Töröl</Button>
+        <Button onClick={load} disabled={showForm} variant="ghost" size="sm">↻</Button>
       </div>
 
       {showForm && (
@@ -142,8 +143,8 @@ export default function CoursesPanel() {
           </div>
           <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
             <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
-              <button type="submit">{form.id ? "Módosít" : "Létrehoz"}</button>
-              <button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,course_code:"",name:"",name_en:""}); }}>Mégse</button>
+              <Button type="submit" variant={form.id ? "warning" : "success"} size="sm">{form.id ? "Módosít" : "Létrehoz"}</Button>
+              <Button type="button" onClick={()=>{ setShowForm(false); setForm({id:null,course_code:"",name:"",name_en:""}); }} variant="ghost" size="sm">Mégse</Button>
             </div>
             <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
@@ -172,9 +173,9 @@ export default function CoursesPanel() {
       </div>
 
       <div style={{display:"flex",gap:8,alignItems:"center",marginTop:8}}>
-        <button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>{t.prev}</button>
+        <Button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0} variant="ghost" size="sm">{t.prev}</Button>
         <div>{`${t.page} ${page+1} / ${totalPages}`}</div>
-        <button onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={page>=totalPages-1}>{t.next}</button>
+        <Button onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={page>=totalPages-1} variant="ghost" size="sm">{t.next}</Button>
         <div style={{marginLeft:"auto"}}>{`${filtered.length} ${t.total}`}</div>
       </div>
     </div>

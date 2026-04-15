@@ -9,13 +9,12 @@ export default function Autocomplete({
   placeholder = "",
   minChars = 1,
   maxResults = 50,
-  allowCreate = false,           // új: engedélyezi az "Create" opciót
-  createLabelFn = (q) => `Create "${q}"`, // felirat a create opciónak
-  onCreate = null,               // (q) => Promise<createdObject|createdId>
+  allowCreate = false,
+  createLabelFn = (q) => `Create "${q}"`,
+  onCreate = null,
   className = "",
   style: outerStyle = {},
   title = "",
-  /** Keskeny input mellett is olvasható legyen a lista: legalább ennyi px széles a legördülő */
   dropdownMinWidth = 280
 }) {
   const [input, setInput] = useState(() => {
@@ -46,7 +45,6 @@ export default function Autocomplete({
     const s = q.trim().toLowerCase();
     const res = items.filter(it => String(labelFn(it)).toLowerCase().includes(s)).slice(0, maxResults);
     const haveExact = res.some(it => String(it[idKey]) === String(value) || String(labelFn(it)).toLowerCase() === s);
-    // add create option if allowed and no exact match
     if (allowCreate && onCreate && q.length >= minChars && !haveExact) {
       const createItem = { __create: true, __q: q, __label: createLabelFn(q) };
       setFiltered([createItem, ...res]);
@@ -61,7 +59,7 @@ export default function Autocomplete({
     setInput(v);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => doFilter(v), 180);
-    onChange(""); // clear bound value while typing
+    onChange("");
   };
 
   const selectItem = async (it) => {
@@ -70,7 +68,6 @@ export default function Autocomplete({
       try {
         setIsCreating(true);
         const created = await onCreate(it.__q);
-        // onCreate may return object or id
         if (!created) { setIsCreating(false); return; }
         if (typeof created === "object") {
           const id = String(created[idKey] ?? created.id ?? created._id ?? "");

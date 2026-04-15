@@ -21,6 +21,8 @@ export default function DownloadProgressButton({ userId }) {
     <Button
       onClick={handleDownload}
       className="btn-compact"
+      variant="primary"
+      size="sm"
       style={{ height: 36, minWidth: 160, padding: "6px 12px" }}
     >
       {lang === "en" ? "Download progress" : "Előrehaladás letöltése"}

@@ -1,3 +1,5 @@
+"""Összesített szak követelmény rekordok (legacy/aggregált nézet) lekérése és admin írás."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import schemas
@@ -12,12 +14,12 @@ def get_major_requirements(skip: int = 0, limit: int = 100, db: Session = Depend
     """
     Szak követelmények lekérdezése.
 
-    Args:
+    Paraméterek:
         skip (int): Hány rekordot hagyjon ki.
         limit (int): Hány rekordot adjon vissza.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.MajorRequirement]: Követelmények listája.
     """
     service = MajorsRequirementsService(db)
@@ -28,11 +30,11 @@ def get_major_requirement(req_id: int, db: Session = Depends(get_db)):
     """
     Egy követelmény lekérdezése azonosító alapján.
 
-    Args:
+    Paraméterek:
         req_id (int): Követelmény azonosító.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.MajorRequirement: Követelmény adatai.
 
     Raises:
@@ -49,11 +51,11 @@ def create_major_requirement(req: schemas.MajorRequirementCreate, db: Session = 
     """
     Új követelmény létrehozása.
 
-    Args:
+    Paraméterek:
         req (schemas.MajorRequirementCreate): Követelmény adatai.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.MajorRequirement: Létrehozott követelmény.
     """
     service = MajorsRequirementsService(db)
@@ -64,12 +66,12 @@ def update_major_requirement(req_id: int, req: schemas.MajorRequirementBase, db:
     """
     Követelmény frissítése.
 
-    Args:
+    Paraméterek:
         req_id (int): Követelmény azonosító.
         req (schemas.MajorRequirementBase): Friss adatok.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.MajorRequirement: Frissített követelmény.
 
     Raises:
@@ -86,11 +88,11 @@ def delete_major_requirement(req_id: int, db: Session = Depends(get_db)):
     """
     Követelmény törlése.
 
-    Args:
+    Paraméterek:
         req_id (int): Követelmény azonosító.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.MajorRequirement: Törölt követelmény.
 
     Raises:

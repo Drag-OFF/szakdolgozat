@@ -1,28 +1,8 @@
-/**
- * Egyetlen chat üzenet megjelenítéséért felelős komponens.
- * Kezeli a válasz (reply), reakció (emoji), saját üzenet kiemelését, és a reakció picker pozícionálását.
- * Nyelvváltás támogatott minden feliraton.
- *
- * @param {Object} props
- * @param {Object} props.msg - Az üzenet objektum.
- * @param {Array} props.users - Felhasználók tömbje.
- * @param {Object} props.currentUser - A jelenlegi felhasználó.
- * @param {Array} props.messages - Az összes üzenet tömbje.
- * @param {any} props.reactingTo - Melyik üzenetre van éppen nyitva a reakció picker.
- * @param {function} props.setReactingTo - Picker állapotkezelő.
- * @param {any} props.hoveredReaction - Fölé vitt reakció.
- * @param {function} props.setHoveredReaction - Hover állapotkezelő.
- * @param {any} props.replyTo - Melyik üzenetre válaszolunk.
- * @param {function} props.setReplyTo - Válasz picker állapotkezelő.
- * @param {function} props.addReaction - Reakció hozzáadása.
- * @param {string} props.userName - Az üzenet szerzőjének neve.
- * @returns {JSX.Element}
- */
-
 import { shortMsg, getUserName, findMessageById, groupReactions, formatDate } from "../utils";
 import Picker from "emoji-picker-react";
 import React, { useState, useEffect } from "react";
 import { useLang } from "../context/LangContext";
+import Button from "./Button";
 
 export default function ChatMessage({
   msg,
@@ -63,18 +43,11 @@ export default function ChatMessage({
   const [hovered, setHovered] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
 
-  // Emoji picker theme
   const theme =
     (document.body.getAttribute("data-theme") || "light") === "dark"
       ? "dark"
       : "light";
 
-  /**
-   * Reakció picker megjelenítése és pozícionálása.
-   * A gomb kattintásának helyétől függően jobbra vagy balra tolja a pickert,
-   * és nem engedi, hogy kilógjon a képernyőről.
-   * @param {MouseEvent} e
-   */
   function handleReactionBtn(e) {
     const pickerWidth = 350;
     const pickerHeight = 400;
@@ -83,26 +56,21 @@ export default function ChatMessage({
     let x = e.clientX;
     let y = e.clientY - 60;
 
-    // Jobb vagy bal oldalra tolás
     if (isOwn) {
       x -= pickerWidth / 2 + 24; // saját üzenetnél balra tol
     } else {
       x += pickerWidth / 2 + 24; // más üzenetnél jobbra tol
     }
 
-    // Jobb szélre ne lógjon ki
     if (x + pickerWidth / 2 > window.innerWidth - margin) {
       x = window.innerWidth - pickerWidth / 2 - margin;
     }
-    // Bal szélre se lógjon ki
     if (x - pickerWidth / 2 < margin) {
       x = pickerWidth / 2 + margin;
     }
-    // Felső szélre ne lógjon ki
     if (y < margin) {
       y = margin;
     }
-    // Alsó szélre se lógjon ki
     if (y + pickerHeight > window.innerHeight - margin) {
       y = window.innerHeight - pickerHeight - margin;
     }
@@ -135,7 +103,6 @@ export default function ChatMessage({
           </span>
         </div>
       )}
-      {/* FELHASZNÁLÓ NÉV KIÍRÁSA */}
       <div className="chat-message-header">
         {msg.display_name}
         {msg.display_neptun && !msg.anonymous && (
@@ -151,20 +118,24 @@ export default function ChatMessage({
       >
         {isOwn && (
           <div className={`chat-message-toolbar${hovered ? " visible" : ""}`}>
-            <button
+            <Button
               className="chat-action-btn"
               title={texts[lang].reaction}
               onClick={handleReactionBtn}
+              variant="ghost"
+              size="sm"
             >
               😊
-            </button>
-            <button
+            </Button>
+            <Button
               className="chat-action-btn"
               title={texts[lang].replyBtn}
               onClick={() => setReplyTo(msg)}
+              variant="ghost"
+              size="sm"
             >
               ↩️
-            </button>
+            </Button>
           </div>
         )}
         <div className="chat-message-bubble">
@@ -172,24 +143,27 @@ export default function ChatMessage({
         </div>
         {!isOwn && (
           <div className={`chat-message-toolbar${hovered ? " visible" : ""}`}>
-            <button
+            <Button
               className="chat-action-btn"
               title={texts[lang].reaction}
               onClick={handleReactionBtn}
+              variant="ghost"
+              size="sm"
             >
               😊
-            </button>
-            <button
+            </Button>
+            <Button
               className="chat-action-btn"
               title={texts[lang].replyBtn}
               onClick={() => setReplyTo(msg)}
+              variant="ghost"
+              size="sm"
             >
               ↩️
-            </button>
+            </Button>
           </div>
         )}
       </div>
-      {/* Footer: own - reakciók, idő; nem own - idő, reakciók */}
       <div className={`chat-message-footer${isOwn ? " own" : ""}`}>
         {isOwn ? (
           <>

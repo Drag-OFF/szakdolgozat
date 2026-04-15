@@ -3,14 +3,8 @@ import { useLang } from "../context/LangContext";
 import useFileDownload from "../hooks/useFileDownload";
 import useFileUpload from "../hooks/useFileUpload.js";
 import { apiUrl } from "../config";
+import Button from "./Button";
 
-/**
- * Egységes kinézetű fájlfeltöltő komponens, magyar és angol feliratokkal.
- * - Nincs külső padding/margin, csak a belső elemek stílusa van itt.
- * - Megjeleníti a kiválasztott fájl nevét.
- * - A feltöltés gomb csak akkor aktív, ha van kiválasztott fájl.
- * - onUpload: (file) => void callback prop.
- */
 export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userId }) {
   const { lang } = useLang ? useLang() : { lang: "hu" };
   const fileInputRef = useRef();
@@ -48,7 +42,6 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
       onUpload(file);
       return;
     }
-    // fallback: használjuk a hook-ot
     (async () => {
       try {
         const res = await upload({ endpoint: "/api/progress/{userId}/import", file, userId, lang });
@@ -106,65 +99,42 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
       <span>
         {fileName || texts[lang]?.noFile || "Nincs fájl"}
         {fileName && (
-          <button
+          <Button
             type="button"
             onClick={() => {
               setFile(null);
               setFileName("");
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
-            style={{
-              marginLeft: 6,
-              background: "transparent",
-              border: "none",
-              color: "#d32f2f",
-              fontWeight: "bold",
-              cursor: "pointer",
-              fontSize: "1.1em"
-            }}
+            style={{ marginLeft: 6, minHeight: "2rem", minWidth: "2rem", padding: "0.15em 0.45em" }}
+            variant="danger"
+            size="sm"
             aria-label="Fájl törlése"
             title="Fájl törlése"
           >
             ×
-          </button>
+          </Button>
         )}
       </span>
-      <button
+      <Button
         type="button"
         onClick={handleUpload}
         disabled={!file}
-        style={{
-          background: "#1976d2",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          padding: "0.3rem 0.9rem",
-          fontWeight: 500,
-          fontSize: "1rem",
-          cursor: file ? "pointer" : "not-allowed"
-        }}
+        variant="success"
+        size="md"
       >
         {texts[lang]?.upload || "Feltöltés"}
-      </button>
-      {/* Sablon letöltő gomb */}
+      </Button>
       {userId && (
-        <button
+        <Button
           type="button"
           onClick={handleTemplateDownload}
-          style={{
-            marginLeft: 8,
-            background: "#eee",
-            color: "#1976d2",
-            border: "1px solid #1976d2",
-            borderRadius: "6px",
-            padding: "0.3rem 0.9rem",
-            fontWeight: 500,
-            fontSize: "1rem",
-            cursor: "pointer"
-          }}
+          style={{ marginLeft: 8 }}
+          variant="primary"
+          size="md"
         >
           {texts[lang]?.template || "Szakos sablon letöltése"}
-        </button>
+        </Button>
       )}
     </div>
   );

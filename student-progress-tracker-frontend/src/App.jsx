@@ -12,13 +12,13 @@ import Admin from "./pages/Admin";
 import Profile from "./pages/Profile";
 import ProgressTracker from "./pages/ProgressTracker";
 import CourseRecommender from "./pages/CourseRecommender";
+import AdminPdfImport from "./pages/AdminPdfImport";
+import AdminTantervEditor from "./pages/AdminTantervEditor";
+import AdminTantervPlanEditor from "./pages/AdminTantervPlanEditor";
+import AdminProgressPdfCheck from "./pages/AdminProgressPdfCheck";
 import { LangProvider } from "./context/LangContext";
 import "./App.css";
 
-/**
- * App komponens.
- * @returns {JSX.Element} Az alkalmazás teljes szerkezete.
- */
 export default function App() {
   const location = useLocation();
 
@@ -36,6 +36,10 @@ export default function App() {
             <Route path="/resend-verify" element={<ResendVerify />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/pdf-import" element={<AdminPdfImport />} />
+            <Route path="/admin/progress-pdf-check" element={<AdminProgressPdfCheck />} />
+            <Route path="/admin/tanterv-editor" element={<AdminTantervEditor />} />
+            <Route path="/admin/tanterv-plan-editor/:planId" element={<AdminTantervPlanEditor />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/progress" element={<ProgressTracker />} />
             <Route path="/recommendations" element={<CourseRecommender />} />

@@ -1,3 +1,5 @@
+"""Chat üzenetek és reakciók perzisztencia — ``ChatService``."""
+
 from sqlalchemy.orm import Session
 from app.db.models import ChatMessage, ChatReaction, User
 from app.db.schemas import ChatMessageCreate
@@ -12,10 +14,10 @@ class ChatService:
         """
         Egyedi anonim név generálása egy felhasználónak.
 
-        Args:
+        Paraméterek:
             user_id (int): Felhasználó azonosító.
 
-        Returns:
+        Visszatérés:
             str: Egyedi anonim név (pl. Anon#1234).
         """
         return f"Anon#{user_id}{random.randint(100,999)}"
@@ -28,10 +30,10 @@ class ChatService:
         Ha a felhasználónak még nincs anonim neve, generál egyet, elmenti a users táblába,
         és azt használja minden további anonim üzenethez.
 
-        Args:
+        Paraméterek:
             message (ChatMessageCreate): Az üzenet adatai (szöveg, user_id, anonim flag stb.).
 
-        Returns:
+        Visszatérés:
             ChatMessage: A létrehozott üzenet adatbázis objektuma.
 
         Raises:
@@ -62,11 +64,11 @@ class ChatService:
         """
         Üzenetek lekérése.
 
-        Args:
+        Paraméterek:
             skip (int): Az üzenetek, amelyeket át kell ugrani.
             limit (int): A visszaadandó üzenetek maximális száma.
 
-        Returns:
+        Visszatérés:
             list[ChatMessage]: Az üzenetek listája.
         """
         return self.db.query(ChatMessage).offset(skip).limit(limit).all()
@@ -75,10 +77,10 @@ class ChatService:
         """
         Egy adott üzenet lekérése az ID alapján.
 
-        Args:
+        Paraméterek:
             message_id (int): Az üzenet ID-ja.
 
-        Returns:
+        Visszatérés:
             ChatMessage: A kért üzenet.
 
         Raises:
@@ -96,12 +98,12 @@ class ChatService:
         Ha a felhasználó már reagált erre az üzenetre, a reakció emoji frissül.
         Ha még nem reagált, új reakció jön létre.
 
-        Args:
+        Paraméterek:
             message_id (int): Az üzenet azonosítója.
             user_id (int): A felhasználó azonosítója.
             emoji (str): Az emoji karakter.
 
-        Returns:
+        Visszatérés:
             ChatReaction: A létrehozott vagy frissített reakció.
         """
         print(f"add_or_update_reaction: message_id={message_id}, user_id={user_id}, emoji={emoji}")
@@ -123,10 +125,10 @@ class ChatService:
         """
         Egy üzenethez tartozó összes reakció lekérése.
 
-        Args:
+        Paraméterek:
             message_id (int): Az üzenet azonosítója.
 
-        Returns:
+        Visszatérés:
             list[ChatReaction]: A reakciók listája.
         """
         return self.db.query(ChatReaction).filter_by(message_id=message_id).all()

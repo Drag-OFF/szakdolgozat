@@ -64,7 +64,8 @@
   transition: right 0.2s;
 }
 
-.navbar-links a {
+.navbar-links a,
+.navbar-links a:visited {
   text-decoration: none;
   background-color: var(--primary);
   color: #fff;
@@ -75,10 +76,58 @@
   transition: background 0.3s, color 0.3s;
 }
 
-.navbar-links a:hover {
+.navbar-links .navbar-link-btn {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 1.08rem;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 0.4rem 1.1rem;
+  border-radius: 6px;
+  min-height: auto;
+  box-sizing: border-box;
+  line-height: 1.2;
+  box-shadow: none;
+}
+
+.navbar-session-timer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7ch; /* "(00:00)" fix helyet foglal */
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  background: var(--primary);
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1.02rem;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1.2;
+  box-sizing: border-box;
+  box-shadow: none;
+}
+
+.navbar-links a:hover,
+.navbar-links a:focus-visible,
+.navbar-links a:active {
   background: var(--primary-dark);
   color: #fff;
   box-shadow: 0 2px 8px #1976d244;
+}
+
+.navbar-links .navbar-link-btn:hover:enabled,
+.navbar-links .navbar-link-btn:focus-visible,
+.navbar-links .navbar-link-btn:active:enabled {
+  background: var(--primary-dark);
+  color: #fff;
+  box-shadow: 0 2px 8px #1976d244;
+  transform: none;
 }
 
 /* Hamburger gomb */
@@ -124,8 +173,24 @@
     right: 0;
     gap: 1.5rem;
   }
-  .navbar-links a {
+  .navbar-links a,
+  .navbar-links a:visited {
     font-size: 1.15rem;
+    border-radius: 0;
+    border-bottom: 1px solid #e0e0e0;
+    width: 75%;
+    text-align: left;
+  }
+  .navbar-links .navbar-link-btn {
+    font-size: 1.15rem;
+    border-radius: 0;
+    border-bottom: 1px solid #e0e0e0;
+    width: 75%;
+    text-align: left;
+  }
+  .navbar-session-timer {
+    font-size: 1.15rem;
+    min-width: 7ch;
     border-radius: 0;
     border-bottom: 1px solid #e0e0e0;
     width: 75%;
@@ -160,7 +225,8 @@
     right: 0;
     gap: 1.5rem;
   }
-  .navbar-links a {
+  .navbar-links a,
+  .navbar-links a:visited {
     font-size: 1.15rem;
     border-radius: 10px;
     background-color: white;
@@ -169,9 +235,42 @@
     width: 75%;
     text-align: left;
   }
-  .navbar-links a:hover {
+  .navbar-links .navbar-link-btn {
+    font-size: 1.15rem;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    width: 75%;
+    text-align: left;
+  }
+  .navbar-session-timer {
+    font-size: 1.15rem;
+    min-width: 7ch;
+    border-radius: 10px;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    width: 75%;
+    text-align: left;
+    font-weight: 500;
+  }
+  .navbar-session-timer:hover {
     background-color: #dbdbdb;
     color: black;
+  }
+  .navbar-links a:hover,
+  .navbar-links a:focus-visible,
+  .navbar-links a:active {
+    background-color: #dbdbdb;
+    color: black;
+  }
+  .navbar-links .navbar-link-btn:hover:enabled,
+  .navbar-links .navbar-link-btn:focus-visible,
+  .navbar-links .navbar-link-btn:active:enabled {
+    background-color: #dbdbdb;
+    color: black;
+    box-shadow: none;
   }
 
 

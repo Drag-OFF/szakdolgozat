@@ -1,10 +1,7 @@
 /**
- * Környezetfüggő beállítások — változók a repó gyökerében lévő `.env`-ből (Vite: VITE_*).
- *
- * VITE_API_PORT: backend HTTP port (ugyanaz, mint uvicorn --port).
- * VITE_API_BASE_URL: teljes API origin; ha meg van adva, felülírja a portos automatikát.
+ * Környezetfüggő frontend konfiguráció:
+ * API alap URL feloldása és egységes endpoint építés.
  */
-
 const trimEndSlash = (s) => String(s || "").replace(/\/+$/, "");
 
 const apiPort = String(import.meta.env.VITE_API_PORT ?? "8000").trim() || "8000";
@@ -26,20 +23,13 @@ function resolveApiBase() {
   return `http://localhost:${apiPort}`;
 }
 
-/** Backend API alap URL (perjel nélkül). Devben üres → relatív /api (Vite proxy). */
 export const API_BASE = resolveApiBase();
 
-/**
- * Teljes API URL. path "/" jellel kezdődjön (pl. "/api/users/login").
- * @param {string} path
- */
+/** API útvonal normalizálása (mindig /-sel kezdődik). */
 export function apiUrl(path) {
   const p = path.startsWith("/") ? path : `/${path}`;
   if (!API_BASE) return p;
   return `${API_BASE}${p}`;
 }
 
-/**
- * Opcionális: phpMyAdmin vagy más admin URL (üres string ha nincs beállítva).
- */
 export const PHPMYADMIN_URL = trimEndSlash(import.meta.env.VITE_PHPMYADMIN_URL ?? "");

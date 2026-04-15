@@ -3,3 +3,9 @@
 .env.local
 .env.*.local
 !.env.example
+
+# Helyi dev indító (PowerShell / gépen specifikus)
+start-dev-servers.bat
+
+# Backend futás közbeni ideiglenes állományok
+student-progress-tracker-backend/runtime/

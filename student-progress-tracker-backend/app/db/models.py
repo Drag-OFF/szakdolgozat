@@ -1,3 +1,8 @@
+"""
+SQLAlchemy ORM modellek: felhasználók, kurzusok, szakok, előrehaladás, chat, követelmény-szabályok.
+
+A ``User.major`` szöveges mező a ``majors.name`` értékével egyezik (nincs fix enum a kódban).
+"""
 from sqlalchemy import Column, Integer, String, Text, Date, DateTime, Boolean, Enum, ForeignKey, UniqueConstraint
 from datetime import datetime
 from sqlalchemy.orm import relationship
@@ -27,6 +32,8 @@ class User(Base):
         role (str): Szerepkör (user/admin).
         created_at (datetime): Létrehozás ideje.
         anonymous_name (str): Névtelen üzenetekhez használt név.
+        major (str): Szak megnevezése; dinamikusan a ``majors`` táblából, admin által bővíthető.
+        chosen_specialization_code (Optional[str]): MK specializáció (pl. MK-S-MA) vagy NONE jellegű sentinel, ha nincs ág.
     """
     __tablename__ = "users"
 
@@ -39,8 +46,8 @@ class User(Base):
     id_card_number = Column(String(20), nullable=False)
     address_card_number = Column(String(20), nullable=False)
     mothers_name = Column(String(100), nullable=False)
-    # A korábbi enum hardcode helyett dinamikusan kezeljük (admin a `majors` táblán keresztül bővíti).
     major = Column(String(255), nullable=False)
+    chosen_specialization_code = Column(String(80), nullable=True)
     verified = Column(Boolean, default=False)
     verify_token = Column(String(255), nullable=True)
     reset_token = Column(String(255), nullable=True)
@@ -89,8 +96,16 @@ class Major(Base):
 
 class MajorRequirementRule(Base):
     """
-    Dinamikus szak-követelmény szabály.
-    Egy szakhoz tetszőleges számú sor vehető fel (pl. info/matek/fizika bontás).
+    Dinamikus szak-követelmény szabály (egy szakhoz több sor: info/matek/fizika bontás stb.).
+
+    Attributes:
+        requirement_type: ``required`` / ``elective`` / ``optional`` / ``pe`` / ``practice`` jelleg.
+        subgroup: Egyedi kulcs, amire a ``course_major.subgroup`` hivatkozhat (pl. ``elective_info_credits``).
+        parent_rule_code: Rollup szülő kódja; a gyerek szabály kreditjei a főcsoportba számítanak.
+            A ``course_major.subgroup`` továbbra is a levél szabály kódjára mutat.
+        value_type: ``credits``, ``count`` vagy ``hours`` — a ``min_value`` mértéke.
+        is_specialization_root: Ha igaz, ez a szabály egy kölcsönösen kizáró specializációs fa gyökere
+            (hallgatói választó + NONE szűrés); a kód prefixe tetszőleges (MK-S-*, SP-*, stb.).
     """
     __tablename__ = "major_requirement_rules"
 
@@ -99,11 +114,13 @@ class MajorRequirementRule(Base):
     code = Column(String(80), nullable=False)
     label_hu = Column(String(255), nullable=False)
     label_en = Column(String(255), nullable=True)
-    requirement_type = Column(String(50), nullable=False)  # required/elective/optional/pe/practice
-    subgroup = Column(String(80), nullable=True)  # pl. elective_info_credits, physics_core, stb.
-    value_type = Column(String(20), nullable=False, default="credits")  # credits/count/hours
+    requirement_type = Column(String(50), nullable=False)
+    subgroup = Column(String(80), nullable=True)
+    parent_rule_code = Column(String(80), nullable=True)
+    value_type = Column(String(20), nullable=False, default="credits")
     min_value = Column(Integer, nullable=False, default=0)
     include_in_total = Column(Boolean, nullable=False, default=True)
+    is_specialization_root = Column(Boolean, nullable=False, default=False)
 
 class CourseMajor(Base):
     """
@@ -117,7 +134,6 @@ class CourseMajor(Base):
         semester (int): Ajánlott félév.
         type (str): Típus (pl. kötelező/választható).
         subgroup (str): Alcsoport (lehet NULL).
-        prerequisites (str): Előfeltételek (JSON vagy szöveg).
     """
     __tablename__ = "course_major"
 
@@ -128,7 +144,6 @@ class CourseMajor(Base):
     semester = Column(Integer, nullable=False)
     type = Column(String(50), nullable=False)
     subgroup = Column(String(50), nullable=True)
-    prerequisites = Column(Text, nullable=True)
 
 class CourseEquivalence(Base):
     """

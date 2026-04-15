@@ -1,3 +1,7 @@
+"""
+Chat API: üzenetek, reakciók, olvasatlan számláló. JWT alapú felhasználó azonosítás.
+"""
+
 from fastapi import APIRouter, HTTPException, Depends, Body
 from sqlalchemy.orm import Session
 from app.db import schemas
@@ -13,11 +17,11 @@ def send_message(message: schemas.ChatMessageCreate, db: Session = Depends(get_d
     """
     Üzenet küldése.
 
-    Args:
+    Paraméterek:
         message (schemas.ChatMessageCreate): A küldendő üzenet.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.ChatMessage: A létrehozott üzenet.
     
     Raises:
@@ -34,12 +38,12 @@ def get_messages(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     """
     Üzenetek lekérése.
 
-    Args:
+    Paraméterek:
         skip (int): Az üzenetek, amelyeket átugrunk.
         limit (int): A maximális üzenetszám, amelyet visszaadunk.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.ChatMessageOut]: Az üzenetek listája, megjelenítendő névvel és neptun kóddal.
     """
     chat_service = ChatService(db)
@@ -74,11 +78,11 @@ def get_message(message_id: int, db: Session = Depends(get_db)):
     """
     Egy adott üzenet lekérése az ID alapján.
 
-    Args:
+    Paraméterek:
         message_id (int): Az üzenet azonosítója.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.ChatMessageOut: A kért üzenet, megjelenítendő névvel és neptun kóddal.
 
     Raises:
@@ -116,19 +120,16 @@ def react_to_message(
     """
     Egy emoji reakció hozzáadása vagy cseréje egy üzenethez.
 
-    Args:
+    Paraméterek:
         message_id (int): Az üzenet azonosítója.
         reaction (schemas.ChatReactionBase): Az emoji karakter.
         db (Session): Adatbázis kapcsolat.
         current_user: Bejelentkezett felhasználó.
 
-    Returns:
+    Visszatérés:
         schemas.ChatReactionOut: A létrehozott vagy frissített reakció.
     """
-    print("current_user:", current_user)
     user_id = current_user.get("id") or current_user.get("user_id")
-    print("### REACT_TO_MESSAGE VÉGPONT MEGHÍVVA ###")
-    print(f"API: message_id={message_id}, emoji={reaction.emoji}, user_id={user_id}")
     chat_service = ChatService(db)
     return chat_service.add_or_update_reaction(message_id, user_id, reaction.emoji)
 
@@ -141,12 +142,12 @@ def get_message_reactions(
     """
     Egy üzenethez tartozó összes reakció lekérése.
 
-    Args:
+    Paraméterek:
         message_id (int): Az üzenet azonosítója.
         db (Session): Adatbázis kapcsolat.
         current_user: Bejelentkezett felhasználó.
 
-    Returns:
+    Visszatérés:
         list[schemas.ChatReactionOut]: A reakciók listája.
     """
     chat_service = ChatService(db)

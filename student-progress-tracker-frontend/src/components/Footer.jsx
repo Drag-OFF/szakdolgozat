@@ -1,12 +1,6 @@
 import "../styles/Footer.css";
 import { useLang } from "../context/LangContext";
 
-/**
- * Lábléc (footer) komponens.
- * Statikus tartalom, a projekt nevét és a készítő nevét jeleníti meg az oldal alján.
- *
- * @returns {JSX.Element}
- */
 export default function Footer() {
   const { lang } = useLang();
 

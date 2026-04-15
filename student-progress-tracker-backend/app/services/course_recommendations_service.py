@@ -1,4 +1,10 @@
-import json
+"""
+Kurzusajánló: a hallgató szakjához tartozó, még nem felvett tárgyak rangsorolása.
+
+Becsült aktuális félév (kreditgörbe vagy teljesített félévek mediánja), páros/páratlan szűrés,
+tárgytípus szűrő, esedékesség, név-token átfedés és kategória (típus / alcsoport) hasonlóság.
+"""
+
 import re
 import statistics
 from collections import Counter
@@ -8,36 +14,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 
-def _parse_prerequisites(raw: Any) -> list[str]:
-    """
-    A `course_major.prerequisites` mező formátuma nem teljesen konzisztens lehet,
-    ezért próbáljuk előbb JSON-ként, majd komával szeparált tokenekként értelmezni.
-    """
-    if raw is None:
-        return []
-
-    if isinstance(raw, list):
-        return [str(x).strip().upper() for x in raw if str(x).strip()]
-
-    s = str(raw).strip()
-    if not s:
-        return []
-
-    # JSON array?
-    if s.startswith("["):
-        try:
-            arr = json.loads(s)
-            if isinstance(arr, list):
-                return [str(x).strip().upper() for x in arr if str(x).strip()]
-        except Exception:
-            pass
-
-    # Fallback: vessző/újsor/szűkítő karakterek alapján tokenek
-    s = s.replace(";", ",").replace("\n", ",").replace("\r", ",")
-    return [t.strip().upper() for t in s.split(",") if t.strip()]
-
-
 class CourseRecommendationsService:
+    """``recommend_courses``: szűrt, pontozott jelöltlista ``recommended`` kulccsal és okokkal."""
+
     def __init__(self, db: Session):
         self.db = db
 
@@ -51,11 +30,25 @@ class CourseRecommendationsService:
         lang: str = "hu",
         limit: int = 20,
     ) -> dict:
+        """
+        Paraméterek:
+            user_id: Cél felhasználó (saját szak mintatantervéből dolgozik).
+            course_codes: Opcionális input kódok név-tokenekhez (üres = teljesített tárgyakból token).
+            semester_parity: ``any`` / ``even`` / ``odd``.
+            due_scope: ``all`` vagy ``due_only`` (esedékes ajánlott félév szerint).
+            course_type_filter: ``all`` / ``required`` / ``elective`` / ``optional``.
+            lang: ``hu`` vagy ``en`` (megjelenő kurzusnév).
+            limit: Visszaadott sorok max. száma.
+
+        Visszatérés:
+            major, semester_parity, recommended, current_semester_estimate, reason kulcsokkal.
+        """
         def estimate_current_semester_from_completed(raw_semesters: list[Any]) -> int:
             """
-            Robusztus becslés:
-            - a completed szemeszterek mediánja adja az alapot
-            - egyszeri, nagyon magas kiugró értékek ne húzzák fel a becslést
+            Robusztus becslés: a teljesített félévek mediánja, majd +1 = következő félév.
+
+            Kiugró felső értékek szűrése: ha a mediánnál jóval nagyobb félév csak egyszer szerepel,
+            nem tekintjük reprezentatívnak (elütés / régi adat).
             """
             semesters = []
             for v in raw_semesters:
@@ -73,8 +66,6 @@ class CourseRecommendationsService:
             median_sem = int(round(statistics.median(semesters)))
             counts = Counter(semesters)
 
-            # Kiugró felső értékek szűrése: ha a mediánnál jóval nagyobb szemeszter
-            # csak egyszer fordul elő, ne tekintsük reprezentatívnak.
             upper_outlier_floor = median_sem + 2
             filtered = [
                 s for s in semesters
@@ -92,10 +83,10 @@ class CourseRecommendationsService:
             fallback_semesters: list[Any],
         ) -> int:
             """
-            Kredit-alapú becslés a szak mintatantervéből:
-            - félévenkénti kreditekből kumulált kreditgörbe készül
-            - azt nézzük, meddig "fedezi" a hallgató teljesített kreditje a görbét
-            - az aktuális félév = utolsó lefedett félév + 1
+            Kredit-alapú becslés a szak mintatantervéből: félévenkénti kreditek kumulált görbéje.
+
+            A teljesített kredit addig halad a görbén, amíg el nem fogy; az aktuális félév = utolsó lefedett + 1.
+            Ha a hallgató több kreditet teljesített, mint a teljes görbe vége, a következő félévre essen.
             """
             sem_credits: list[tuple[int, int]] = []
             for row in semester_credit_rows:
@@ -123,8 +114,6 @@ class CourseRecommendationsService:
                 else:
                     break
 
-            # Ha a user már több kreditet teljesített, mint a teljes görbe vége,
-            # tegyük a következő szemeszterre.
             if completed_credit_sum >= cumulative and passed_semester == max_semester:
                 return max_semester + 1
 
@@ -142,7 +131,6 @@ class CourseRecommendationsService:
         if not major_id:
             raise ValueError("A felhasználó szakához tartozó major nem található.")
 
-        # Ne ajánljuk a már teljesített / folyamatban lévő kurzusokat.
         taken_course_ids = set(
             row[0]
             for row in self.db.execute(
@@ -241,13 +229,11 @@ class CourseRecommendationsService:
             input_name_tokens |= _tokens(r[1] or "")
             input_name_tokens |= _tokens(r[2] or "")
 
-        # Ha nincs megadott input, az elvégzett tárgyakból képezzük a tématokeneket.
         if not input_name_tokens:
             for r in completed_rows:
                 input_name_tokens |= _tokens(r[2] or "")
                 input_name_tokens |= _tokens(r[3] or "")
 
-        # Jelölt kurzusok az adott majorból.
         rows = self.db.execute(
             text(
                 """
@@ -259,8 +245,7 @@ class CourseRecommendationsService:
                     cm.semester,
                     cm.credit,
                     cm.type,
-                    cm.subgroup,
-                    cm.prerequisites
+                    cm.subgroup
                 FROM course_major cm
                 JOIN courses c ON c.id = cm.course_id
                 WHERE cm.major_id = :mid
@@ -268,12 +253,6 @@ class CourseRecommendationsService:
             ),
             {"mid": major_id},
         ).fetchall()
-
-        prereq_reverse_graph: dict[str, int] = {}
-        for row in rows:
-            prereqs = _parse_prerequisites(row[8])
-            for pre in prereqs:
-                prereq_reverse_graph[pre] = prereq_reverse_graph.get(pre, 0) + 1
 
         parity = (semester_parity or "any").lower()
         due_scope_norm = (due_scope or "all").lower()
@@ -302,14 +281,10 @@ class CourseRecommendationsService:
 
         scored = []
         for row in rows:
-            course_id, course_code, name_hu, name_en, semester, credit, ctype, subgroup, prereq_raw = row
+            course_id, course_code, name_hu, name_en, semester, credit, ctype, subgroup = row
 
             if course_id in taken_course_ids:
                 continue
-            prereqs = _parse_prerequisites(prereq_raw)
-            prereq_set = set(prereqs)
-            matched_input_prereq = course_codes.intersection(prereq_set)
-            matched_completed_prereq = completed_codes.intersection(prereq_set)
 
             course_name = name_en if lang == "en" and name_en else name_hu
             candidate_tokens = _tokens(course_name or "")
@@ -341,38 +316,20 @@ class CourseRecommendationsService:
             if is_overdue:
                 urgency_score = 50 + min(20, overdue_distance * 3)
 
-            prereq_total = len(prereq_set)
-            prereq_completed_ratio = (len(matched_completed_prereq) / prereq_total) if prereq_total > 0 else 1.0
-            prereq_progress_score = int(prereq_completed_ratio * 30)
-
-            # Előfeltétel-háló hatás: hány tárgyhoz előfeltétel a jelölt kurzus.
-            unlock_impact = prereq_reverse_graph.get(str(course_code or "").strip().upper(), 0)
-            unlock_impact_score = min(30, unlock_impact * 3)
-
             similarity_score = (
-                len(matched_input_prereq) * 8
-                + len(matched_completed_prereq) * 3
-                + token_overlap * 2
+                token_overlap * 2
                 + type_similarity * 2
                 + subgroup_similarity
             )
-            total_score = urgency_score + similarity_score + prereq_progress_score + unlock_impact_score
+            total_score = urgency_score + similarity_score
 
             reasons = []
             if is_overdue:
                 reasons.append("overdue_by_recommended_semester")
-            if matched_input_prereq:
-                reasons.append("matches_input_prerequisites")
-            if matched_completed_prereq:
-                reasons.append("matches_completed_prerequisites")
             if token_overlap > 0:
                 reasons.append("name_similarity")
             if type_similarity > 0 or subgroup_similarity > 0:
                 reasons.append("category_similarity")
-            if prereq_progress_score >= 20:
-                reasons.append("prerequisites_almost_satisfied")
-            if unlock_impact > 0:
-                reasons.append("high_prerequisite_impact")
             if not reasons:
                 reasons.append("major_curriculum_candidate")
 
@@ -386,12 +343,6 @@ class CourseRecommendationsService:
                     "category": ctype,
                     "normalized_type": normalized_type,
                     "subgroup": subgroup,
-                    "matched_prerequisites": sorted(matched_input_prereq),
-                    "matched_completed_prerequisites": sorted(matched_completed_prereq),
-                    "prerequisite_progress_score": prereq_progress_score,
-                    "prerequisite_progress_ratio": round(prereq_completed_ratio, 3),
-                    "unlock_impact_count": unlock_impact,
-                    "unlock_impact_score": unlock_impact_score,
                     "is_overdue": bool(is_overdue),
                     "urgency_score": urgency_score,
                     "similarity_score": similarity_score,

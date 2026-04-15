@@ -1,3 +1,7 @@
+"""
+Kurzusajánló REST végpont: POST törzsben szűrők, válaszban rangsorolt jelöltek.
+"""
+
 from typing import Literal, List
 
 from fastapi import APIRouter, Depends, HTTPException

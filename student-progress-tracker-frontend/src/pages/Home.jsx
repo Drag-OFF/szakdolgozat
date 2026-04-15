@@ -1,14 +1,5 @@
 import { useLang } from "../context/LangContext";
 import { HOME_LABELS } from "../translations";
-/**
- * Főoldal komponens.
- * Üdvözlő szöveget és egy képet jelenít meg a felhasználónak.
- */
-
-/**
- * Home komponens.
- * @returns {JSX.Element} A főoldal tartalma.
- */
 export default function Home() {
   const { lang } = useLang();
   const t = HOME_LABELS[lang] || HOME_LABELS.hu;

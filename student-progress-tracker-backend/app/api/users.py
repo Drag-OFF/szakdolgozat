@@ -1,3 +1,7 @@
+"""
+Felhasználó API: regisztráció, bejelentkezés, profil, e-mail verifikáció, jelszó, admin műveletek, fiók törlés.
+"""
+
 import uuid
 from typing import List, Tuple
 from datetime import datetime
@@ -20,6 +24,7 @@ from app.config import (
 from app.services.users_service import UsersService
 from app.utils.utils import create_access_token, admin_required, get_current_user
 from app.utils.utils import verify_password, hash_password
+from app.services.requirements_service import validate_chosen_specialization_for_major_name
 
 router = APIRouter()
 
@@ -28,11 +33,11 @@ def send_verification_email(to_email: str, verify_token: str) -> Tuple[int, dict
     """
     Verifikációs e-mail küldése Mailjet segítségével.
 
-    Args:
+    Paraméterek:
         to_email: A címzett e-mail címe.
         verify_token: A verifikációs token, amely a linkben szerepel.
 
-    Returns:
+    Visszatérés:
         tuple: (HTTP státuszkód, Mailjet válasz JSON)
     """
     if not MAILJET_API_KEY or not MAILJET_API_SECRET:
@@ -130,6 +135,33 @@ def get_me(db: Session = Depends(get_db), current_user=Depends(get_current_user)
     return user
 
 
+@router.patch(
+    "/me/specialization",
+    response_model=schemas.User,
+    summary="Saját MK specializáció",
+    description="Jelölt specializációs ág (rule code) vagy NONE; üres body = szűrés kikapcsolva.",
+)
+def patch_my_specialization(
+    body: schemas.SpecializationChoiceBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    user_id = current_user.get("user_id") or current_user.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Érvénytelen token.")
+    user = db.query(models.User).filter(models.User.id == int(user_id)).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="Felhasználó nem található.")
+    try:
+        normalized = validate_chosen_specialization_for_major_name(user.major, body.code, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    user.chosen_specialization_code = normalized
+    db.commit()
+    db.refresh(user)
+    return user
+
+
 @router.get("/chat-leaderboard", response_model=List[schemas.ChatLeaderboardUser], summary="Chat ranglista", description="Dinamikus pontszám ranglista a teljesített kurzusok alapján.")
 def get_chat_leaderboard(db: Session = Depends(get_db), user=Depends(get_current_user)):
     """
@@ -179,7 +211,10 @@ def update_user(user_id: int, user: schemas.UserUpdate, db: Session = Depends(ge
     Csak admin jogosultsággal hívható.
     """
     users_service = UsersService(db)
-    updated_user = users_service.update_user(user_id, user)
+    try:
+        updated_user = users_service.update_user(user_id, user)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if updated_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return updated_user
@@ -220,12 +255,34 @@ def login_user(login_data: schemas.UserLogin, db: Session = Depends(get_db)):
         if not getattr(user, "verified", True):
             raise HTTPException(status_code=401, detail="Kérjük, előbb erősítsd meg az e-mail címedet a belépéshez!")
         access_token = create_access_token({"user_id": user.id, "role": user.role})
-        user_profile = {"id": user.id, "name": user.name, "neptun": user.uid, "role": user.role, "major": user.major}
+        user_profile = {
+            "id": user.id,
+            "name": user.name,
+            "neptun": user.uid,
+            "role": user.role,
+            "major": user.major,
+            "chosen_specialization_code": getattr(user, "chosen_specialization_code", None),
+        }
         return {"access_token": access_token, "token_type": "bearer", "user": user_profile}
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=401, detail=str(e))
+
+
+@router.post(
+    "/refresh-token",
+    response_model=schemas.Token,
+    summary="Access token frissítése",
+    description="Bejelentkezett felhasználó számára új hozzáférési token kiadása.",
+)
+def refresh_access_token(current_user=Depends(get_current_user)):
+    user_id = current_user.get("user_id") or current_user.get("id")
+    role = current_user.get("role")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Érvénytelen token.")
+    access_token = create_access_token({"user_id": int(user_id), "role": role})
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/change-password", summary="Jelszó módosítása", description="Bejelentkezett felhasználó jelszavának módosítása.")
@@ -256,6 +313,9 @@ def delete_my_profile(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    """
+    Progress sorok törlése; chat üzenetek megmaradnak. A ``users`` sor anonimizálva marad (FK integritás), nem fizikai DELETE.
+    """
     user_id = current_user.get("user_id") or current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Érvénytelen token.")
@@ -267,13 +327,8 @@ def delete_my_profile(
     if not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=400, detail="Hibás jelszó.")
 
-    # A kérés alapján:
-    # - progress adatok törlése
-    # - chat tartalom (üzenetek/reakciók) megőrzése
     db.execute(text("DELETE FROM progress WHERE user_id = :uid"), {"uid": int(user_id)})
 
-    # Profil anonimizálása ahelyett, hogy fizikailag törölnénk a users sort,
-    # így a chat FK-k sértetlenek maradnak.
     token = uuid.uuid4().hex[:10]
     anonymized_uid = f"DEL{int(user_id)}{token[:3]}".upper()[:16]
     anonymized_email = f"deleted+{int(user_id)}-{token}@deleted.local"
@@ -298,6 +353,8 @@ def delete_my_profile(
     user.role = "user"
     user.anonymous_name = f"Deleted#{int(user_id)}"
     user.created_at = user.created_at or datetime.utcnow()
+    if hasattr(user, "chosen_specialization_code"):
+        user.chosen_specialization_code = None
 
     db.commit()
 

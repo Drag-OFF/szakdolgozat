@@ -1,3 +1,8 @@
+"""
+Pydantic sémák: REST API kérések és válaszok validálása, ORM objektumok szerializálása (``from_attributes``).
+
+A mezőnevek és típusok egyeznek a FastAPI routerek ``response_model`` / body típusaival.
+"""
 from pydantic import BaseModel, ConfigDict, validator, EmailStr, Field
 from typing import Optional, List
 import re
@@ -21,6 +26,7 @@ class UserBase(BaseModel):
         role (str): Szerepkör.
         created_at (datetime): Létrehozás ideje.
         anonymous_name (Optional[str]): Anonim név, ha van.
+        chosen_specialization_code (Optional[str]): MK-S-* specializáció vagy NONE (spec nélkül).
     """
     uid: str
     email: str
@@ -34,6 +40,7 @@ class UserBase(BaseModel):
     role: str
     created_at: datetime
     anonymous_name: Optional[str] = None
+    chosen_specialization_code: Optional[str] = None
 
 class UserCreate(BaseModel):
     """
@@ -110,6 +117,7 @@ class UserUpdate(BaseModel):
         created_at (Optional[datetime]): Létrehozás ideje.
         password_hash (Optional[str]): Jelszó hash.
         anonymous_name (Optional[str]): Anonim név, ha van.
+        chosen_specialization_code (Optional[str]): MK specializáció vagy NONE.
     """
     uid: Optional[str] = None
     email: Optional[str] = None
@@ -119,6 +127,7 @@ class UserUpdate(BaseModel):
     address_card_number: Optional[str] = None
     mothers_name: Optional[str] = None
     major: Optional[str] = None
+    chosen_specialization_code: Optional[str] = None
     verified: Optional[bool] = None
     role: Optional[str] = None
     created_at: Optional[datetime] = None
@@ -167,6 +176,23 @@ class ChangePasswordRequest(BaseModel):
 
 class DeleteProfileRequest(BaseModel):
     password: str
+
+
+class SpecializationChoiceBody(BaseModel):
+    """
+    Specializáció választás: egy jelölt fa gyökér ``code`` (admin: is_specialization_root), NONE = minden ilyen fa kizárva,
+    code üres/null = nincs szűrés.
+    """
+    code: Optional[str] = None
+
+    @validator("code", pre=True)
+    def normalize_code(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str) and not v.strip():
+            return None
+        return str(v).strip().upper()
+
 
 class User(UserBase):
     """
@@ -252,11 +278,12 @@ class MajorCreate(MajorBase):
 class MajorUpdate(BaseModel):
     """
     Szak frissítési séma. Opcionális mezők: csak a módosítandó mezőket küldd.
+
+    ``model_config``: Pydantic v2 — ORM példányokból is képezhető a modell (``from_attributes``).
     """
     name: Optional[str] = None
     name_en: Optional[str] = None
 
-    # pydantic v2: ORM-objektumokból történő modellezés
     model_config = ConfigDict(from_attributes=True)
 
 class Major(MajorBase):
@@ -326,15 +353,22 @@ class MajorRequirement(MajorRequirementBase):
         from_attributes = True
 
 class MajorRequirementRuleBase(BaseModel):
+    """
+    Szak követelmény szabály API réteg (egyedi ``code``, típus, rollup ``parent_rule_code``).
+
+    ``value_type``: ``credits`` (kredit), ``count`` (darab) vagy ``hours`` (óra) — a ``min_value`` mértéke.
+    """
     major_id: int
     code: str
     label_hu: str
     label_en: Optional[str] = None
     requirement_type: str
     subgroup: Optional[str] = None
-    value_type: str = "credits"  # credits | count | hours
+    parent_rule_code: Optional[str] = None
+    value_type: str = "credits"
     min_value: int = 0
     include_in_total: bool = True
+    is_specialization_root: bool = False
 
 class MajorRequirementRuleCreate(MajorRequirementRuleBase):
     pass
@@ -345,9 +379,11 @@ class MajorRequirementRuleUpdate(BaseModel):
     label_en: Optional[str] = None
     requirement_type: Optional[str] = None
     subgroup: Optional[str] = None
+    parent_rule_code: Optional[str] = None
     value_type: Optional[str] = None
     min_value: Optional[int] = None
     include_in_total: Optional[bool] = None
+    is_specialization_root: Optional[bool] = None
 
 class MajorRequirementRule(MajorRequirementRuleBase):
     id: int
@@ -364,7 +400,6 @@ class CourseMajorBase(BaseModel):
         semester (int): Ajánlott félév.
         type (str): Típus (pl. kötelező/választható).
         subgroup (Optional[str]): Alcsoport (lehet None).
-        prerequisites (Optional[str]): Előfeltételek (JSON vagy szöveg, lehet None).
     """
     course_id: int
     major_id: int
@@ -372,7 +407,6 @@ class CourseMajorBase(BaseModel):
     semester: int
     type: str
     subgroup: Optional[str] = None
-    prerequisites: Optional[str] = None
 
 class CourseMajorCreate(CourseMajorBase):
     """
@@ -385,7 +419,6 @@ class CourseMajorCreate(CourseMajorBase):
         semester (int): Ajánlott félév.
         type (str): Típus.
         subgroup (Optional[str]): Alcsoport.
-        prerequisites (Optional[str]): Előfeltételek.
     """
     pass
 
@@ -401,7 +434,6 @@ class CourseMajor(CourseMajorBase):
         semester (int): Ajánlott félév.
         type (str): Típus.
         subgroup (Optional[str]): Alcsoport.
-        prerequisites (Optional[str]): Előfeltételek.
     """
     id: int
     model_config = ConfigDict(from_attributes=True)
@@ -417,7 +449,6 @@ class CourseMajorUpdate(BaseModel):
     semester: Optional[int] = None
     type: Optional[str] = None
     subgroup: Optional[str] = None
-    prerequisites: Optional[str] = None
 
 class CourseEquivalenceBase(BaseModel):
     """

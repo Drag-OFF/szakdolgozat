@@ -1,3 +1,5 @@
+"""JWT, jelszó hash, ``get_current_user`` / admin függőségek, státusz normalizálás importokhoz."""
+
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
@@ -30,10 +32,10 @@ def hash_password(password: str) -> str:
     """
     Jelszó hash-elése bcrypt algoritmussal.
 
-    Args:
+    Paraméterek:
         password (str): A felhasználó jelszava.
 
-    Returns:
+    Visszatérés:
         str: A hash-elt jelszó.
     """
     return pwd_context.hash(password)
@@ -42,11 +44,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Jelszó ellenőrzése a hash-elt jelszóval.
 
-    Args:
+    Paraméterek:
         plain_password (str): A felhasználó által megadott jelszó.
         hashed_password (str): Az adatbázisban tárolt hash-elt jelszó.
 
-    Returns:
+    Visszatérés:
         bool: True, ha egyezik, különben False.
     """
     return pwd_context.verify(plain_password, hashed_password)
@@ -56,10 +58,10 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(HTTPBea
     """
     JWT token ellenőrzése és payload visszaadása.
 
-    Args:
+    Paraméterek:
         credentials (HTTPAuthorizationCredentials): A kérésben kapott token.
 
-    Returns:
+    Visszatérés:
         dict: A tokenben lévő payload (pl. user_id, role).
 
     Raises:
@@ -79,10 +81,10 @@ def admin_required(user=Depends(get_current_user)):
     """
     Csak admin jogosultságú felhasználó férhet hozzá.
 
-    Args:
+    Paraméterek:
         user (dict): A JWT tokenből kinyert payload.
 
-    Returns:
+    Visszatérés:
         dict: A payload, ha admin.
 
     Raises:

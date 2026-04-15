@@ -10,9 +10,11 @@ import "../styles/ProgressTable.css";
 import "../styles/AdminPanels.css";
 import { apiUrl } from "../config";
 import { getUserObject, getAccessToken } from "../authStorage";
+import Button from "../components/Button";
 
 const COURSES_PAGE_SIZE = 10;
 
+/** Hallgatói kurzus progress lista + követelmény összegzés oldal. */
 export default function ProgressTracker() {
   const user = getUserObject();
   const [progressFull, setProgressFull] = useState([]);
@@ -49,6 +51,7 @@ export default function ProgressTracker() {
     (points ? String(p.points || "") === points : true)
   );
 
+  // Lapozás és kliens oldali szűrés az aktuális feltételek alapján.
   const coursesTotalPages = Math.max(1, Math.ceil(filtered.length / COURSES_PAGE_SIZE));
   const coursesDisplayed = filtered.slice(
     coursesPage * COURSES_PAGE_SIZE,
@@ -89,7 +92,7 @@ export default function ProgressTracker() {
                     const formData = new FormData();
                     formData.append("file", file);
                     try {
-                      const res = await fetch(
+                      const res = await authFetch(
                         apiUrl(`/api/progress/${user.id}/import?lang=${lang}`),
                         {
                           method: "POST",
@@ -135,23 +138,27 @@ export default function ProgressTracker() {
                 <ProgressTable progressFull={coursesDisplayed} />
               </div>
               <div className="progress-courses-pagination">
-                <button
+                <Button
                   type="button"
                   onClick={() => setCoursesPage(p => Math.max(0, p - 1))}
                   disabled={coursesPage === 0}
+                  variant="ghost"
+                  size="sm"
                 >
                   {t.prev}
-                </button>
+                </Button>
                 <div>{`${t.page} ${coursesPage + 1} / ${coursesTotalPages}`}</div>
-                <button
+                <Button
                   type="button"
                   onClick={() =>
                     setCoursesPage(p => Math.min(coursesTotalPages - 1, p + 1))
                   }
                   disabled={coursesPage >= coursesTotalPages - 1}
+                  variant="ghost"
+                  size="sm"
                 >
                   {t.next}
-                </button>
+                </Button>
                 <div className="progress-courses-pagination-total">
                   {`${filtered.length} ${t.total}`}
                 </div>

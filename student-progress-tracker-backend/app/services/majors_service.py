@@ -1,3 +1,5 @@
+"""Szakok tábla CRUD — ``MajorsService``."""
+
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 
@@ -22,11 +24,11 @@ class MajorsService:
         """
         Szakok lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Hány rekordot hagyjon ki.
             limit (int): Hány rekordot adjon vissza.
 
-        Returns:
+        Visszatérés:
             List[Major]: Szakok listája.
         """
         return self.db.query(models.Major).offset(skip).limit(limit).all()
@@ -35,10 +37,10 @@ class MajorsService:
         """
         Egy szak lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             major_id (int): Szak azonosító.
 
-        Returns:
+        Visszatérés:
             Major | None: Szak vagy None.
         """
         return self.db.query(models.Major).filter(models.Major.id == major_id).first()
@@ -47,10 +49,10 @@ class MajorsService:
         """
         Új szak létrehozása.
 
-        Args:
+        Paraméterek:
             major (MajorCreate): Szak adatai.
 
-        Returns:
+        Visszatérés:
             Major: Létrehozott szak.
         """
         db_major = models.Major(**major.dict())
@@ -63,11 +65,11 @@ class MajorsService:
         """
         Szak adatainak frissítése.
 
-        Args:
+        Paraméterek:
             major_id (int): Szak azonosító.
             major (MajorBase): Friss adatok.
 
-        Returns:
+        Visszatérés:
             Major | None: Frissített szak vagy None.
         """
         db_major = self.get_major(major_id)
@@ -83,10 +85,10 @@ class MajorsService:
         """
         Szak törlése.
 
-        Args:
+        Paraméterek:
             major_id (int): Szak azonosító.
 
-        Returns:
+        Visszatérés:
             Major | None: Törölt szak vagy None.
         """
         db_major = self.get_major(major_id)

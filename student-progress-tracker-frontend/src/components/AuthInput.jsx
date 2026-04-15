@@ -1,18 +1,5 @@
 import { useLang } from "../context/LangContext";
 
-/**
- * Egyedi input mező komponens hitelesítési (login/regisztráció) űrlapokhoz.
- * Megjeleníti a labelt, az inputot, és opcionálisan hibát.
- *
- * @param {Object} props
- * @param {string} props.label - A mező felirata.
- * @param {string} props.id - Az input egyedi azonosítója.
- * @param {string} [props.type="text"] - Az input típusa.
- * @param {string} props.value - Az input aktuális értéke.
- * @param {function} props.onChange - Változáskezelő függvény.
- * @param {string} [props.error] - Hibaszöveg, ha van.
- * @returns {JSX.Element}
- */
 export default function AuthInput({
   label,
   id,

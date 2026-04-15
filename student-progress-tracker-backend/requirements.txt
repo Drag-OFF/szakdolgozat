@@ -12,9 +12,12 @@ websockets
 alembic
 pytest
 httpx
+beautifulsoup4
 pymysql
 email-validator
 passlib
 python-multipart
 mailjet-rest
 cryptography
+pypdf
+pdfplumber

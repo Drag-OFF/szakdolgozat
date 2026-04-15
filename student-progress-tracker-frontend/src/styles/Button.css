@@ -1,0 +1,124 @@
+.ui-btn {
+  --btn-bg: transparent;
+  --btn-fg: #3b3b3b;
+  --btn-border: #1a1a1a;
+  --btn-hover-bg: #1a1a1a;
+  --btn-hover-fg: #ffffff;
+  --btn-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+  appearance: none;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  border-radius: 0.9375em;
+  box-sizing: border-box;
+  display: inline-block;
+  font-family: Roobert, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  font-weight: 600;
+  line-height: normal;
+  margin: 0;
+  min-height: 3.05em;
+  min-width: 0;
+  outline: none;
+  padding: 0.72em 1.45em;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  will-change: transform;
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.ui-btn:hover:enabled {
+  color: var(--btn-hover-fg);
+  background: var(--btn-hover-bg);
+  box-shadow: var(--btn-shadow);
+  transform: translateY(-1px);
+}
+
+.ui-btn:active:enabled {
+  box-shadow: none;
+  transform: translateY(0);
+}
+
+.ui-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.3);
+}
+
+.ui-btn:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ui-btn--sm {
+  min-height: 2.35em;
+  padding: 0.45em 1.05em;
+  font-size: 13px;
+}
+
+.ui-btn--md {
+  min-height: 2.85em;
+  padding: 0.62em 1.35em;
+  font-size: 14px;
+}
+
+.ui-btn--lg {
+  min-height: 3.35em;
+  padding: 0.85em 1.95em;
+  font-size: 16px;
+}
+
+.ui-btn--primary {
+  --btn-bg: #0f62fe;
+  --btn-fg: #ffffff;
+  --btn-border: #0f62fe;
+  --btn-hover-bg: #0b4fd1;
+  --btn-hover-fg: #ffffff;
+}
+
+.ui-btn--success {
+  --btn-bg: #1f9d55;
+  --btn-fg: #ffffff;
+  --btn-border: #1f9d55;
+  --btn-hover-bg: #15713d;
+  --btn-hover-fg: #ffffff;
+}
+
+.ui-btn--danger {
+  --btn-bg: #dc2626;
+  --btn-fg: #ffffff;
+  --btn-border: #dc2626;
+  --btn-hover-bg: #b91c1c;
+  --btn-hover-fg: #ffffff;
+}
+
+.ui-btn--warning {
+  --btn-bg: #f59e0b;
+  --btn-fg: #1f2937;
+  --btn-border: #f59e0b;
+  --btn-hover-bg: #d97706;
+  --btn-hover-fg: #ffffff;
+}
+
+.ui-btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: #1f2937;
+  --btn-border: #1f2937;
+  --btn-hover-bg: #1f2937;
+  --btn-hover-fg: #ffffff;
+}
+
+.ui-btn--neutral {
+  --btn-bg: transparent;
+  --btn-fg: #3b3b3b;
+  --btn-border: #1a1a1a;
+  --btn-hover-bg: #1a1a1a;
+  --btn-hover-fg: #ffffff;
+}
+

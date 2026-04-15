@@ -1,3 +1,7 @@
+"""
+Előrehaladás (progress) API: CRUD, követelmények összegzés, XLSX sablon/export/import.
+"""
+
 import logging
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Request
 from fastapi.responses import StreamingResponse
@@ -24,11 +28,11 @@ def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_
     """
     Haladás létrehozása.
 
-    Args:
+    Paraméterek:
         progress (schemas.ProgressCreate): A létrehozandó haladás adatai.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.Progress: A létrehozott haladás.
 
     Raises:
@@ -45,12 +49,12 @@ def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     """
     Haladások lekérése.
 
-    Args:
+    Paraméterek:
         skip (int): A kihagyandó haladások száma.
         limit (int): A visszaadandó haladások maximális száma.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.Progress]: A haladások listája.
     """
     progress_service = ProgressService(db)
@@ -61,11 +65,11 @@ def get_user_progress(user_id: int, db: Session = Depends(get_db)):
     """
     Egy adott felhasználó haladásának lekérése.
 
-    Args:
+    Paraméterek:
         user_id (int): A felhasználó azonosítója.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.Progress]: A felhasználó haladásának listája.
 
     Raises:
@@ -82,12 +86,12 @@ def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Sess
     """
     Haladás frissítése.
 
-    Args:
+    Paraméterek:
         progress_id (int): A frissítendő haladás azonosítója.
         progress (schemas.ProgressUpdate): A frissítendő haladás adatai.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.Progress: A frissített haladás.
 
     Raises:
@@ -104,11 +108,11 @@ def delete_progress(progress_id: int, db: Session = Depends(get_db)):
     """
     Haladás törlése.
 
-    Args:
+    Paraméterek:
         progress_id (int): A törlendő haladás azonosítója.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         dict: A törlés sikerességéről szóló üzenet.
 
     Raises:
@@ -125,11 +129,11 @@ def get_user_completed_courses(user_id: int, db: Session = Depends(get_db)):
     """
     Egy adott felhasználó teljesített kurzusainak lekérése.
 
-    Args:
+    Paraméterek:
         user_id (int): A felhasználó azonosítója.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.Progress]: A felhasználó összes 'completed' státuszú kurzusa.
 
     Raises:
@@ -143,11 +147,11 @@ def get_user_in_progress_courses(user_id: int, db: Session = Depends(get_db)):
     """
     Egy adott felhasználó folyamatban lévő kurzusainak lekérése.
 
-    Args:
+    Paraméterek:
         user_id (int): A felhasználó azonosítója.
         db (Session): Az adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.Progress]: A felhasználó összes 'in_progress' státuszú kurzusa.
 
     Raises:
@@ -198,12 +202,12 @@ def requirements_endpoint(
     """
     Egy felhasználó szakos követelményeinek, teljesített és hiányzó kreditjeinek, elérhető kurzusainak lekérdezése.
 
-    Args:
+    Paraméterek:
         user_id (int): A felhasználó azonosítója.
         lang (str): Nyelv ('hu' vagy 'en').
         db (Session): SQLAlchemy adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         dict: A követelmények, teljesített kreditek, elérhető kurzusok, stb.
     """
     return get_user_requirements(user_id, lang, db)
@@ -220,12 +224,13 @@ def template_xlsx(
 ):
     """
     Szakhoz tartozó összes tárgyat tartalmazó XLSX sablon generálása.
+
+    Jogosultság: admin bármely ``user_id``-hoz; hallgató csak saját magához. A JWT ``current_user`` lehet dict vagy objektum;
+    szerepkör ``role`` vagy ``roles`` mezőben (string vagy lista).
     """
-    # debug: naplózzuk a current_user és a bejövő header-ek tartalmát
     logger.debug("template_xlsx called; request.headers: %s", {k:v for k,v in request.headers.items()})
     logger.debug("template_xlsx called; current_user: %r", current_user)
 
-    # kinyerés: támogassuk dict és objektum formátumot, valamint 'role' vagy 'roles'
     current_role = None
     current_id = -1
     try:
@@ -239,7 +244,6 @@ def template_xlsx(
         logger.exception("Error parsing current_user: %s", e)
         current_id = -1
 
-    # admin ellenőrzés: támogassuk string és lista formátumokat
     def is_admin(role_val) -> bool:
         if role_val is None:
             return False

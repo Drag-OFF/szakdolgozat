@@ -1,3 +1,5 @@
+"""Kurzustár CRUD — ``CoursesService``."""
+
 from sqlalchemy.orm import Session
 from app.db.models import Course as CourseModel
 from app.db.schemas import Course, CourseCreate, CourseUpdate
@@ -7,7 +9,7 @@ class CoursesService:
         """
         CoursesService inicializálása.
 
-        Args:
+        Paraméterek:
             db (Session): SQLAlchemy adatbázis kapcsolat.
         """
         self.db = db
@@ -16,10 +18,10 @@ class CoursesService:
         """
         Új kurzus létrehozása.
 
-        Args:
+        Paraméterek:
             course_data (CourseCreate): A létrehozandó kurzus adatai.
 
-        Returns:
+        Visszatérés:
             CourseModel: A létrehozott kurzus példánya.
         """
         course = CourseModel(**course_data.dict())
@@ -32,11 +34,11 @@ class CoursesService:
         """
         Az összes kurzus lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Kihagyandó rekordok száma.
             limit (int): Visszaadandó rekordok száma.
 
-        Returns:
+        Visszatérés:
             list[CourseModel]: Kurzusok listája.
         """
         return self.db.query(CourseModel).offset(skip).limit(limit).all()
@@ -45,10 +47,10 @@ class CoursesService:
         """
         Egy kurzus lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             course_id (int): A kurzus azonosítója.
 
-        Returns:
+        Visszatérés:
             CourseModel: A megtalált kurzus példánya.
 
         Raises:
@@ -63,11 +65,11 @@ class CoursesService:
         """
         Kurzus adatainak frissítése.
 
-        Args:
+        Paraméterek:
             course_id (int): A frissítendő kurzus azonosítója.
             course_data (CourseUpdate): A frissítési adatok.
 
-        Returns:
+        Visszatérés:
             CourseModel: A frissített kurzus példánya.
 
         Raises:
@@ -86,10 +88,10 @@ class CoursesService:
         """
         Kurzus törlése azonosító alapján.
 
-        Args:
+        Paraméterek:
             course_id (int): A törlendő kurzus azonosítója.
 
-        Returns:
+        Visszatérés:
             bool: True ha törölve lett, False ha nem található.
         """
         course = self.db.query(CourseModel).filter(CourseModel.id == course_id).first()

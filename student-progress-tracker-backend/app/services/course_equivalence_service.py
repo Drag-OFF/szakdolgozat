@@ -1,3 +1,5 @@
+"""Kurzus ekvivalencia párok CRUD — ``CourseEquivalenceService``."""
+
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 
@@ -29,11 +31,11 @@ class CourseEquivalenceService:
         """
         Ekvivalenciák lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Hány rekordot hagyjon ki.
             limit (int): Hány rekordot adjon vissza.
 
-        Returns:
+        Visszatérés:
             List[CourseEquivalence]: Ekvivalenciák listája.
         """
         return self.db.query(models.CourseEquivalence).offset(skip).limit(limit).all()
@@ -42,10 +44,10 @@ class CourseEquivalenceService:
         """
         Egy ekvivalencia lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             eq_id (int): Ekvivalencia azonosító.
 
-        Returns:
+        Visszatérés:
             CourseEquivalence | None: Ekvivalencia vagy None.
         """
         return self.db.query(models.CourseEquivalence).filter(models.CourseEquivalence.id == eq_id).first()
@@ -54,10 +56,10 @@ class CourseEquivalenceService:
         """
         Új ekvivalencia létrehozása.
 
-        Args:
+        Paraméterek:
             eq (CourseEquivalenceCreate): Ekvivalencia adatai.
 
-        Returns:
+        Visszatérés:
             CourseEquivalence: Létrehozott ekvivalencia.
         """
         db_eq = models.CourseEquivalence(**_schema_to_dict(eq))
@@ -70,11 +72,11 @@ class CourseEquivalenceService:
         """
         Ekvivalencia frissítése.
 
-        Args:
+        Paraméterek:
             eq_id (int): Ekvivalencia azonosító.
             eq (CourseEquivalenceBase): Friss adatok.
 
-        Returns:
+        Visszatérés:
             CourseEquivalence | None: Frissített ekvivalencia vagy None.
         """
         db_eq = self.get_by_id(eq_id)
@@ -90,10 +92,10 @@ class CourseEquivalenceService:
         """
         Ekvivalencia törlése.
 
-        Args:
+        Paraméterek:
             eq_id (int): Ekvivalencia azonosító.
 
-        Returns:
+        Visszatérés:
             CourseEquivalence | None: Törölt ekvivalencia vagy None.
         """
         db_eq = self.get_by_id(eq_id)

@@ -1,0 +1,473 @@
+.admin-pdf-check-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 12px 160px;
+}
+
+.admin-pdf-check-backlink-wrap {
+  margin-bottom: 12px;
+}
+
+.admin-pdf-check-backlink {
+  color: #155a9a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-pdf-check-backlink:hover {
+  text-decoration: underline;
+}
+
+.admin-pdf-check-hero {
+  border-radius: 10px;
+}
+
+.admin-pdf-check-hero-body {
+  padding: 14px;
+}
+
+.admin-pdf-check-blurb {
+  margin: 0 0 10px;
+  color: #4b5563;
+}
+
+.admin-pdf-check-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #0b4f85;
+}
+
+.admin-pdf-check-file-input {
+  width: 100%;
+  max-width: 560px;
+}
+
+.admin-pdf-check-actions {
+  margin-top: 12px;
+}
+
+.admin-pdf-check-file-list {
+  margin-top: 10px;
+  color: #374151;
+  font-size: 14px;
+}
+
+.admin-pdf-check-error {
+  margin-top: 10px;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.admin-pdf-check-results-card {
+  margin-top: 12px;
+}
+
+.admin-pdf-check-results-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.admin-pdf-check-results-title {
+  margin: 0;
+}
+
+.admin-pdf-check-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0b4f85;
+  font-weight: 600;
+}
+
+.admin-pdf-check-muted {
+  color: #57534e;
+}
+
+.admin-pdf-check-person {
+  padding-top: 4px;
+}
+
+.admin-pdf-check-person.with-top-border {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 14px;
+  margin-top: 14px;
+}
+
+.admin-pdf-check-person-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-pdf-check-person-name {
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.admin-pdf-check-status-pill {
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-pdf-check-status-pill.ok {
+  background: #e7f7ef;
+  color: #0f766e;
+}
+
+.admin-pdf-check-status-pill.warn {
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.admin-pdf-check-userline {
+  margin-top: 6px;
+  color: #374151;
+}
+
+.admin-pdf-check-doc-kind-line {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.admin-pdf-check-import-block {
+  margin-top: 10px;
+}
+
+.admin-pdf-check-import-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.admin-pdf-check-warning-line {
+  margin-top: 6px;
+  color: #7f1d1d;
+}
+
+.admin-pdf-check-warning-line-amber {
+  color: #92400e;
+}
+
+.admin-pdf-check-name-mismatch-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #111827;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.admin-pdf-check-manual-match {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed #bfdbfe;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.admin-pdf-check-manual-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #0b4f85;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-pdf-check-manual-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+}
+
+.admin-pdf-check-manual-row-secondary {
+  margin-top: 8px;
+}
+
+.admin-pdf-check-edit-zone {
+  margin-top: 10px;
+  border: 1px solid #e6eef6;
+  border-radius: 10px;
+  background: #fafcff;
+  padding: 10px;
+}
+
+.admin-pdf-check-edit-title {
+  font-weight: 700;
+  color: #0b4f85;
+  margin-bottom: 8px;
+}
+
+.admin-pdf-check-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-pdf-check-table {
+  min-width: 1050px;
+}
+
+.admin-pdf-check-row-indb {
+  background: #ecfdf5;
+}
+
+.admin-pdf-check-row-missing {
+  background: #fff7ed;
+}
+
+.admin-pdf-check-input {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid #cfe3f7;
+  border-radius: 6px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.admin-pdf-check-input:focus {
+  outline: none;
+  border-color: #1e6fbf;
+  box-shadow: 0 0 0 2px rgba(30, 111, 191, 0.15);
+}
+
+.admin-pdf-check-input-small {
+  max-width: 78px;
+}
+
+.admin-pdf-check-hint {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.admin-pdf-check-dash {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.admin-pdf-check-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.admin-pdf-check-row-status {
+  width: 100%;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-pdf-check-row-status.success {
+  color: #047857;
+}
+
+.admin-pdf-check-row-status.error {
+  color: #b91c1c;
+}
+
+.admin-pdf-check-btn {
+  border: 1px solid #cfe3f7;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.admin-pdf-check-btn:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.admin-pdf-check-btn-primary {
+  background: linear-gradient(180deg, #2f86d9, #1e6fbf);
+  color: #fff;
+  border-color: #155a9a;
+}
+
+.admin-pdf-check-btn-primary:hover:enabled {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.admin-pdf-check-btn-success {
+  background: linear-gradient(180deg, #22c55e, #16a34a);
+  color: #fff;
+  border-color: #15803d;
+}
+
+.admin-pdf-check-btn-success:hover:enabled {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.admin-pdf-check-btn-ghost {
+  background: #fff;
+  color: #0b4f85;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+}
+
+.admin-pdf-check-btn-ghost:hover:enabled {
+  transform: translateY(-1px);
+  background: #f2f8ff;
+}
+
+.admin-pdf-check-btn-icon {
+  min-width: 36px;
+  text-align: center;
+  background: #fff;
+  color: #0b4f85;
+}
+
+.admin-pdf-check-btn-icon.is-active {
+  background: #eff6ff;
+}
+
+.admin-pdf-check-debug-details {
+  margin-top: 10px;
+}
+
+.admin-pdf-check-debug-details summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #0b4f85;
+}
+
+.admin-pdf-check-debug-textarea {
+  width: 100%;
+  min-height: 160px;
+  margin-top: 8px;
+  border: 1px solid #dbeaf8;
+  border-radius: 8px;
+  padding: 8px;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.admin-pdf-check-debug-actions {
+  margin-top: 8px;
+}
+
+.admin-pdf-check-summary-grid {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.admin-pdf-check-summary-item {
+  border: 1px solid #dbeaf8;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fbff;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-pdf-check-summary-item span {
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.admin-pdf-check-summary-item strong {
+  font-size: 20px;
+  color: #0b4f85;
+}
+
+.admin-pdf-check-summary-item.ready {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.admin-pdf-check-summary-item.not-ready {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.admin-pdf-check-missing-title {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #0b4f85;
+}
+
+.admin-pdf-check-missing-list {
+  margin-top: 8px;
+}
+
+.admin-pdf-check-sticky-edit {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  max-width: min(700px, calc(100vw - 28px));
+  background: #0b4f85;
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 18px rgba(11, 79, 133, 0.24);
+}
+
+.admin-pdf-check-sticky-text {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.admin-pdf-check-sticky-edit .admin-pdf-check-btn-ghost {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+.admin-pdf-check-sticky-edit .admin-pdf-check-btn-ghost:hover:enabled {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.admin-pdf-check-bottom-space {
+  height: 80px;
+}
+
+@media (max-width: 900px) {
+  .admin-pdf-check-page {
+    padding: 0 8px 145px;
+  }
+  .admin-pdf-check-manual-row {
+    grid-template-columns: 1fr;
+  }
+  .admin-pdf-check-sticky-edit {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    max-width: none;
+  }
+}

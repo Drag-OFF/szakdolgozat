@@ -6,7 +6,8 @@ import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { PROGRESS_LABELS } from "../../translations";
 import { API_BASE } from "../../config";
-import { getAccessToken } from "../../authStorage";
+import { formatChosenSpecDisplay } from "../../utils";
+import Button from "../Button";
 
 export default function ProgressPanel() {
   const { fetchJson, authFetch } = useAuthFetch();
@@ -72,7 +73,8 @@ export default function ProgressPanel() {
       u?.email,
       u?.major,
       u?.id,
-      u?.user_id
+      u?.user_id,
+      u?.chosen_specialization_code
     ].some(f => {
       try { return f !== undefined && f !== null && String(f).toLowerCase().includes(q); } catch { return false; }
     });
@@ -91,13 +93,11 @@ export default function ProgressPanel() {
     if (!userId) return alert(t.chooseUser);
     setLoadingTemplate(true);
     try {
-      const token = getAccessToken();
-      const headers = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
-      headers.Accept = "application/octet-stream";
-
       const url = `${API_BASE}/api/progress/${encodeURIComponent(userId)}/template-xlsx?lang=${lang}`;
-      const res = await fetch(url, { method: "GET", headers: new Headers(headers), mode: "cors" });
+      const res = await authFetch(url, {
+        method: "GET",
+        headers: { Accept: "application/octet-stream" },
+      });
 
       if (!res.ok) {
         const text = await res.text().catch(() => null);
@@ -187,10 +187,10 @@ export default function ProgressPanel() {
           />
         </div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => { if (!selectedId) return alert(t.chooseUser); downloadTemplateFor(selectedId); }} disabled={!selectedId || loadingTemplate}>
+          <Button onClick={() => { if (!selectedId) return alert(t.chooseUser); downloadTemplateFor(selectedId); }} disabled={!selectedId || loadingTemplate} variant="primary" size="sm">
             {loadingTemplate ? t.downloading : t.downloadTemplate}
-          </button>
-          <button onClick={() => { setSelectedId(""); }}>{t.clearSelection}</button>
+          </Button>
+          <Button onClick={() => { setSelectedId(""); }} variant="ghost" size="sm">{t.clearSelection}</Button>
         </div>
       </div>
 
@@ -202,17 +202,18 @@ export default function ProgressPanel() {
               <th style={{ textAlign: "left", padding: 8 }}>{lang === "hu" ? "Név" : "Name"}</th>
               <th style={{ textAlign: "left", padding: 8, width: 140 }}>{lang === "hu" ? "Neptun" : "Neptun"}</th>
               <th style={{ textAlign: "left", padding: 8, width: 160 }}>{lang === "hu" ? "Szak" : "Major"}</th>
+              <th style={{ textAlign: "left", padding: 8, width: 88 }}>{t.colSpec}</th>
               <th style={{ textAlign: "left", padding: 8 }}>{lang === "hu" ? "Email" : "Email"}</th>
               <th style={{ textAlign: "left", padding: 8, width: 160 }}>{lang === "hu" ? "Létrehozva" : "Created"}</th>
             </tr>
           </thead>
           <tbody>
             {loadingUsers ? (
-              <tr><td colSpan={6} style={{ padding: 8 }}>{t.loadingUsers}</td></tr>
+              <tr><td colSpan={7} style={{ padding: 8 }}>{t.loadingUsers}</td></tr>
             ) : loadError ? (
-              <tr><td colSpan={6} style={{ padding: 8, color: "darkred" }}>{t.loadErrorPrefix} {String(loadError)}</td></tr>
+              <tr><td colSpan={7} style={{ padding: 8, color: "darkred" }}>{t.loadErrorPrefix} {String(loadError)}</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={6} style={{ padding: 8 }}>{t.noResults}</td></tr>
+              <tr><td colSpan={7} style={{ padding: 8 }}>{t.noResults}</td></tr>
             ) : filtered.map((u, i) => {
               const id = u?.id ?? u?.user_id ?? String(i);
               const isSel = String(id) === String(selectedId);
@@ -227,6 +228,9 @@ export default function ProgressPanel() {
                   <td style={{ padding: 8 }}>{u?.name || "-"}</td>
                   <td style={{ padding: 8 }}>{u?.uid || "-"}</td>
                   <td style={{ padding: 8 }}>{u?.major || "-"}</td>
+                  <td style={{ padding: 8, fontSize: 13 }} title={u?.chosen_specialization_code || ""}>
+                    {formatChosenSpecDisplay(u?.chosen_specialization_code, lang)}
+                  </td>
                   <td style={{ padding: 8 }}>{u?.email || "-"}</td>
                   <td style={{ padding: 8 }}>{fmtDate(u?.created_at)}</td>
                 </tr>
@@ -257,7 +261,7 @@ export default function ProgressPanel() {
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <strong>{file.name}</strong>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); setFileOwner(null); }} style={{ marginLeft: 12 }}>{t.removeFile}</button>
+              <Button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); setFileOwner(null); }} style={{ marginLeft: 12 }} variant="danger" size="sm">{t.removeFile}</Button>
             </div>
             {fileOwner ? (
               <div style={{ fontSize: 12, color: fileOwner === selectedId ? "#080" : "#a00" }}>
@@ -268,7 +272,7 @@ export default function ProgressPanel() {
             )}
             {fileOwner && String(fileOwner) !== String(selectedId) && (
               <div style={{ marginTop: 6 }}>
-                <button onClick={(e) => { e.stopPropagation(); setFileOwner(selectedId); }}>{t.assignToSelected}</button>
+                <Button onClick={(e) => { e.stopPropagation(); setFileOwner(selectedId); }} variant="warning" size="sm">{t.assignToSelected}</Button>
               </div>
             )}
           </div>
@@ -282,10 +286,10 @@ export default function ProgressPanel() {
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={handleUpload} disabled={!selectedId || !file || uploading || (fileOwner && String(fileOwner) !== String(selectedId))}>
+        <Button onClick={handleUpload} disabled={!selectedId || !file || uploading || (fileOwner && String(fileOwner) !== String(selectedId))} variant="success" size="md">
           {uploading ? t.uploading : t.upload}
-        </button>
-        <button onClick={() => { setFile(null); setFileOwner(null); }} disabled={!file}>{t.cancel}</button>
+        </Button>
+        <Button onClick={() => { setFile(null); setFileOwner(null); }} disabled={!file} variant="ghost" size="md">{t.cancel}</Button>
       </div>
     </div>
   );

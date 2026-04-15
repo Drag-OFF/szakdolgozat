@@ -2,10 +2,6 @@ import { useEffect } from "react";
 import AdminDashboard from "../components/admin/AdminDashboard";
 import { getAccessToken } from "../authStorage";
 
-/**
- * JWT tokenből visszaadja a felhasználó szerepkörét.
- * @returns {string|null} A szerepkör vagy null.
- */
 function getRoleFromToken() {
   const token = getAccessToken();
   if (!token) return null;
@@ -17,14 +13,6 @@ function getRoleFromToken() {
   }
 }
 
-
-/**
- * Admin oldal komponens.
- * Csak admin jogosultságú felhasználók érhetik el.
- * Ha nem admin a felhasználó, átirányítja a főoldalra.
- *
- * @returns {JSX.Element} Az admin oldal tartalma.
- */
 
 export default function Admin() {
   useEffect(() => {

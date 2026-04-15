@@ -1,3 +1,5 @@
+"""Felhasználó regisztráció, belépés, profil CRUD — ``UsersService``."""
+
 from sqlalchemy.orm import Session
 from app.db.models import User as UserModel
 from app.db.schemas import User, UserCreate, UserUpdate, UserLogin
@@ -12,7 +14,7 @@ class UsersService:
         """
         UsersService inicializálása.
 
-        Args:
+        Paraméterek:
             db (Session): SQLAlchemy adatbázis kapcsolat.
         """
         self.db = db
@@ -21,7 +23,7 @@ class UsersService:
         """
         Az összes felhasználó lekérdezése.
 
-        Returns:
+        Visszatérés:
             list[UserModel]: Az összes felhasználó listája.
         """
         return self.db.query(UserModel).all()
@@ -30,10 +32,10 @@ class UsersService:
         """
         Egy felhasználó lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             user_id (int): A felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             UserModel vagy None: A megtalált felhasználó példánya, vagy None ha nincs ilyen.
         """
         return self.db.query(UserModel).filter(UserModel.id == user_id).first()
@@ -42,10 +44,10 @@ class UsersService:
         """
         Új felhasználó létrehozása, jelszó hash-eléssel és verifikációs token generálással.
 
-        Args:
+        Paraméterek:
             user_data (UserCreate): A létrehozandó felhasználó adatai.
 
-        Returns:
+        Visszatérés:
             UserModel: A létrehozott felhasználó példánya.
 
         Raises:
@@ -73,11 +75,11 @@ class UsersService:
         """
         Felhasználó adatainak frissítése.
 
-        Args:
+        Paraméterek:
             user_id (int): A frissítendő felhasználó azonosítója.
             user_data (UserUpdate): A frissítendő adatok.
 
-        Returns:
+        Visszatérés:
             UserModel vagy None: A frissített felhasználó példánya, vagy None ha nincs ilyen.
 
         Raises:
@@ -86,7 +88,17 @@ class UsersService:
         user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
         if not user:
             return None
-        for key, value in user_data.dict(exclude_unset=True).items():
+        data = user_data.dict(exclude_unset=True)
+        target_major = data.get("major", user.major)
+        if "chosen_specialization_code" in data:
+            from app.services.requirements_service import validate_chosen_specialization_for_major_name
+
+            data["chosen_specialization_code"] = validate_chosen_specialization_for_major_name(
+                target_major,
+                data["chosen_specialization_code"],
+                self.db,
+            )
+        for key, value in data.items():
             setattr(user, key, value)
         self.db.commit()
         self.db.refresh(user)
@@ -96,10 +108,10 @@ class UsersService:
         """
         Felhasználó törlése azonosító alapján.
 
-        Args:
+        Paraméterek:
             user_id (int): A törlendő felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             bool: True, ha sikeres volt a törlés, különben False.
         """
         user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
@@ -113,10 +125,10 @@ class UsersService:
         """
         Felhasználó bejelentkeztetése e-mail vagy NEPTUN kód és jelszó alapján.
 
-        Args:
+        Paraméterek:
             login_data (UserLogin): A bejelentkezési adatok (e-mail vagy uid, jelszó).
 
-        Returns:
+        Visszatérés:
             UserModel: A bejelentkezett felhasználó példánya, ha sikeres a bejelentkezés.
 
         Raises:

@@ -8,13 +8,6 @@ import AuthSelect from "../components/AuthSelect";
 import { useLang } from "../context/LangContext";
 import { API_BASE } from "../config";
 
-/**
- * Regisztrációs oldal komponens.
- * Lehetővé teszi a felhasználók számára, hogy új fiókot hozzanak létre.
- * Minden mezőt validál, hibás mezőket pirossal keretez, és csak helyes adatok esetén küldi el a regisztrációs kérést a backendnek.
- *
- * @returns {JSX.Element} A regisztrációs oldal tartalma.
- */
 export default function Register() {
   const [form, setForm] = useState({
     uid: "", email: "", password: "", name: "", birth_date: "",

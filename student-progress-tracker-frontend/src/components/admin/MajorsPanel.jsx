@@ -3,6 +3,7 @@ import useAuthFetch from "../../hooks/useAuthFetch";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { API_BASE } from "../../config";
+import Button from "../Button";
 
 const PAGE_SIZE = 10;
 
@@ -16,13 +17,13 @@ const ADMIN_MAJORS_TEXTS = {
     cancel: "Mégse",
     loading: "Szakok betöltése...",
     name: "Szak megnevezése (HU)",
-    nameColHint: "A táblázat szaknév (HU) oszlopába kerül.",
+    nameColHint: "A szak magyar megnevezése.",
     nameEn: "Szak megnevezése (EN)",
-    nameEnColHint: "A táblázat angol név oszlopába kerül (ha kitöltöd).",
+    nameEnColHint: "A szak angol megnevezése (ha kitöltöd).",
     phName: "pl. Informatika BSc",
     phNameEn: "pl. Computer Science BSc",
-    tiName: "A szak megnevezése magyarul — a táblázat első név oszlopa.",
-    tiNameEn: "Angol megnevezés; a táblázat angol oszlopában jelenik meg.",
+    tiName: "A szak megnevezése magyarul.",
+    tiNameEn: "A szak angol megnevezése.",
     save: "Mentés",
     update: "Frissítés",
     reload: "↻",
@@ -42,13 +43,13 @@ const ADMIN_MAJORS_TEXTS = {
     cancel: "Cancel",
     loading: "Loading majors...",
     name: "Major name (HU)",
-    nameColHint: "Maps to the table’s Hungarian name column.",
+    nameColHint: "Hungarian name of the major.",
     nameEn: "Major name (EN)",
-    nameEnColHint: "Maps to the English name column when provided.",
+    nameEnColHint: "English name of the major (optional).",
     phName: "e.g. Computer Science BSc",
     phNameEn: "e.g. Computer Science BSc",
-    tiName: "Hungarian name of the major — shown in the first name column.",
-    tiNameEn: "English name; shown in the English column.",
+    tiName: "Hungarian name of the major.",
+    tiNameEn: "English name of the major.",
     save: "Save",
     update: "Update",
     reload: "↻",
@@ -185,10 +186,10 @@ export default function MajorsPanel() {
           onChange={e => setQuery(e.target.value)}
           style={{ flex: 1 }}
         />
-        <button onClick={openCreate} disabled={showForm}>{t.create}</button>
-        <button onClick={openEdit} disabled={showForm || !selectedId}>{t.edit}</button>
-        <button onClick={remove} disabled={showForm || !selectedId}>{t.remove}</button>
-        <button onClick={load} disabled={showForm}>{t.reload}</button>
+        <Button onClick={openCreate} disabled={showForm} variant="success" size="sm">{t.create}</Button>
+        <Button onClick={openEdit} disabled={showForm || !selectedId} variant="warning" size="sm">{t.edit}</Button>
+        <Button onClick={remove} disabled={showForm || !selectedId} variant="danger" size="sm">{t.remove}</Button>
+        <Button onClick={load} disabled={showForm} variant="ghost" size="sm">{t.reload}</Button>
       </div>
 
       {showForm && (
@@ -223,8 +224,8 @@ export default function MajorsPanel() {
           </div>
           <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
             <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
-              <button type="submit">{form.id ? t.update : t.save}</button>
-              <button type="button" onClick={() => setShowForm(false)}>{t.cancel}</button>
+              <Button type="submit" variant={form.id ? "warning" : "success"} size="sm">{form.id ? t.update : t.save}</Button>
+              <Button type="button" onClick={() => setShowForm(false)} variant="ghost" size="sm">{t.cancel}</Button>
             </div>
             <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
@@ -275,13 +276,13 @@ export default function MajorsPanel() {
       )}
 
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
-        <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>
+        <Button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} variant="ghost" size="sm">
           {lang === "en" ? "Prev" : "Előző"}
-        </button>
+        </Button>
         <div>{`${lang === "en" ? "Page" : "Oldal"} ${page + 1} / ${totalPages}`}</div>
-        <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}>
+        <Button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1} variant="ghost" size="sm">
           {lang === "en" ? "Next" : "Következő"}
-        </button>
+        </Button>
         <div style={{ marginLeft: "auto" }}>{filtered.length} {lang === "en" ? "records" : "rekord"}</div>
       </div>
     </div>

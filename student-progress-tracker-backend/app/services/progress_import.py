@@ -1,9 +1,28 @@
+"""
+XLSX előrehaladás import: soronkénti validáció, ekvivalencia és duplikátum ellenőrzés, bulk mentés.
+
+Oszlopok: kód, név, kategória, ajánlott félév, kredit, státusz, teljesítés féléve, pont (sablon szerint).
+Sikeres import előtt a felhasználó összes ``progress`` sora törlődik, majd az új sorok kerülnek be.
+"""
+
+import re
+
 import openpyxl
 from fastapi import HTTPException
 from sqlalchemy import text
 from app.db import models
 from app.utils.translations import CATEGORY_MAP
 from app.utils.utils import normalize_status, parse_int, get_error_message
+
+_LEGACY_TE_SUFFIX_RE = re.compile(r"^([A-Z]{2,12}\d{2,6}[A-Z]{0,4})-TE$", re.I)
+
+
+def _canonicalize_course_code_alias(raw_code: str) -> str:
+    code = str(raw_code or "").strip().upper()
+    m = _LEGACY_TE_SUFFIX_RE.fullmatch(code)
+    if m:
+        return m.group(1).upper()
+    return code
 
 class ProgressImportService:
     def __init__(self, db):
@@ -14,6 +33,10 @@ class ProgressImportService:
         XLSX import: validál, gyűjti a mentendő objektumokat;
         ha nincs sorhiba, törli a régi rekordokat és menti az újak.
         Elfogadja a státusz magyar és angol formáit, adatbázisba canonical angol kulcs kerül.
+
+        Sorok: 1=kód, 2=név, 3=kategória, 4=félév, 5=kredit, 6=státusz, 7=teljesítés féléve, 8=pont.
+        Üres státusz és üres teljesítés félév együtt = sor kihagyva; csak az egyik kitöltve = hiba.
+        Ekvivalens kurzusok nem szerepelhetnek kétszer. Pontszám részben szabályalapú számítás.
         """
         try:
             wb = openpyxl.load_workbook(file.file, data_only=True)
@@ -26,7 +49,6 @@ class ProgressImportService:
         seen_courses = set()
         ekvivalens_map = {}
 
-        # load equivalences
         try:
             eq_rows = self.db.execute(text("SELECT course_id, equivalent_course_id FROM course_equivalence")).fetchall()
             for row in eq_rows:
@@ -35,7 +57,6 @@ class ProgressImportService:
         except Exception:
             pass
 
-        # mapping: code(1), name(2), category(3), semester(4), credit(5), status(6), completed_semester(7), points(8)
         for idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
             cells = list(row) if row is not None else []
             while len(cells) < 8:
@@ -49,51 +70,45 @@ class ProgressImportService:
             status_present = status_raw is not None and str(status_raw).strip() != ""
             completed_present = completed_raw is not None and str(completed_raw).strip() != ""
 
-            # both empty -> skip row
             if not (status_present or completed_present):
                 continue
-            # exactly one present -> error
             if status_present ^ completed_present:
                 row_errors.append(get_error_message("missing_pair", lang))
 
-            # course code
             if not code or str(code).strip() == "":
                 row_errors.append(get_error_message("missing_code", lang))
                 course = None
             else:
-                code_s = str(code).strip()
+                code_s = str(code).strip().upper()
+                code_canon = _canonicalize_course_code_alias(code_s)
                 course = self.db.query(models.Course).filter(models.Course.course_code == code_s).first()
+                if not course and code_canon != code_s:
+                    course = self.db.query(models.Course).filter(models.Course.course_code == code_canon).first()
                 if not course:
                     row_errors.append(get_error_message("course_not_found", lang, code=code_s))
 
-            # category validation
             valid_categories = set(CATEGORY_MAP["hu"].values()) | set(CATEGORY_MAP["en"].values())
             if category and category not in valid_categories:
                 row_errors.append(f"Invalid category '{category}'.")
 
-            # status normalization
             status_norm = None
             if status_present:
                 status_norm = normalize_status(status_raw)
                 if not status_norm:
                     row_errors.append(get_error_message("invalid_status", lang))
 
-            # credit
             credit_val, credit_err = parse_int(credit)
             if credit_err:
                 row_errors.append(get_error_message("invalid_number", lang, col="credit", val=credit))
 
-            # points
             points_val, points_err = parse_int(points)
             if points_err:
                 row_errors.append(get_error_message("invalid_number", lang, col="points", val=points))
 
-            # semester (recommended)
             semester_val, sem_err = parse_int(semester)
             if sem_err:
                 row_errors.append(get_error_message("invalid_number", lang, col="semester", val=semester))
 
-            # completed_semester
             completed_val, comp_err = parse_int(completed_raw)
             if comp_err:
                 row_errors.append(get_error_message("invalid_number", lang, col="completed_semester", val=completed_raw))
@@ -102,7 +117,6 @@ class ProgressImportService:
                 errors.append({"row": idx, "errors": row_errors, "values": {"code": code, "status": status_raw, "completed_semester": completed_raw}})
                 continue
 
-            # duplicate / equivalent checks
             course_id = course.id if course else None
             if course_id:
                 if course_id in seen_courses:
@@ -120,7 +134,6 @@ class ProgressImportService:
                     continue
                 seen_courses.add(course_id)
 
-            # prepare object
             computed_points = None
             if (status_norm or "in_progress") == "in_progress":
                 computed_points = 2
@@ -138,10 +151,8 @@ class ProgressImportService:
                         else:
                             computed_points = 3
             else:
-                # ha ismeretlen státusz, használjuk a fájlban adott pontot vagy 0-t
                 computed_points = points_val if points_val is not None else 0
 
-            # prepare object (pontszámmal)
             prepared.append(models.Progress(
                 user_id=user_id,
                 course_id=course_id,
@@ -153,7 +164,6 @@ class ProgressImportService:
         if errors:
             return {"success": False, "imported": 0, "errors": errors}
 
-        # commit: delete old -> save new
         try:
             self.db.query(models.Progress).filter(models.Progress.user_id == user_id).delete()
             self.db.commit()

@@ -1,15 +1,3 @@
-/**
- * Új jelszó beállító űrlap komponens.
- * Két input mezőt jelenít meg: új jelszó és megerősítés.
- * Realtime validációval ellenőrzi, hogy a jelszó legalább 8 karakter és egyezik a megerősítéssel.
- * Hibás mezőknél piros keret és hibaüzenet jelenik meg.
- * Sikeres beküldés után a submit gomb inaktív lesz.
- *
- * Props:
- * - onSubmit: (password, setMsg) => void - Beküldési függvény, a szülő adja át.
- * - texts: lokalizált szövegek objektuma.
- * - sent: bool, sikeres beküldés után true.
- */
 import { useState } from "react";
 import AuthInput from "./AuthInput";
 import { useLang } from "../context/LangContext";

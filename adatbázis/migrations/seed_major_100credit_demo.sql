@@ -62,7 +62,7 @@ COMMIT;
 --
 -- Példa course_major (feltételezve @cid_req, @cid_inf, ... kurzus id-kat):
 --
--- INSERT INTO course_major (course_id, major_id, credit, semester, type, subgroup, prerequisites) VALUES
+-- INSERT INTO course_major (course_id, major_id, credit, semester, type, subgroup) VALUES
 --   (@cid_req,  @mid, 3, 1, 'required',  NULL, NULL),
 --   (@cid_inf,  @mid, 5, 3, 'elective',  'demo_koteval_info', NULL),
 --   (@cid_math, @mid, 5, 2, 'elective',  'demo_koteval_math', NULL),

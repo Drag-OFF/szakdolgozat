@@ -1,3 +1,5 @@
+"""Hallgatói előrehaladás rekordok adatbázis műveletei — ``ProgressService``."""
+
 from sqlalchemy.orm import Session
 from app.db import models
 from typing import List, Any
@@ -10,11 +12,11 @@ class ProgressService:
         """
         Az összes haladás lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Kihagyandó rekordok száma.
             limit (int): Visszaadandó rekordok száma.
 
-        Returns:
+        Visszatérés:
             list[Progress]: Haladások listája.
         """
         return self.db.query(models.Progress).offset(skip).limit(limit).all()
@@ -23,10 +25,10 @@ class ProgressService:
         """
         Haladás létrehozása.
 
-        Args:
+        Paraméterek:
             progress_data (ProgressCreate): A létrehozandó haladás adatai.
 
-        Returns:
+        Visszatérés:
             Progress: A létrehozott haladás objektum.
         """
         progress = models.Progress(**progress_data.dict())
@@ -39,10 +41,10 @@ class ProgressService:
         """
         Haladás lekérdezése felhasználó szerint.
 
-        Args:
+        Paraméterek:
             user_id (int): A felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             list[Progress]: A felhasználóhoz tartozó haladások listája.
         """
         return self.db.query(models.Progress).filter(models.Progress.user_id == user_id).all()
@@ -51,11 +53,11 @@ class ProgressService:
         """
         Haladás frissítése.
 
-        Args:
+        Paraméterek:
             progress_id (int): A frissítendő haladás azonosítója.
             progress_data (ProgressUpdate): A frissítési adatok.
 
-        Returns:
+        Visszatérés:
             Progress: A frissített haladás objektum.
 
         Raises:
@@ -74,7 +76,7 @@ class ProgressService:
         """
         Haladás törlése.
 
-        Args:
+        Paraméterek:
             progress_id (int): A törlendő haladás azonosítója.
         """
         progress = self.db.query(models.Progress).filter(models.Progress.id == progress_id).first()
@@ -86,10 +88,10 @@ class ProgressService:
         """
         Visszaadja a felhasználó összes teljesített kurzusát.
 
-        Args:
+        Paraméterek:
             user_id (int): A felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             list[Progress]: A felhasználóhoz tartozó, 'completed' státuszú kurzusok listája.
         """
         return self.db.query(models.Progress).filter(
@@ -101,10 +103,10 @@ class ProgressService:
         """
         Visszaadja a felhasználó összes folyamatban lévő kurzusát.
 
-        Args:
+        Paraméterek:
             user_id (int): A felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             list[Progress]: A felhasználóhoz tartozó, 'in_progress' státuszú kurzusok listája.
         """
         return self.db.query(models.Progress).filter(
@@ -116,10 +118,10 @@ class ProgressService:
         """
         Visszaadja a felhasználó exportálható előrehaladási adatait soronként (Excel/CSV-hez).
 
-        Args:
+        Paraméterek:
             user_id (int): A felhasználó azonosítója.
 
-        Returns:
+        Visszatérés:
             List[List[Any]]: Sorok listája, minden sor egy kurzus adatait tartalmazza.
         """
         status_map = {

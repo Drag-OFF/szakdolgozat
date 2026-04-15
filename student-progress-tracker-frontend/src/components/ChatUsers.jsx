@@ -1,20 +1,6 @@
-/**
- * Chat oldalsáv (felhasználók listája) komponens.
- * Asztali nézetben fix sidebar, mobilon slide-panelként jelenik meg.
- * Nyelvváltás támogatott minden feliraton.
- *
- * @param {Object} props
- * @param {Array} props.admins - Adminisztrátor felhasználók tömbje.
- * @param {Array} props.users - Normál felhasználók tömbje.
- * @param {string} props.ownNeptun - A saját Neptun kód.
- * @param {boolean} [props.open] - Mobilon a panel nyitott-e.
- * @param {function} [props.onClose] - Mobilon a panel zárása.
- * @param {boolean} [props.isMobile] - Mobil nézet-e.
- * @returns {JSX.Element}
- */
-
 import React from "react";
 import { useLang } from "../context/LangContext";
+import Button from "./Button";
 
 export default function ChatUsers({ admins, users, ownNeptun, open = false, onClose, isMobile }) {
   const { lang } = useLang();
@@ -34,11 +20,10 @@ export default function ChatUsers({ admins, users, ownNeptun, open = false, onCl
 
   const allUsers = [...admins, ...users];
 
-  // Asztali nézet: fix sidebar, mobilon: slide-panel
   return isMobile ? (
     <aside className={`chat-sidebar slide-panel${open ? " open" : ""}`}>
       {onClose && (
-        <button className="slide-close" onClick={onClose} aria-label="Close">×</button>
+        <Button className="slide-close" onClick={onClose} aria-label="Close" variant="ghost" size="sm">×</Button>
       )}
       <div className="chat-title">{texts[lang].title}</div>
       <div className="chat-user-list">

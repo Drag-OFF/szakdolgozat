@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import useAuthFetch from "../../hooks/useAuthFetch";
 import Autocomplete from "../common/Autocomplete";
+import Button from "../Button";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { API_BASE } from "../../config";
 
-/** subgroupMode: none = nincs alcsoport szűrés (NULL); sqlNull = csak course_major.subgroup IS NULL (__NULL__); custom = egyedi kulcs */
 const emptyForm = {
   id: null,
   code: "",
@@ -16,9 +16,11 @@ const emptyForm = {
   subgroupCustom: "",
   value_type: "credits",
   min_value: 0,
-  include_in_total: true
+  include_in_total: true,
+  is_specialization_root: false
 };
 
+/** Backend subgroup érték -> űrlapmezők (none/sqlNull/custom) leképezés. */
 function subgroupToFormFields(subgroup) {
   const raw = subgroup == null ? "" : String(subgroup).trim();
   if (!raw) return { subgroupMode: "none", subgroupCustom: "" };
@@ -26,6 +28,7 @@ function subgroupToFormFields(subgroup) {
   return { subgroupMode: "custom", subgroupCustom: raw };
 }
 
+/** Űrlap subgroup mezők -> backend kompatibilis érték (null / "__NULL__" / string). */
 function formFieldsToSubgroup(subgroupMode, subgroupCustom) {
   if (subgroupMode === "sqlNull") return "__NULL__";
   if (subgroupMode === "custom") {
@@ -35,6 +38,7 @@ function formFieldsToSubgroup(subgroupMode, subgroupCustom) {
   return null;
 }
 
+/** Szakonkénti dinamikus követelmény szabályok admin szerkesztője. */
 export default function MajorRequirementsPanel() {
   const { authFetch } = useAuthFetch();
   const { lang } = useLang();
@@ -44,25 +48,33 @@ export default function MajorRequirementsPanel() {
   const [selectedId, setSelectedId] = useState(null);
   const [form, setForm] = useState({ ...emptyForm });
   const [showForm, setShowForm] = useState(false);
+  const [bulkDeleteLoading, setBulkDeleteLoading] = useState(false);
 
   const t = {
     hu: {
       selectMajor: "Szak kiválasztása...",
       majorFilterLabel: "Szak (szabálylista)",
-      hMajorFilter: "A táblázat csak ehhez a szakhoz tartozó szabályokat mutatja",
+      hMajorFilter: "Csak a kiválasztott szak szabályai láthatók.",
       title: "Dinamikus szak követelmény szabályok",
       add: "Új szabály",
       edit: "Szerkeszt",
       del: "Töröl",
+      clearAll: "Összes törlése",
       refresh: "↻",
       save: "Mentés",
       cancel: "Mégse",
       noMajor: "Válassz szakot.",
       noRow: "Válassz egy szabály sort.",
       delConfirm: "Biztos törlöd a szabályt?",
+      clearAllConfirm:
+        "Biztos törlöd a kiválasztott szak összes szabályát és kapcsolódó beállítását? Ez a művelet nem vonható vissza.",
+      clearAllDone: "A kiválasztott szak szabályai és kapcsolódó beállításai törölve.",
+      clearAllHint:
+        "Figyelem: ez a művelet a kiválasztott szakhoz tartozó kapcsolódó szabályokat és beállításokat is törli.",
+      noRulesToDelete: "Nincs törölhető szabály ennél a szaknál.",
       subgroupHelp: "Alcsoport",
       subgroupNone: "Nincs alcsoport szűrés (általános)",
-      subgroupSqlNull: "Csak „alcsoport nélküli” kurzusok (subgroup üres a táblában)",
+      subgroupSqlNull: "Csak alcsoport nélküliek",
       subgroupCustom: "Egyedi kulcs (pl. infó / matek blokk)",
       subgroupCustomPh: "pl. demo_koteval_info",
       metricCredits: "Kredit",
@@ -78,36 +90,45 @@ export default function MajorRequirementsPanel() {
       labelHu: "Megjelenő név (HU)",
       labelEn: "Megjelenő név (EN)",
       includeTotal: "Beleszámít az összesítésbe",
+      specRoot: "Spec. fa gyökér",
+      specRootHint: "Kölcsönösen kizáró specializációs ág (hallgatói választó); a kód bármi lehet (MK-S-*, SP-*, …).",
       nullSubgroupDisplay: "-",
-      cols: ["#", "Kód", "Megnevezés", "Típus", "Alcsoport", "Mérték", "Minimum"],
-      hCode: "Táblázat oszlop: Kód",
-      hLabelHu: "Táblázat: megjelenő név (magyar) — „Megnevezés” oszlop",
-      hLabelEn: "Táblázat: angol felirat (ha van)",
-      hType: "Táblázat oszlop: Típus (választó)",
-      hMetric: "Táblázat oszlop: Mérték (kredit / darab / óra)",
-      hMin: "Táblázat oszlop: Minimum (számmező)",
-      hSubgroupBlock: "Táblázat oszlop: Alcsoport — a választott mód szerint",
-      hInclude: "Nem külön oszlop; az összesítő számításnál számít",
+      cols: ["#", "Kód", "Megnevezés", "Típus", "Alcsoport", "Mérték", "Minimum", "Spec"],
+      hCode: "Egyedi azonosító.",
+      hLabelHu: "Megjelenő név magyarul.",
+      hLabelEn: "Megjelenő név angolul (ha van).",
+      hType: "Szabály típusa.",
+      hMetric: "Mérték típusa (kredit / darab / óra).",
+      hMin: "Elvárt minimum érték.",
+      hSubgroupBlock: "Alcsoport beállítása.",
+      hInclude: "Beleszámít az összesítésbe.",
       typeReq: "Követelmény típusa",
       metricLabel: "Mérték (érték típus)"
     },
     en: {
       selectMajor: "Select a major...",
       majorFilterLabel: "Major (rule list)",
-      hMajorFilter: "The table below shows rules for this major only",
+      hMajorFilter: "Only rules of the selected major are shown.",
       title: "Dynamic major requirement rules",
       add: "Add rule",
       edit: "Edit",
       del: "Delete",
+      clearAll: "Delete all",
       refresh: "↻",
       save: "Save",
       cancel: "Cancel",
       noMajor: "Select a major first.",
       noRow: "Select a rule row.",
       delConfirm: "Delete this rule?",
+      clearAllConfirm:
+        "Delete all rules and related settings for the selected major? This cannot be undone.",
+      clearAllDone: "Rules and related settings were deleted for the selected major.",
+      clearAllHint:
+        "Warning: this operation also removes related settings for the selected major.",
+      noRulesToDelete: "No rules to delete for this major.",
       subgroupHelp: "Subgroup",
       subgroupNone: "No subgroup filter (general)",
-      subgroupSqlNull: "Only courses with empty subgroup in DB",
+      subgroupSqlNull: "Only items without subgroup",
       subgroupCustom: "Custom key (e.g. IT / math block)",
       subgroupCustomPh: "e.g. demo_koteval_info",
       metricCredits: "Credits",
@@ -123,16 +144,18 @@ export default function MajorRequirementsPanel() {
       labelHu: "Display label (HU)",
       labelEn: "Display label (EN)",
       includeTotal: "Include in total summary",
+      specRoot: "Spec. tree root",
+      specRootHint: "Mutually exclusive specialization branch (student picker); code can be any prefix.",
       nullSubgroupDisplay: "No subgroup",
-      cols: ["#", "Code", "Label", "Type", "Subgroup", "Metric", "Min"],
-      hCode: "Table column: Code",
-      hLabelHu: "Table: display label (HU) — „Label” column",
-      hLabelEn: "Table: English label (optional)",
-      hType: "Table column: Type (dropdown)",
-      hMetric: "Table column: Metric (credits / count / hours)",
-      hMin: "Table column: Min (number)",
-      hSubgroupBlock: "Table column: Subgroup — depends on mode below",
-      hInclude: "Not a separate column; used in total summary logic",
+      cols: ["#", "Code", "Label", "Type", "Subgroup", "Metric", "Min", "Spec"],
+      hCode: "Unique identifier.",
+      hLabelHu: "Display label in Hungarian.",
+      hLabelEn: "Display label in English (optional).",
+      hType: "Rule type.",
+      hMetric: "Metric type (credits / count / hours).",
+      hMin: "Minimum required value.",
+      hSubgroupBlock: "Subgroup setting.",
+      hInclude: "Included in summary totals.",
       typeReq: "Requirement type",
       metricLabel: "Metric (value type)"
     }
@@ -147,6 +170,18 @@ export default function MajorRequirementsPanel() {
   const selectedMajor = useMemo(
     () => majors.find(m => String(m.id) === String(selectedMajorId)),
     [majors, selectedMajorId]
+  );
+
+  const subgroupSuggestions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (items || [])
+            .map((x) => String(x?.subgroup || "").trim())
+            .filter((x) => x && x !== "__NULL__")
+        )
+      ).sort((a, b) => a.localeCompare(b)),
+    [items]
   );
 
   const loadMajors = async () => {
@@ -195,7 +230,8 @@ export default function MajorRequirementsPanel() {
       ...subgroupToFormFields(row.subgroup),
       value_type: row.requirement_type === "pe" ? "count" : (row.value_type || "credits"),
       min_value: row.min_value || 0,
-      include_in_total: !!row.include_in_total
+      include_in_total: !!row.include_in_total,
+      is_specialization_root: !!row.is_specialization_root
     });
     setShowForm(true);
   };
@@ -212,7 +248,8 @@ export default function MajorRequirementsPanel() {
       subgroup: formFieldsToSubgroup(form.subgroupMode, form.subgroupCustom),
       value_type: form.requirement_type === "pe" ? "count" : form.value_type,
       min_value: Number(form.min_value || 0),
-      include_in_total: !!form.include_in_total
+      include_in_total: !!form.include_in_total,
+      is_specialization_root: !!form.is_specialization_root
     };
     if (!payload.code || !payload.label_hu) {
       alert(lang === "en" ? "Code and HU label are required." : "A code és a HU címke kötelező.");
@@ -249,6 +286,31 @@ export default function MajorRequirementsPanel() {
     else alert(lang === "en" ? "Delete failed." : "Törlés sikertelen.");
   };
 
+  const removeAllForMajor = async () => {
+    if (!selectedMajorId) return alert(t.noMajor);
+    if (!items.length) return alert(t.noRulesToDelete);
+    if (!confirm(t.clearAllConfirm)) return;
+    setBulkDeleteLoading(true);
+    try {
+      const res = await authFetch(
+        `${API_BASE}/api/major_requirement_rules/bulk/by-major/${encodeURIComponent(selectedMajorId)}`,
+        { method: "DELETE" }
+      );
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        alert(err?.detail || (lang === "en" ? "Bulk delete failed." : "Összes törlése sikertelen."));
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      await loadRules(selectedMajorId);
+      const rulesN = Number(data?.deleted_rules_count || 0);
+      const cmN = Number(data?.deleted_course_major_count || 0);
+      alert(`${t.clearAllDone} (${rulesN} rule, ${cmN} course-major)`);
+    } finally {
+      setBulkDeleteLoading(false);
+    }
+  };
+
   return (
     <div className="admin-panel">
       <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 10, flexWrap: "wrap" }}>
@@ -270,13 +332,25 @@ export default function MajorRequirementsPanel() {
         </div>
         <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions" style={{ flex: "0 0 auto" }}>
           <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" onClick={openCreate}>{t.add}</button>
-            <button type="button" onClick={openEdit} disabled={!selectedId}>{t.edit}</button>
-            <button type="button" onClick={remove} disabled={!selectedId}>{t.del}</button>
-            <button type="button" onClick={() => selectedMajorId && loadRules(selectedMajorId)}>{t.refresh}</button>
+            <Button type="button" onClick={openCreate} variant="success" size="sm">{t.add}</Button>
+            <Button type="button" onClick={openEdit} disabled={!selectedId} variant="warning" size="sm">{t.edit}</Button>
+            <Button type="button" onClick={remove} disabled={!selectedId} variant="danger" size="sm">{t.del}</Button>
+            <Button
+              type="button"
+              onClick={removeAllForMajor}
+              disabled={!selectedMajorId || bulkDeleteLoading || items.length === 0}
+              variant="danger"
+              size="sm"
+            >
+              {t.clearAll}
+            </Button>
+            <Button type="button" onClick={() => selectedMajorId && loadRules(selectedMajorId)} variant="ghost" size="sm">{t.refresh}</Button>
           </div>
           <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
         </div>
+      </div>
+      <div style={{ marginTop: -4, marginBottom: 10, fontSize: 12, color: "#7c2d12", fontWeight: 600 }}>
+        {t.clearAllHint}
       </div>
 
       <div style={{ marginBottom: 8, color: "#0b4f85", fontWeight: 700 }}>
@@ -285,22 +359,22 @@ export default function MajorRequirementsPanel() {
 
       {showForm && (
         <form onSubmit={submit} className="major-rules-form" style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12, padding: 12, background: "#f6f9fc", borderRadius: 8, border: "1px solid #cfe0f5" }}>
-          <div className="admin-form-grid admin-form-grid--align-start admin-form-grid--fit">
-            <div className="admin-form-field admin-form-field--h" style={{ flex: "0 1 260px", minWidth: 160, maxWidth: 300 }}>
+          <div className="major-rules-form__grid major-rules-form__grid--codes">
+            <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.code}</div>
               <div className="admin-form-control-wrap">
                 <input className="progress-input" placeholder={t.code} title={t.hCode} value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value }))} />
               </div>
               <div className="admin-form-col-hint">{t.hCode}</div>
             </div>
-            <div className="admin-form-field admin-form-field--h admin-form-field--grow">
+            <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.labelHu}</div>
               <div className="admin-form-control-wrap">
                 <input className="progress-input" placeholder={t.labelHu} title={t.hLabelHu} value={form.label_hu} onChange={e => setForm(f => ({ ...f, label_hu: e.target.value }))} />
               </div>
               <div className="admin-form-col-hint">{t.hLabelHu}</div>
             </div>
-            <div className="admin-form-field admin-form-field--h admin-form-field--grow">
+            <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.labelEn}</div>
               <div className="admin-form-control-wrap">
                 <input className="progress-input" placeholder={t.labelEn} title={t.hLabelEn} value={form.label_en} onChange={e => setForm(f => ({ ...f, label_en: e.target.value }))} />
@@ -308,8 +382,8 @@ export default function MajorRequirementsPanel() {
               <div className="admin-form-col-hint">{t.hLabelEn}</div>
             </div>
           </div>
-          <div className="admin-form-grid admin-form-grid--align-start admin-form-grid--fit">
-            <div className="admin-form-field admin-form-field--h" style={{ flex: "0 1 280px", minWidth: 220, maxWidth: 320 }}>
+          <div className="major-rules-form__grid major-rules-form__grid--metrics">
+            <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.typeReq}</div>
               <div className="admin-form-control-wrap">
                 <select
@@ -336,7 +410,7 @@ export default function MajorRequirementsPanel() {
               </div>
               <div className="admin-form-col-hint">{t.hType}</div>
             </div>
-            <div className="admin-form-field admin-form-field--h" style={{ flex: "0 1 240px", minWidth: 200, maxWidth: 300 }}>
+            <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.metricLabel}</div>
               <div className="admin-form-control-wrap">
                 <select
@@ -355,54 +429,54 @@ export default function MajorRequirementsPanel() {
               </div>
               <div className="admin-form-col-hint">{t.hMetric}</div>
             </div>
-            <div className="admin-form-field admin-form-field--h" style={{ flex: "0 1 140px", minWidth: 120, maxWidth: 180 }}>
+            <div className="admin-form-field admin-form-field--h major-rules-field--min">
               <div className="admin-form-label-text">{t.minValue}</div>
               <div className="admin-form-control-wrap">
-                <input className="progress-input" type="number" placeholder={t.minValue} title={t.hMin} value={form.min_value} onChange={e => setForm(f => ({ ...f, min_value: e.target.value }))} />
+                <input
+                  className="progress-input"
+                  type="number"
+                  step="any"
+                  placeholder={t.minValue}
+                  title={t.hMin}
+                  value={form.min_value}
+                  onChange={e => setForm(f => ({ ...f, min_value: e.target.value }))}
+                />
               </div>
               <div className="admin-form-col-hint">{t.hMin}</div>
             </div>
           </div>
-          <fieldset style={{ margin: 0, padding: "8px 12px", border: "1px solid #bcd", borderRadius: 6 }}>
+          <fieldset style={{ margin: 0, padding: "10px 12px", border: "1px solid #bcd", borderRadius: 8, background: "#fff" }}>
             <legend style={{ fontWeight: 600 }}>
               {t.subgroupHelp}
               <span className="admin-form-col-hint" style={{ display: "block", fontWeight: 500, marginTop: 4 }}>{t.hSubgroupBlock}</span>
             </legend>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                <input
-                  type="radio"
-                  name="subgroupMode"
-                  checked={form.subgroupMode === "none"}
-                  onChange={() => setForm(f => ({ ...f, subgroupMode: "none" }))}
-                />
-                <span>{t.subgroupNone}</span>
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                <input
-                  type="radio"
-                  name="subgroupMode"
-                  checked={form.subgroupMode === "sqlNull"}
-                  onChange={() => setForm(f => ({ ...f, subgroupMode: "sqlNull" }))}
-                />
-                <span>{t.subgroupSqlNull}</span>
-              </label>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", cursor: "pointer" }}>
-                <input
-                  type="radio"
-                  name="subgroupMode"
-                  checked={form.subgroupMode === "custom"}
-                  onChange={() => setForm(f => ({ ...f, subgroupMode: "custom" }))}
-                />
-                <span>{t.subgroupCustom}</span>
-                <input
-                  placeholder={t.subgroupCustomPh}
-                  value={form.subgroupCustom}
-                  onChange={e => setForm(f => ({ ...f, subgroupCustom: e.target.value, subgroupMode: "custom" }))}
-                  disabled={form.subgroupMode !== "custom"}
-                  style={{ minWidth: 200, flex: 1 }}
-                />
-              </label>
+            <div style={{ display: "grid", gap: 8 }}>
+              <select
+                className="progress-input"
+                value={form.subgroupMode}
+                onChange={(e) => setForm((f) => ({ ...f, subgroupMode: e.target.value }))}
+                title={t.hSubgroupBlock}
+              >
+                <option value="none">{t.subgroupNone}</option>
+                <option value="sqlNull">{t.subgroupSqlNull}</option>
+                <option value="custom">{t.subgroupCustom}</option>
+              </select>
+              {form.subgroupMode === "custom" && (
+                <>
+                  <input
+                    className="progress-input"
+                    list="mrp-subgroup-suggestions"
+                    placeholder={t.subgroupCustomPh}
+                    value={form.subgroupCustom}
+                    onChange={e => setForm(f => ({ ...f, subgroupCustom: e.target.value, subgroupMode: "custom" }))}
+                  />
+                  <datalist id="mrp-subgroup-suggestions">
+                    {subgroupSuggestions.map((sg) => (
+                      <option key={sg} value={sg} />
+                    ))}
+                  </datalist>
+                </>
+              )}
             </div>
           </fieldset>
           <label style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, cursor: "pointer" }}>
@@ -412,10 +486,21 @@ export default function MajorRequirementsPanel() {
             </span>
             <span className="admin-form-col-hint" style={{ paddingLeft: 28 }}>{t.hInclude}</span>
           </label>
+          <label style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, cursor: "pointer" }}>
+            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <input
+                type="checkbox"
+                checked={!!form.is_specialization_root}
+                onChange={(e) => setForm((f) => ({ ...f, is_specialization_root: e.target.checked }))}
+              />
+              <span style={{ fontWeight: 600 }}>{t.specRoot}</span>
+            </span>
+            <span className="admin-form-col-hint" style={{ paddingLeft: 28 }}>{t.specRootHint}</span>
+          </label>
           <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions" style={{ flex: "0 0 auto" }}>
             <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
-              <button type="submit">{t.save}</button>
-              <button type="button" onClick={() => setShowForm(false)}>{t.cancel}</button>
+              <Button type="submit" variant="success" size="sm">{t.save}</Button>
+              <Button type="button" onClick={() => setShowForm(false)} variant="ghost" size="sm">{t.cancel}</Button>
             </div>
             <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
@@ -424,7 +509,8 @@ export default function MajorRequirementsPanel() {
 
       <div className="admin-card">
         <div className="admin-card-body">
-          <table className="progress-table">
+          <div className="major-rules-table-wrap">
+          <table className="progress-table major-rules-table">
             <thead>
               <tr>
                 {t.cols.map(c => <th key={c}>{c}</th>)}
@@ -442,11 +528,13 @@ export default function MajorRequirementsPanel() {
                     <td>{formatSubgroup(r.subgroup)}</td>
                     <td>{r.value_type}</td>
                     <td>{r.min_value}</td>
+                    <td title={t.specRootHint}>{r.is_specialization_root ? "✓" : ""}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

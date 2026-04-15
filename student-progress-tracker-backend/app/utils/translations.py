@@ -1,3 +1,5 @@
+"""Export/import Excel fejlécek, státusz és kategória feliratok, hibaüzenet sablonok (hu/en)."""
+
 EXPORT_HEADER = {
     "hu": [
         "Kurzus kód",

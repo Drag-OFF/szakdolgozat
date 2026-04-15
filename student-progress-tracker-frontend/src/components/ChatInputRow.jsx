@@ -1,28 +1,7 @@
 import Picker from "emoji-picker-react";
 import React, { useRef, useState } from "react";
 import { useLang } from "../context/LangContext";
-
-/**
- * Chat üzenet beküldő sor komponens.
- * Emoji picker, szövegmező, küldés gomb, anonim checkbox, válasz sáv.
- * Nyelvváltás támogatott minden feliraton.
- *
- * @param {Object} props
- * @param {string} props.input - Üzenet szövege.
- * @param {function} props.setInput - Üzenet setter.
- * @param {boolean} props.showEmoji - Emoji picker láthatóság.
- * @param {function} props.setShowEmoji - Emoji picker setter.
- * @param {function} props.onEmojiClick - Emoji kiválasztás handler.
- * @param {boolean} props.isAnonymous - Anonim mód.
- * @param {function} props.setIsAnonymous - Anonim mód setter.
- * @param {function} props.sendMessage - Üzenet küldése.
- * @param {Object|null} props.replyTo - Válaszolt üzenet.
- * @param {function} props.setReplyTo - Válasz törlése.
- * @param {Array} props.users - Felhasználók tömbje.
- * @param {function} props.getUserName - User név lekérdezése.
- * @param {function} props.shortMsg - Rövidített üzenet szöveg.
- * @returns {JSX.Element}
- */
+import Button from "./Button";
 export default function ChatInputRow({
   input,
   setInput,
@@ -66,7 +45,6 @@ export default function ChatInputRow({
       ? "dark"
       : "light";
 
-  // Enter küld, Shift+Enter sortörés
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -113,25 +91,29 @@ export default function ChatInputRow({
             }
           </span>
           <span className="chat-reply-bar-text">{shortMsg(replyTo)}</span>
-          <button
+          <Button
             className="chat-reply-bar-close"
             onClick={() => setReplyTo(null)}
             title={texts[lang].replyClose}
+            variant="ghost"
+            size="sm"
           >
             ×
-          </button>
+          </Button>
         </div>
       )}
       <div className="chat-input-row" style={{ position: "relative" }}>
-        <button
+        <Button
           className="chat-emoji-btn"
           ref={emojiBtnRef}
           onClick={handleEmojiBtnClick}
           title={texts[lang].emoji}
           type="button"
+          variant="ghost"
+          size="sm"
         >
           😊
-        </button>
+        </Button>
         {showEmoji && (
           <div
             className="chat-emoji-picker-floating"
@@ -155,9 +137,9 @@ export default function ChatInputRow({
         />
 
         <div className="chat-input-controllers">
-          <button className="chat-send-btn" onClick={sendMessage} type="button">
+          <Button className="chat-send-btn" onClick={sendMessage} type="button" variant="primary" size="sm">
             {texts[lang].send}
-          </button>
+          </Button>
           <label className="chat-anon-label">
             <span className="chat-anon-checkbox">
               <input

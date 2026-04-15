@@ -1,12 +1,3 @@
-/**
- * Jelszó visszaállítás oldal tokennel.
- * A felhasználó a kiküldött linkre kattintva új jelszót állíthat be.
- * A PasswordResetForm komponenst használja, amely két mezőt jelenít meg:
- * - Új jelszó
- * - Jelszó megerősítése
- * A jelszó minimum 8 karakter kell legyen, és egyeznie kell a megerősítéssel.
- * Sikeres jelszócsere után automatikusan átirányít a főoldalra.
- */
 import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PasswordResetForm from "../components/PasswordResetForm";
@@ -44,11 +35,6 @@ export default function ResetPassword() {
     }
   };
 
-  /**
-   * Beküldi az új jelszót a backendnek.
-   * @param {string} password - Az új jelszó.
-   * @param {function} setMsg - Hibák/siker üzenet beállítása.
-   */
   async function handlePasswordReset(password, setMsg) {
     try {
       const resp = await authFetch(apiUrl("/api/users/reset-password"), {

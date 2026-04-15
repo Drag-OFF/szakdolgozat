@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import CourseList from "./CourseList";
 import { authFetch } from "../utils";
 import "../styles/RequirementsStatus.css";
 import { useLang } from "../context/LangContext";
 import { apiUrl } from "../config";
-import { getUserObject, getAccessToken } from "../authStorage";
+import { getUserObject, getAccessToken, setUserJson } from "../authStorage";
 
+/**
+ * Követelmény nézet:
+ * szabályösszegzés + dinamikus kurzuslisták renderelése és frissítése.
+ */
 function CreditRow({ title, data }) {
   const d = data || { completed: 0, required: 0, missing: 0 };
   return (
@@ -58,7 +62,6 @@ function SummaryTable({ data, lang }) {
   const asNumber = v => {
     if (v === null || v === undefined) return undefined;
     if (typeof v === "number" || typeof v === "string") return v;
-    // ha objektum jön (pl. {completed, required} vagy {value: 5}), próbáljuk kihámozni a számot
     if (typeof v === "object") {
       return v.completed ?? v.value ?? v.count ?? v.total ?? undefined;
     }
@@ -111,7 +114,6 @@ function excessForRow(r) {
   return Math.max(0, c - req);
 }
 
-/** Fő csoport a táblázat sorrendjéhez (backend logikával egyezően). */
 function displayBucket(r) {
   const rt = String(r.requirement_type || "").trim();
   const sg = String(r.subgroup ?? "").trim();
@@ -119,6 +121,7 @@ function displayBucket(r) {
   return rt || "other";
 }
 
+/** Nyers követelménysorok blokkosítása típus szerint, megjelenítési sorrendben. */
 function groupRequirementsBySection(rows) {
   const list = Array.isArray(rows) ? rows : [];
   const groups = [];
@@ -134,6 +137,101 @@ function groupRequirementsBySection(rows) {
   return groups;
 }
 
+/** Szabálysorokból fa kapcsolat építése (gyökerek + gyereklista map). */
+function buildRuleTreeForRows(rows) {
+  const list = Array.isArray(rows) ? [...rows] : [];
+  const orderIdx = new Map();
+  list.forEach((r, i) => orderIdx.set(r, i));
+  const byCode = new Map();
+  for (const r of list) {
+    const c = String(r.code || "").trim().toUpperCase();
+    if (c) byCode.set(c, r);
+  }
+  const childLists = new Map();
+  for (const r of list) {
+    const self = String(r.code || "").trim().toUpperCase();
+    const pc = String(r.parent_rule_code || "").trim().toUpperCase();
+    if (!self) continue;
+    if (pc && byCode.has(pc) && pc !== self) {
+      if (!childLists.has(pc)) childLists.set(pc, []);
+      childLists.get(pc).push(r);
+    }
+  }
+  for (const ch of childLists.values()) {
+    ch.sort((a, b) => (orderIdx.get(a) ?? 0) - (orderIdx.get(b) ?? 0));
+  }
+  const roots = list.filter((r) => {
+    const self = String(r.code || "").trim().toUpperCase();
+    const pc = String(r.parent_rule_code || "").trim().toUpperCase();
+    return !pc || !byCode.has(pc) || pc === self;
+  });
+  roots.sort((a, b) => (orderIdx.get(a) ?? 0) - (orderIdx.get(b) ?? 0));
+  return { roots, childLists };
+}
+
+/** Rekurzív render helper a szabályfához tartozó kurzuslistákhoz. */
+function renderDynamicCourseListNodes(r, childLists, depth, lang, labels, embedded, openDynamic, setOpenDynamic) {
+  const code = String(r.code || "").trim().toUpperCase();
+  const kids = code ? childLists.get(code) || [] : [];
+  const key = r.id ?? r.code;
+  const courses = r.available_courses || [];
+  const out = [];
+  const isOpen = !!openDynamic[key];
+
+  if (courses.length > 0) {
+    out.push(
+      <div
+        key={`cl-${key}`}
+        className={depth > 0 ? "req-dynamic-courselist-nested" : undefined}
+      >
+        <CourseList
+          courses={courses}
+          title={`${r.label || r.code} - ${labels.available}`}
+          defaultOpen={isOpen}
+          setDefaultOpen={(updater) => {
+            setOpenDynamic((prev) => {
+              const cur = !!prev[key];
+              const nextVal = typeof updater === "function" ? updater(cur) : !!updater;
+              return { ...prev, [key]: !!nextVal };
+            });
+          }}
+        />
+      </div>
+    );
+  } else if (depth === 0 && kids.length === 0 && Number(r.missing) > 0) {
+    out.push(
+      <div key={`noc-${key}`} className="req-rule-no-courses" style={{ marginLeft: Math.min(depth * 14, 42) }}>
+        <span className="req-rule-no-courses-label">{r.label || r.code}</span>
+        {" — "}
+        {lang === "en"
+          ? "No courses are currently listed for this rule."
+          : "Ehhez a szabályhoz jelenleg nincs listázható kurzus."}
+      </div>
+    );
+  }
+
+  for (const k of kids) {
+    out.push(
+      ...renderDynamicCourseListNodes(k, childLists, depth + 1, lang, labels, embedded, openDynamic, setOpenDynamic)
+    );
+  }
+  return out;
+}
+
+function renderDynamicCourseListsInTreeOrder(rows, lang, labels, embedded, openDynamic, setOpenDynamic) {
+  const groups = groupRequirementsBySection(rows);
+  const blocks = [];
+  for (const g of groups) {
+    const tree = buildRuleTreeForRows(g.rows);
+    for (const root of tree.roots) {
+      blocks.push(
+        ...renderDynamicCourseListNodes(root, tree.childLists, 0, lang, labels, embedded, openDynamic, setOpenDynamic)
+      );
+    }
+  }
+  return blocks;
+}
+
 function sectionTitleForType(typeKey, lang) {
   const m = {
     required: { hu: "Kötelező", en: "Required" },
@@ -147,7 +245,6 @@ function sectionTitleForType(typeKey, lang) {
   return lang === "en" ? x.en : x.hu;
 }
 
-/** Egy csoporton belüli szabályokhoz: ha mind ugyanaz a mérték, megjeleníthető utótag. */
 function unitLabelForGroup(groupRows, lang) {
   if (!groupRows.length) return "";
   const types = [...new Set(groupRows.map(r => String(r.value_type || "credits").toLowerCase()))];
@@ -156,6 +253,34 @@ function unitLabelForGroup(groupRows, lang) {
   if (v === "hours") return lang === "en" ? " h" : " ó";
   if (v === "count") return lang === "en" ? " (count)" : " db";
   return lang === "en" ? " cr" : " kr";
+}
+
+function renderTotalsTreeNode(r, childLists, lang, renderRowNums, unitLabelForGroup) {
+  const code = String(r.code || "").trim().toUpperCase();
+  const kids = code ? childLists.get(code) || [] : [];
+  const unit = unitLabelForGroup([r], lang);
+  const rowTitle = (r.label || r.code || "").trim();
+  const rowKey = r.id ?? r.code ?? rowTitle;
+
+  if (kids.length === 0) {
+    return (
+      <li key={rowKey} className="req-group-totals-subitem">
+        <span className="req-group-totals-cat req-group-totals-cat--sub">{rowTitle}</span>
+        {renderRowNums(r, unit)}
+      </li>
+    );
+  }
+  return (
+    <li key={rowKey} className="req-group-totals-nest">
+      <div className="req-group-totals-subitem req-group-totals-subitem--parent">
+        <span className="req-group-totals-cat req-group-totals-cat--sub">{rowTitle}</span>
+        {renderRowNums(r, unit)}
+      </div>
+      <ul className="req-group-totals-sublist req-group-totals-sublist--nested">
+        {kids.map((k) => renderTotalsTreeNode(k, childLists, lang, renderRowNums, unitLabelForGroup))}
+      </ul>
+    </li>
+  );
 }
 
 function DynamicGroupSummaryTotals({ rows, lang }) {
@@ -204,26 +329,23 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
     <div className="req-group-totals" role="region" aria-label={t.title}>
       <h3 className="req-group-totals-title">{t.title}</h3>
       <ul className="req-group-totals-list">
-        {groups.map(g => {
+        {groups.map((g) => {
           const sectionLabel = sectionTitleForType(g.type, lang);
-          const multi = g.rows.length > 1;
+          const tree = buildRuleTreeForRows(g.rows);
+          const hasNesting = tree.roots.some((r) => {
+            const c = String(r.code || "").trim().toUpperCase();
+            return c && (tree.childLists.get(c) || []).length > 0;
+          });
+          const multi = g.rows.length > 1 || hasNesting;
 
           if (multi) {
             return (
               <li key={g.type} className="req-group-totals-item req-group-totals-item--group">
                 <div className="req-group-totals-group-head">{sectionLabel}</div>
                 <ul className="req-group-totals-sublist">
-                  {g.rows.map(r => {
-                    const unit = unitLabelForGroup([r], lang);
-                    const rowKey = r.id ?? r.code ?? `${g.type}-${r.label}`;
-                    const rowTitle = (r.label || r.code || "").trim() || sectionLabel;
-                    return (
-                      <li key={rowKey} className="req-group-totals-subitem">
-                        <span className="req-group-totals-cat req-group-totals-cat--sub">{rowTitle}</span>
-                        {renderRowNums(r, unit)}
-                      </li>
-                    );
-                  })}
+                  {tree.roots.map((r) =>
+                    renderTotalsTreeNode(r, tree.childLists, lang, renderRowNums, unitLabelForGroup)
+                  )}
                 </ul>
               </li>
             );
@@ -231,8 +353,7 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
 
           const r = g.rows[0];
           const unit = unitLabelForGroup(g.rows, lang);
-          const rowTitle =
-            (r.label || r.code || "").trim() || sectionLabel;
+          const rowTitle = (r.label || r.code || "").trim() || sectionLabel;
           return (
             <li key={g.type} className="req-group-totals-item">
               <span className="req-group-totals-cat">{rowTitle}</span>
@@ -246,7 +367,6 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
   );
 }
 
-/** Rövid alcím csak kötvál sorokhoz — mi számít bele. */
 function electiveRowHint(r, lang) {
   if (r.requirement_type !== "elective") return null;
   const raw = r.subgroup;
@@ -257,6 +377,53 @@ function electiveRowHint(r, lang) {
     return lang === "en" ? "Only courses with no subgroup tag" : "Csak alcsoport nélküli kötvál kurzusok";
   }
   return lang === "en" ? `Block: ${raw}` : `Blokk: ${raw}`;
+}
+
+function renderDynamicTableRuleRows(r, childLists, lang, t, depth) {
+  const code = String(r.code || "").trim().toUpperCase();
+  const kids = code ? childLists.get(code) || [] : [];
+  const namedSg = hasNamedSubgroup(r.subgroup);
+  const elective = r.requirement_type === "elective";
+  const ex = excessForRow(r);
+  const hint = electiveRowHint(r, lang);
+  const rowClass = [
+    "req-data-row",
+    depth > 0 ? "req-rule-nested-child" : "",
+    kids.length > 0 ? "req-rule-nested-parent" : "",
+    namedSg ? "req-rule-subgroup-row" : "",
+    elective && namedSg ? "req-rule-elective-block" : "",
+    elective && !namedSg ? "req-rule-elective-inner" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const indentExtra =
+    depth > 0 ? " req-cat-indent req-cat-indent-dynamic" : namedSg ? " req-cat-indent" : "";
+  const deepElective = elective && namedSg ? " req-cat-indent--deep" : "";
+  const out = [
+    <tr key={r.id || r.code || r.label} className={rowClass}>
+      <td className={`cat${indentExtra}${deepElective}`}>
+        <div className="req-cat-title">{r.label || r.code}</div>
+        {hint ? <div className="req-cat-hint">{hint}</div> : null}
+      </td>
+      <td className="num">{r.completed ?? 0}</td>
+      <td className="num">{r.required ?? 0}</td>
+      <td className="num">
+        {ex > 0 ? (
+          <span className="req-over-fulfill" title={t.overFulfillment}>
+            +{ex}
+          </span>
+        ) : (
+          <span className={(r.missing ?? 0) > 0 ? "req-missing-short" : "req-missing-ok"}>
+            {r.missing ?? 0}
+          </span>
+        )}
+      </td>
+    </tr>
+  ];
+  for (const k of kids) {
+    out.push(...renderDynamicTableRuleRows(k, childLists, lang, t, depth + 1));
+  }
+  return out;
 }
 
 function DynamicSummaryTable({ rows, lang }) {
@@ -290,54 +457,24 @@ function DynamicSummaryTable({ rows, lang }) {
           </tr>
         </thead>
         <tbody>
-          {groups.map(g => (
-            <React.Fragment key={g.type}>
-              <tr className="req-section-header-row">
-                <td colSpan={4}>{sectionTitleForType(g.type, lang)}</td>
-              </tr>
-              {g.rows.map(r => {
-                const namedSg = hasNamedSubgroup(r.subgroup);
-                const elective = r.requirement_type === "elective";
-                const ex = excessForRow(r);
-                const hint = electiveRowHint(r, lang);
-                const rowClass = [
-                  "req-data-row",
-                  namedSg ? "req-rule-subgroup-row" : "",
-                  elective && namedSg ? "req-rule-elective-block" : "",
-                  elective && !namedSg ? "req-rule-elective-inner" : ""
-                ]
-                  .filter(Boolean)
-                  .join(" ");
-                return (
-                  <tr key={r.id || r.code || r.label} className={rowClass}>
-                    <td className={`cat${namedSg ? " req-cat-indent" : ""}${elective && namedSg ? " req-cat-indent--deep" : ""}`}>
-                      <div className="req-cat-title">{r.label || r.code}</div>
-                      {hint ? <div className="req-cat-hint">{hint}</div> : null}
-                    </td>
-                    <td className="num">{r.completed ?? 0}</td>
-                    <td className="num">{r.required ?? 0}</td>
-                    <td className="num">
-                      {ex > 0 ? (
-                        <span className="req-over-fulfill" title={t.overFulfillment}>
-                          +{ex}
-                        </span>
-                      ) : (
-                        <span className={(r.missing ?? 0) > 0 ? "req-missing-short" : "req-missing-ok"}>
-                          {r.missing ?? 0}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </React.Fragment>
-          ))}
+          {groups.map((g) => {
+            const tree = buildRuleTreeForRows(g.rows);
+            return (
+              <React.Fragment key={g.type}>
+                <tr className="req-section-header-row">
+                  <td colSpan={4}>{sectionTitleForType(g.type, lang)}</td>
+                </tr>
+                {tree.roots.flatMap((r) => renderDynamicTableRuleRows(r, tree.childLists, lang, t, 0))}
+              </React.Fragment>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
 }
 
+/** Hallgatói követelményteljesítés és hiánylista fő komponense. */
 export default function RequirementsStatus({ embedded = false }) {
   const user = getUserObject();
   const statusRootClass = embedded
@@ -361,7 +498,13 @@ export default function RequirementsStatus({ embedded = false }) {
         pe: "Physical education",
         practice: "Internship",
         thesis1: "Thesis 1",
-        thesis2: "Thesis 2"
+        thesis2: "Thesis 2",
+        specLegend: "Specialization (MK tree)",
+        specHint: "Only one branch applies. Pick the track you follow; requirements from other branches are hidden.",
+        specAll: "All branches (no filter)",
+        specNone: "No specialization (common differentiated only)",
+        specSaveError: "Could not save specialization.",
+        specSaving: "Saving…"
       }
     : {
         loginRequired: "Jelentkezz be a követelmények megtekintéséhez!",
@@ -377,7 +520,13 @@ export default function RequirementsStatus({ embedded = false }) {
         pe: "Testnevelés",
         practice: "Szakmai gyakorlat",
         thesis1: "Szakdolgozat 1",
-        thesis2: "Szakdolgozat 2"
+        thesis2: "Szakdolgozat 2",
+        specLegend: "Specializáció (MK fa)",
+        specHint: "Egyszerre csak egy ág érvényes. Válaszd a saját szakirányod; a többi ág követelményei elrejtődnek.",
+        specAll: "Minden ág (nincs szűrés)",
+        specNone: "Specializáció nélkül (csak közös differenciált)",
+        specSaveError: "A specializáció mentése sikertelen.",
+        specSaving: "Mentés…"
       };
 
   const [openRequired, setOpenRequired] = useState(false);
@@ -390,59 +539,122 @@ export default function RequirementsStatus({ embedded = false }) {
   const [openThesis1, setOpenThesis1] = useState(false);
   const [openThesis2, setOpenThesis2] = useState(false);
   const [openDynamic, setOpenDynamic] = useState({});
+  const [specSaving, setSpecSaving] = useState(false);
+  const [specErr, setSpecErr] = useState("");
+
+  const loadRequirements = useCallback(
+    (opts) => {
+      if (!user.id) return Promise.resolve();
+      const silent = !!(opts && opts.silent);
+      if (!silent) setLoading(true);
+      return authFetch(apiUrl(`/api/progress/${user.id}/requirements?lang=${lang || "hu"}`), {
+        headers: { Authorization: `Bearer ${getAccessToken()}` }
+      })
+        .then(res => res.json().catch(() => null))
+        .then(data => {
+          setReq(data || null);
+          if (!silent) setLoading(false);
+        })
+        .catch(() => {
+          setReq(null);
+          if (!silent) setLoading(false);
+        });
+    },
+    [user.id, lang]
+  );
 
   useEffect(() => {
     if (!user.id) return;
-    setLoading(true);
-    // kérjük a backendet a jelenlegi nyelv szerint, így minden adat lokalizált lesz
-    authFetch(apiUrl(`/api/progress/${user.id}/requirements?lang=${lang || "hu"}`), {
-      headers: { Authorization: `Bearer ${getAccessToken()}` }
-    })
-      .then(res => res.json().catch(() => null))
-      .then(data => {
-        setReq(data || null);
-        setLoading(false);
-      })
-      .catch(() => {
-        setReq(null);
-        setLoading(false);
+    loadRequirements();
+  }, [user.id, lang, loadRequirements]);
+
+  async function saveSpecializationChoice(code) {
+    if (!user.id) return;
+    setSpecErr("");
+    setSpecSaving(true);
+    try {
+      const body = code == null ? {} : { code };
+      const res = await authFetch(apiUrl("/api/users/me/specialization"), {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
       });
-  }, [user.id, lang]);
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setSpecErr((data && data.detail) || t.specSaveError);
+        setSpecSaving(false);
+        return;
+      }
+      const u = getUserObject();
+      setUserJson({
+        ...u,
+        chosen_specialization_code: data.chosen_specialization_code ?? null
+      });
+      await loadRequirements({ silent: true });
+    } catch {
+      setSpecErr(t.specSaveError);
+    } finally {
+      setSpecSaving(false);
+    }
+  }
 
   if (!user.id) return <div className="auth-msg">{t.loginRequired}</div>;
   if (loading) return <div>{t.loading}</div>;
   if (!req) return <div>{t.loadError}</div>;
 
-  // Új, dinamikus szabály alapú működés (szakonként eltérő oszlopok/kategóriák).
   if (req.mode === "dynamic" && Array.isArray(req.requirements)) {
     const dynRows = req.requirements;
+    const specValue = req.chosen_specialization_code ?? null;
+    const branches = Array.isArray(req.specialization_branches) ? req.specialization_branches : [];
+    const showSpecPicker = branches.length > 0;
+    const specOptions = showSpecPicker
+      ? [
+          { code: null, label: t.specAll },
+          { code: "NONE", label: t.specNone },
+          ...branches.map((b) => ({
+            code: b.code,
+            label: lang === "en" && b.label_en ? b.label_en : (b.label_hu || b.code)
+          }))
+        ]
+      : [];
     return (
       <div className={statusRootClass}>
         {!embedded && <h2>{t.title}</h2>}
+        {showSpecPicker ? (
+          <fieldset className="req-spec-fieldset" disabled={specSaving}>
+            <legend>{t.specLegend}</legend>
+            <p className="req-spec-hint">{t.specHint}</p>
+            {specOptions.map((opt) => (
+              <label key={String(opt.code)} className="req-spec-option">
+                <input
+                  type="radio"
+                  name="chosen-mk-spec"
+                  checked={
+                    (specValue == null && opt.code == null) ||
+                    (specValue != null && opt.code != null && String(specValue) === String(opt.code))
+                  }
+                  onChange={() => saveSpecializationChoice(opt.code)}
+                />
+                <span>{opt.label}</span>
+              </label>
+            ))}
+            {specSaving ? <div className="req-spec-saving">{t.specSaving}</div> : null}
+            {specErr ? <div className="req-spec-err">{specErr}</div> : null}
+          </fieldset>
+        ) : null}
         <DynamicGroupSummaryTotals rows={dynRows} lang={lang} />
         <DynamicSummaryTable rows={dynRows} lang={lang} />
 
-        {dynRows.map(r => (
-          <CourseList
-            key={r.id || r.code}
-            courses={r.available_courses || []}
-            title={`${r.label || r.code} - ${t.available}`}
-            defaultOpen={!!openDynamic[r.id || r.code]}
-            setDefaultOpen={(updater) => {
-              const key = r.id || r.code;
-              setOpenDynamic(prev => {
-                const current = !!prev[key];
-                const nextValue = typeof updater === "function" ? updater(current) : !!updater;
-                return { ...prev, [key]: !!nextValue };
-              });
-            }}
-          />
-        ))}
+        <div className="req-dynamic-courselists">
+          {renderDynamicCourseListsInTreeOrder(dynRows, lang, t, embedded, openDynamic, setOpenDynamic)}
+        </div>
       </div>
     );
   }
 
-  // biztonságos fallback-ek a hiányzó mezőkre
   const safe = {
     total_credits: req.total_credits || { completed: 0, required: 0, missing: 0 },
     required_credits: req.required_credits || { completed: 0, required: 0, missing: 0, available_courses: [] },
@@ -458,10 +670,6 @@ export default function RequirementsStatus({ embedded = false }) {
   const electiveInfoCoreCourses = safe.elective_credits.core?.info_core?.available_courses || [];
   const electiveNonCoreCourses = safe.elective_credits.non_core?.available_courses || [];
 
-  // debug: ellenőrizzük a backendből érkező struktúrát (távolítsd el később)
-  console.log("requirements (raw):", req);
-
-  // normalizált summary objektum a SummaryTable számára (fallback a safe objektumokra)
   const summaryData = {
     total: {
       completed: safe.total_credits.completed,
@@ -497,10 +705,7 @@ export default function RequirementsStatus({ embedded = false }) {
   return (
     <div className={statusRootClass}>
       {!embedded && <h2>{t.title}</h2>}
-      {/* összegző táblázat — használd a backend által visszaadott req.summary vagy a fő req objektumot */}
       <SummaryTable data={req?.summary || summaryData} lang={lang} />
-
-      {/* A régi, dupla táblázat eltávolítva - csak a SummaryTable jelenik meg */}
 
       <CourseList
         courses={safe.required_credits.available_courses || []}

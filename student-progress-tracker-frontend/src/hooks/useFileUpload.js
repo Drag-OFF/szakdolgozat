@@ -1,6 +1,10 @@
 import useAuthFetch from "./useAuthFetch";
 import { API_BASE } from "../config";
 
+/**
+ * Általános fájlfeltöltő hook auth támogatással.
+ * Bemenet: endpoint/file/userId/lang, kimenet: HTTP státusz + parsed body.
+ */
 export default function useFileUpload(baseUrl = API_BASE) {
   const { authFetch, fetchJson } = useAuthFetch();
 

@@ -5,15 +5,12 @@ import ChatUsers from "../components/ChatUsers";
 import ChatMessagesList from "../components/ChatMessagesList";
 import ChatInputRow from "../components/ChatInputRow";
 import ChatLeaderboard from "../components/ChatLeaderboard";
+import Button from "../components/Button";
 import { useLang } from "../context/LangContext";
 import { apiUrl } from "../config";
 import { getAccessToken, getUserObject } from "../authStorage";
 
-/**
- * Egyedi hook, amely figyeli az ablak méretét, és visszaadja, hogy mobil nézetben vagyunk-e.
- * @param {number} [breakpoint=1000] - A mobil/desktop váltás szélessége.
- * @returns {boolean} Igaz, ha mobil nézet.
- */
+/** Egyszerű viewport hook a chat mobil/desktop elrendezéséhez. */
 function useIsMobile(breakpoint = 900) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
   useEffect(() => {
@@ -24,20 +21,7 @@ function useIsMobile(breakpoint = 900) {
   return isMobile;
 }
 
-/**
- * Chat oldal fő komponense.
- * Itt történik az üzenetek, felhasználók, reakciók, válaszok, ranglista és témaváltás kezelése.
- * Mobil és asztali nézetet is támogat.
- *
- * Főbb funkciók:
- * - Üzenetek lekérése, küldése, reakciók hozzáadása
- * - Felhasználók és adminok listázása
- * - Ranglista megjelenítése
- * - Emoji picker, válasz funkció, anonim üzenetküldés
- * - Téma (sötét/világos) és nyelv váltás
- *
- * @returns {JSX.Element} A chat oldal teljes tartalma.
- */
+/** Chat oldal: üzenetfolyam, reakciók, user lista és toplista kezelése. */
 export default function Chat() {
   const { lang } = useLang();
   const [messages, setMessages] = useState([]);
@@ -148,7 +132,7 @@ export default function Chat() {
         },
         body: JSON.stringify({ emoji })
       });
-      if (!res) return;
+      if (!res.ok) return;
       await fetchMessages();
     } catch (e) {}
     setReactingTo(null);
@@ -157,7 +141,6 @@ export default function Chat() {
   const admins = users.filter(u => u.role === "admin");
   const normalUsers = users.filter(u => u.role !== "admin");
 
-  // Téma váltás gomb (body data-theme)
   function toggleTheme() {
     const body = document.body;
     body.setAttribute(
@@ -185,37 +168,43 @@ export default function Chat() {
       <div className="chat-main">
         <div className="chat-header">
           <div className="chat-header-left">
-            <button
+            <Button
               className="chat-header-btn"
               onClick={() => setSidebarOpen(true)}
               title={lang === "en" ? "Open users panel" : "Bal sáv nyitása"}
+              variant="ghost"
+              size="sm"
             >
               ☰
               <span />
               <span />
               <span />
-            </button>
+            </Button>
             <div className={`navbar-links`}></div>
           </div>
 
           <div className="chat-header-center">
-            <button
+            <Button
               className="chat-header-btn"
               onClick={toggleTheme}
               title={lang === "en" ? "Toggle theme" : "Téma váltás"}
+              variant="ghost"
+              size="sm"
             >
               🌙 / ☀️
-            </button>
+            </Button>
           </div>
 
           <div className="chat-header-right">
-            <button
+            <Button
               className="chat-header-btn"
               onClick={() => setLeaderboardOpen(true)}
               title={lang === "en" ? "Open leaderboard panel" : "Jobb sáv nyitása"}
+              variant="ghost"
+              size="sm"
             >
               ⚙️
-            </button>
+            </Button>
           </div>
         </div>
         <ChatMessagesList

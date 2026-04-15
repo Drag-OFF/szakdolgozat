@@ -1,3 +1,7 @@
+"""
+Szakok (``majors``) CRUD API: listázás, lekérés, létrehozás, módosítás, törlés. Írás admin jogosultsághoz kötött.
+"""
+
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.db import schemas
 from app.db.database import get_db
 from app.services.majors_service import MajorsService
+from app.services.requirements_service import get_specialization_branches_for_major
 from app.utils.utils import admin_required
 
 router = APIRouter()
@@ -14,8 +19,19 @@ router = APIRouter()
 @router.get("", response_model=List[schemas.Major], summary="Szakok listázása", description="Visszaadja a szakok listáját.")
 def list_majors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     service = MajorsService(db)
-    # Service-ben a metódus neve get_majors
     return service.get_majors(skip=skip, limit=limit)
+
+
+@router.get(
+    "/{major_id}/specialization-branches",
+    summary="MK specializációs ágak (szabályok alapján)",
+    description="A szakhoz tartozó, admin által „spec. fa gyökérként” jelölt szabályok; admin felülethez.",
+)
+def list_specialization_branches(major_id: int, db: Session = Depends(get_db), admin=Depends(admin_required)):
+    service = MajorsService(db)
+    if not service.get_major(major_id):
+        raise HTTPException(status_code=404, detail="Major not found")
+    return {"branches": get_specialization_branches_for_major(major_id, db)}
 
 
 @router.get("/{major_id}", response_model=schemas.Major, summary="Szak lekérése", description="Egy szak részleteinek lekérése azonosító alapján.")

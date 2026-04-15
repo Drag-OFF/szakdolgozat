@@ -1,9 +1,7 @@
 /**
- * JWT + user JSON tárolása.
- * Alapértelmezés: sessionStorage — új böngésző-munkamenet = nincs bejelentkezve (régi localStorage token nem marad).
- * Ha maradandó bejelentkezést akarsz: VITE_AUTH_PERSIST=local a .env-ben (localStorage).
+ * Központi auth tároló segédek:
+ * token/user olvasás-írás és biztonságos kijelentkeztető átirányítás.
  */
-
 const TOKEN_KEY = "access_token";
 const USER_KEY = "user";
 
@@ -38,7 +36,6 @@ export function setUserJson(obj) {
   getStore()?.setItem(USER_KEY, JSON.stringify(obj));
 }
 
-/** Token + user törlése mindkét tárolóból (váltás / kijelentkezés / 401). */
 export function clearAuth() {
   const s = getStore();
   s?.removeItem(TOKEN_KEY);
@@ -47,4 +44,21 @@ export function clearAuth() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   } catch (_) {}
+}
+
+/**
+ * Törli az auth állapotot, majd opcionálisan a `next` útvonalra
+ * visszahozható login oldalra navigál.
+ */
+export function redirectToLogin(next) {
+  clearAuth();
+  if (typeof window === "undefined") return;
+  let path = typeof next === "string" ? next : "";
+  if (!path) {
+    path = window.location.pathname + window.location.search;
+  }
+  const safe =
+    path.startsWith("/") && !path.startsWith("//") && !path.includes("://") ? path : "";
+  const q = safe && safe !== "/login" ? `?next=${encodeURIComponent(safe)}` : "";
+  window.location.assign(`/login${q}`);
 }

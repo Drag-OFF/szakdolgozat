@@ -1,3 +1,5 @@
+"""Jelszó reset token validálás és új hash mentés."""
+
 from sqlalchemy.orm import Session
 from app.db.models import User as UserModel
 from passlib.context import CryptContext

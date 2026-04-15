@@ -20,13 +20,6 @@ const texts = {
   }
 };
 
-/**
- * Megerősítő e-mail újraküldése oldal.
- * Lehetővé teszi a felhasználónak, hogy újra elküldje a regisztrációs megerősítő e-mailt.
- * Nyelvváltás támogatott minden feliraton.
- *
- * @returns {JSX.Element} Az oldal tartalma.
- */
 export default function ResendVerify() {
   return (
     <EmailActionForm

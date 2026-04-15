@@ -1,3 +1,7 @@
+"""
+Kurzus–szak (``course_major``) kapcsolatok REST API: mintatanterv sorok adminisztrációja.
+"""
+
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,7 +18,6 @@ router = APIRouter()
 @router.get("", response_model=List[schemas.CourseMajor], summary="Kurzus–szak kapcsolatok listázása", description="Visszaadja a kurzus–szak kapcsolatokat. Csak bejelentkezett felhasználók érhetik el.")
 def list_course_majors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), user = Depends(get_current_user)):
     svc = CourseMajorService(db)
-    # Service-ben a metódus neve get_all
     return svc.get_all(skip=skip, limit=limit)
 
 

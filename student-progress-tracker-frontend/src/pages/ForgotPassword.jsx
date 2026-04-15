@@ -20,13 +20,6 @@ const texts = {
   }
 };
 
-/**
- * Elfelejtett jelszó oldal.
- * Az e-mail cím megadása után lehetőség van jelszó-visszaállító e-mailt kérni.
- * Csak akkor engedi a kérést, ha az e-mail tartalmaz @ jelet.
- *
- * @returns {JSX.Element} Az elfelejtett jelszó oldal tartalma.
- */
 export default function ForgotPassword() {
   return (
     <EmailActionForm

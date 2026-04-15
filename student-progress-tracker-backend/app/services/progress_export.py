@@ -1,5 +1,8 @@
 """
-Excel export és sablon generálás logika.
+Excel export és XLSX sablon generálás (openpyxl): előrehaladás sablon letöltés és export.
+
+A sablonban a státusz és a teljesítés féléve szerkeszthető oszlop (sárga kitöltés), többi cella zárolt;
+lapvédelem opcionális jelszóval. Exportnál a fájlnév tartalmazza a NEPTUN (uid) azonosítót.
 """
 
 import openpyxl
@@ -13,13 +16,13 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
     """
     Szakhoz tartozó összes tárgyat tartalmazó XLSX sablon generálása.
 
-    Args:
+    Paraméterek:
         user_id (int): A felhasználó azonosítója.
         lang (str): Nyelv ('hu' vagy 'en').
         db (Session): SQLAlchemy adatbázis kapcsolat.
         current_user (dict): Bejelentkezett felhasználó adatai.
 
-    Returns:
+    Visszatérés:
         StreamingResponse: Letölthető XLSX fájl.
     """
     try:
@@ -88,9 +91,8 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
             prog.completed_semester if prog else ""
         ])
 
-    # --- Kiemelés: csak a Státusz és Teljesítés féléve oszlop legyen szerkeszthető, színezve ---
-    status_col = 6  # Státusz (completed/in_progress)
-    semester_col = 7  # Teljesítés féléve
+    status_col = 6
+    semester_col = 7
 
     for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
         for idx, cell in enumerate(row, start=1):
@@ -99,7 +101,6 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
                 cell.fill = openpyxl.styles.PatternFill(start_color="FFFFCC", end_color="FFFFCC", fill_type="solid")
             else:
                 cell.protection = openpyxl.styles.Protection(locked=True)
-            # --- Fekete rácsozás minden cellára ---
             cell.border = openpyxl.styles.Border(
                 left=openpyxl.styles.Side(style='thin', color='000000'),
                 right=openpyxl.styles.Side(style='thin', color='000000'),
@@ -107,7 +108,6 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
                 bottom=openpyxl.styles.Side(style='thin', color='000000')
             )
 
-    # Fejlécre is rácsozás
     for cell in ws[1]:
         cell.border = openpyxl.styles.Border(
             left=openpyxl.styles.Side(style='thin', color='000000'),
@@ -118,9 +118,8 @@ def generate_progress_template_xlsx(user_id: int, lang: str, db: Session, curren
 
     ws.protection.enable()
     ws.protection.sheet = True
-    ws.protection.password = "progress"  # opcionális
+    ws.protection.password = "progress"
 
-    # --- Oszlop szélesség marad ---
     for col in ws.columns:
         max_length = 0
         col_letter = openpyxl.utils.get_column_letter(col[0].column)
@@ -150,7 +149,6 @@ def export_progress_xlsx(user_id: int, lang: str, db: Session, current_user: dic
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó adatainak letöltéséhez.")
 
-    # lekérjük a neptun (uid) értékét a users táblából
     user_row = db.execute(text("SELECT uid FROM users WHERE id = :uid"), {"uid": user_id}).fetchone()
     if not user_row:
         from fastapi import HTTPException

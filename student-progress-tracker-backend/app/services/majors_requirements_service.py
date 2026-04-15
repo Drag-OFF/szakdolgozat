@@ -1,3 +1,5 @@
+"""Összesített szak követelmény tábla CRUD — ``MajorsRequirementsService``."""
+
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 
@@ -22,11 +24,11 @@ class MajorsRequirementsService:
         """
         Követelmények lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Hány rekordot hagyjon ki.
             limit (int): Hány rekordot adjon vissza.
 
-        Returns:
+        Visszatérés:
             List[MajorRequirement]: Követelmények listája.
         """
         return self.db.query(models.MajorRequirement).offset(skip).limit(limit).all()
@@ -35,10 +37,10 @@ class MajorsRequirementsService:
         """
         Egy követelmény lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             req_id (int): Követelmény azonosító.
 
-        Returns:
+        Visszatérés:
             MajorRequirement | None: Követelmény vagy None.
         """
         return self.db.query(models.MajorRequirement).filter(models.MajorRequirement.id == req_id).first()
@@ -54,10 +56,10 @@ class MajorsRequirementsService:
         """
         Új követelmény létrehozása.
 
-        Args:
+        Paraméterek:
             req (MajorRequirementCreate): Követelmény adatai.
 
-        Returns:
+        Visszatérés:
             MajorRequirement: Létrehozott követelmény.
         """
         db_req = models.MajorRequirement(**req.dict())
@@ -70,11 +72,11 @@ class MajorsRequirementsService:
         """
         Követelmény frissítése.
 
-        Args:
+        Paraméterek:
             req_id (int): Követelmény azonosító.
             req (MajorRequirementBase): Friss adatok.
 
-        Returns:
+        Visszatérés:
             MajorRequirement | None: Frissített követelmény vagy None.
         """
         db_req = self.get_by_id(req_id)
@@ -90,10 +92,10 @@ class MajorsRequirementsService:
         """
         Követelmény törlése.
 
-        Args:
+        Paraméterek:
             req_id (int): Követelmény azonosító.
 
-        Returns:
+        Visszatérés:
             MajorRequirement | None: Törölt követelmény vagy None.
         """
         db_req = self.get_by_id(req_id)

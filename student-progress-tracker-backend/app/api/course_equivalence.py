@@ -1,3 +1,5 @@
+"""Kurzus ekvivalenciák (helyettesítő tárgyak) admin API."""
+
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -16,12 +18,12 @@ def get_course_equivalences(skip: int = 0, limit: int = 100, db: Session = Depen
     """
     Kurzus ekvivalenciák lekérdezése.
 
-    Args:
+    Paraméterek:
         skip (int): Hány rekordot hagyjon ki.
         limit (int): Hány rekordot adjon vissza.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         list[schemas.CourseEquivalence]: Ekvivalenciák listája.
     """
     service = CourseEquivalenceService(db)
@@ -32,11 +34,11 @@ def get_course_equivalence(eq_id: int, db: Session = Depends(get_db)):
     """
     Egy kurzus ekvivalencia lekérdezése azonosító alapján.
 
-    Args:
+    Paraméterek:
         eq_id (int): Ekvivalencia azonosító.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.CourseEquivalence: Ekvivalencia adatai.
 
     Raises:
@@ -53,11 +55,11 @@ def create_course_equivalence(eq: schemas.CourseEquivalenceCreate, db: Session =
     """
     Új kurzus ekvivalencia létrehozása.
 
-    Args:
+    Paraméterek:
         eq (schemas.CourseEquivalenceCreate): Ekvivalencia adatai.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.CourseEquivalence: Létrehozott ekvivalencia.
     """
     service = CourseEquivalenceService(db)
@@ -72,12 +74,12 @@ def update_course_equivalence(eq_id: int, eq: schemas.CourseEquivalenceBase, db:
     """
     Ekvivalencia frissítése.
 
-    Args:
+    Paraméterek:
         eq_id (int): Ekvivalencia azonosító.
         eq (schemas.CourseEquivalenceBase): Friss adatok.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.CourseEquivalence: Frissített ekvivalencia.
 
     Raises:
@@ -97,11 +99,11 @@ def delete_course_equivalence(eq_id: int, db: Session = Depends(get_db)):
     """
     Ekvivalencia törlése.
 
-    Args:
+    Paraméterek:
         eq_id (int): Ekvivalencia azonosító.
         db (Session): Adatbázis kapcsolat.
 
-    Returns:
+    Visszatérés:
         schemas.CourseEquivalence: Törölt ekvivalencia.
 
     Raises:

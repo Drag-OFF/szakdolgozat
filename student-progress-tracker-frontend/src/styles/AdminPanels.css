@@ -298,13 +298,21 @@
   justify-content: flex-start;
 }
 .admin-form-grid--fit > .admin-form-field:not(.admin-form-field--actions) {
-  flex: 0 1 260px;
-  max-width: 300px;
-  min-width: 140px;
+  flex: 1 1 280px;
+  max-width: 380px;
+  min-width: 220px;
 }
 .admin-form-grid--fit > .admin-form-field--actions {
   flex: 0 0 auto;
   min-width: auto;
+}
+
+@media (max-width: 980px) {
+  .admin-form-grid--fit > .admin-form-field:not(.admin-form-field--actions) {
+    flex: 1 1 100%;
+    max-width: none;
+    min-width: 0;
+  }
 }
 
 /* Egy vízszintes sor: minden mező alja egy vonalban; keskeny képernyőn vízszintes görgetés */
@@ -380,10 +388,6 @@
   min-width: min(100%, 200px);
   max-width: 300px;
 }
-.course-major-form-grid .course-major-field--prereq {
-  flex: 2 1 320px;
-  min-width: min(100%, 280px);
-}
 
 /* Autocomplete belső inputja nem kapja a .progress-input osztályt — egységes méret */
 .admin-form-inline-row input[type="text"] {
@@ -423,6 +427,8 @@
   color: #5a6b7a;
   margin-top: 2px;
   line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* Címke és vezérlő egy sorban; „Táblázat oszlop…” a második sorban (gombok az inputokkal egy vonalban) */
@@ -498,4 +504,137 @@ h1.admin-title {
 /* Szak szabályok űrlap: Autocomplete legördülő ne legyen levágva */
 .major-rules-form {
   overflow: visible;
+}
+
+/* Dinamikus szabályok: rács, egyenlő oszlopok — ne zsugorodjon össze a 3. mező */
+.major-rules-form__grid {
+  display: grid;
+  gap: 12px 16px;
+  align-items: start;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 4px;
+}
+.major-rules-form__grid .admin-form-field--h {
+  min-width: 0;
+}
+.major-rules-form__grid .admin-form-field--h .admin-form-label-text {
+  max-width: min(100%, 14rem);
+}
+@media (min-width: 720px) {
+  .major-rules-form__grid--codes {
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
+  }
+  .major-rules-form__grid--metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 719px) {
+  .major-rules-form__grid--codes,
+  .major-rules-form__grid--metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Második sor: mindhárom mező ugyanúgy — címke felül, vezérlő alul (nem címke|mező vízszintesen) */
+.major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h .admin-form-label-text,
+.major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h .admin-form-control-wrap,
+.major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h .admin-form-col-hint {
+  grid-column: unset;
+  grid-row: unset;
+  width: 100%;
+  max-width: none;
+}
+.major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h .admin-form-control-wrap {
+  min-width: 0;
+}
+
+.major-rules-form__grid input[type="number"].progress-input {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  line-height: 1.2;
+  padding-right: 0.65rem;
+  box-sizing: border-box;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.major-rules-form__grid input[type="number"].progress-input::-webkit-outer-spin-button,
+.major-rules-form__grid input[type="number"].progress-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.major-rules-table-wrap {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 4px;
+}
+.major-rules-table {
+  width: 100%;
+  min-width: 720px;
+}
+.major-rules-table th,
+.major-rules-table td {
+  padding: 8px 10px;
+  vertical-align: top;
+}
+.major-rules-table td:nth-child(3) {
+  white-space: normal;
+  max-width: 22rem;
+}
+
+/* Users panel: edit form should not collapse into one crowded row */
+.users-panel-toolbar {
+  flex-wrap: wrap;
+}
+
+.users-edit-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.users-edit-form .admin-form-field--h {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.users-edit-form .admin-form-field--h .admin-form-label-text,
+.users-edit-form .admin-form-field--h .admin-form-control-wrap,
+.users-edit-form .admin-form-field--h .admin-form-col-hint {
+  grid-column: auto;
+  grid-row: auto;
+  width: 100%;
+  max-width: none;
+}
+
+.users-edit-form .admin-form-field--h .admin-form-label-text {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.users-edit-form__field--full {
+  grid-column: 1 / -1;
+}
+
+.users-edit-form__actions {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .users-edit-form {
+    grid-template-columns: 1fr;
+  }
 }

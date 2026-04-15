@@ -1,18 +1,6 @@
-/**
- * Chat ranglista (leaderboard) komponens.
- * Asztali nézetben fix sidebar, mobilon slide-panelként jelenik meg.
- * Nyelvváltás támogatott minden feliraton.
- *
- * @param {Object} props
- * @param {Array} props.leaderboard - A ranglista felhasználók tömbje.
- * @param {boolean} [props.open] - Mobilon a panel nyitott-e.
- * @param {function} [props.onClose] - Mobilon a panel zárása.
- * @param {boolean} [props.isMobile] - Mobil nézet-e.
- * @returns {JSX.Element}
- */
-
 import React from "react";
 import { useLang } from "../context/LangContext";
+import Button from "./Button";
 
 export default function ChatLeaderboard({ leaderboard, open = false, onClose, isMobile }) {
   const { lang } = useLang();
@@ -28,11 +16,10 @@ export default function ChatLeaderboard({ leaderboard, open = false, onClose, is
     }
   };
 
-  // Asztali nézet: fix sidebar, mobilon: slide-panel
   return isMobile ? (
     <aside className={`chat-leaderboard slide-panel right${open ? " open" : ""}`}>
       {onClose && (
-        <button className="slide-close" onClick={onClose} aria-label="Bezárás">×</button>
+        <Button className="slide-close" onClick={onClose} aria-label="Bezárás" variant="ghost" size="sm">×</Button>
       )}
       <div className="leaderboard-title">{texts[lang].title}</div>
       <div className="leaderboard-list">

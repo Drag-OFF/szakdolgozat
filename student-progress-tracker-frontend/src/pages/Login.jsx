@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
 import { authFetch, isValidEmail, isValidNeptun } from "../utils";
@@ -8,19 +8,19 @@ import { useLang } from "../context/LangContext";
 import { apiUrl } from "../config";
 import { setAccessToken, setUserJson } from "../authStorage";
 
-/**
- * Bejelentkezési oldal komponens.
- * Lehetővé teszi a felhasználók számára, hogy e-mail vagy Neptun kód és jelszó megadásával bejelentkezzenek.
- * Sikeres bejelentkezéskor JWT + user a sessionStorage-ban (vagy localStorage, ha VITE_AUTH_PERSIST=local).
- *
- * @returns {JSX.Element} A bejelentkezési űrlap és kapcsolódó UI elemek.
- */
 export default function Login() {
   const [uid, setUid] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { lang } = useLang();
+
+  function safeNextPath(raw) {
+    if (!raw || typeof raw !== "string") return null;
+    if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) return null;
+    return raw;
+  }
 
   const texts = {
     hu: {
@@ -78,18 +78,17 @@ export default function Login() {
         setUserJson(result.user);
         window.dispatchEvent(new Event("user-login"));
         setMsg(texts[lang].success);
+        const next = safeNextPath(searchParams.get("next"));
         setTimeout(() => {
-          navigate("/"); // <-- csak itt navigálunk!
-        }, 1000);
+          navigate(next || "/", { replace: true });
+        }, 600);
       } else if (
         result.detail &&
         (result.detail.includes("erősítsd meg") || result.detail.toLowerCase().includes("verify"))
       ) {
         setMsg(result.detail);
-        // Nem navigál sehova, marad a loginon
       } else {
         setMsg(result.detail || texts[lang].error);
-        // Nem navigál sehova, marad a loginon
       }
     } catch (err) {
       setMsg(texts[lang].network + err);

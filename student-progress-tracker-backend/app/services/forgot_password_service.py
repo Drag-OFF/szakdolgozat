@@ -1,3 +1,5 @@
+"""Elfelejtett jelszó: reset token + Mailjet e-mail küldés — ``ForgotPasswordService``."""
+
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 import uuid
@@ -54,20 +56,18 @@ class ForgotPasswordService:
         Ha létezik a felhasználó, generál token-t, elmenti, és elküldi e-mailben.
         Ha nincs ilyen e-mail, hibát ad vissza.
 
-        Returns:
+        Visszatérés:
             (success: bool, message: str)
         """
         user = self.db.query(User).filter(User.email == email).first()
         if not user:
             return False, "Nincs ilyen e-mail cím regisztrálva."
 
-        # Token generálás és mentés
         reset_token = str(uuid.uuid4())
         user.reset_token = reset_token
-        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)  # 1 óra érvényesség
+        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
         self.db.commit()
 
-        # E-mail küldés Mailjettel
         status, resp = self.send_reset_email(user.email, reset_token)
         if status != 200:
             return False, f"E-mail küldési hiba: {resp}"

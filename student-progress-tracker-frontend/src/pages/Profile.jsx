@@ -5,12 +5,8 @@ import { useLang } from "../context/LangContext";
 import { PROFILE_LABELS } from "../translations";
 import { API_BASE } from "../config";
 import { getUserObject, setUserJson, clearAuth } from "../authStorage";
+import Button from "../components/Button";
 
-/**
- * Profil oldal komponens.
- * Olvashatóan megjeleníti a bejelentkezett felhasználó adatait.
- * A felhasználó nem szerkesztheti a nevét/email-jét itt — csak jelszót módosíthat.
- */
 export default function Profile() {
   const { authFetch } = useAuthFetch();
   const { lang } = useLang();
@@ -20,7 +16,6 @@ export default function Profile() {
   const [majors, setMajors] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // password form
   const [oldPass, setOldPass] = useState("");
   const [newPass, setNewPass] = useState("");
   const [newPassConfirm, setNewPassConfirm] = useState("");
@@ -45,7 +40,7 @@ export default function Profile() {
             setUserJson(data);
           }
         }
-      } catch (e) { /* ignore */ } finally { setLoading(false); }
+      } catch (_) {} finally { setLoading(false); }
     };
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,10 +164,9 @@ export default function Profile() {
           <div className="info-row"><b>{t.created}</b> {fmtDate(user.created_at || user.created)}</div>
 
           <div style={{ marginTop:8 }}>
-            {/* nem engedünk szerkesztést név/email mezőkben */}
-            <button onClick={() => { clearAuth(); window.location.reload(); }}>
+            <Button onClick={() => { clearAuth(); window.location.reload(); }} variant="danger" size="sm">
               {t.logout}
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -183,8 +177,8 @@ export default function Profile() {
             <input type="password" placeholder={t.newPassword} value={newPass} onChange={e=>setNewPass(e.target.value)} />
             <input type="password" placeholder={t.newPasswordConfirm} value={newPassConfirm} onChange={e=>setNewPassConfirm(e.target.value)} />
             <div style={{ display:"flex", gap:8 }}>
-              <button type="submit" disabled={savingPw}>{t.submit}</button>
-              <button type="button" onClick={()=>{ setOldPass(""); setNewPass(""); setNewPassConfirm(""); setPwStatus(""); setPwOk(false); }} disabled={savingPw}>{t.clear}</button>
+              <Button type="submit" disabled={savingPw} variant="warning" size="sm">{t.submit}</Button>
+              <Button type="button" onClick={()=>{ setOldPass(""); setNewPass(""); setNewPassConfirm(""); setPwStatus(""); setPwOk(false); }} disabled={savingPw} variant="ghost" size="sm">{t.clear}</Button>
             </div>
             {pwStatus && <div className={pwOk ? "status-ok" : "status-err"}>{pwStatus}</div>}
           </form>
@@ -210,9 +204,9 @@ export default function Profile() {
             {t.deleteConfirmCheck}
           </label>
           <div>
-            <button className="danger-btn" type="submit" disabled={deleting}>
+            <Button className="danger-btn" type="submit" disabled={deleting} variant="danger" size="md">
               {t.deleteButton}
-            </button>
+            </Button>
           </div>
           {deleteStatus && <div className={deleteOk ? "status-ok" : "status-err"}>{deleteStatus}</div>}
         </form>

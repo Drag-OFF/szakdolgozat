@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import UsersPanel from "./UsersPanel";
 import CoursesPanel from "./CoursesPanel";
 import CourseMajorPanel from "./CourseMajorPanel";
@@ -28,6 +29,54 @@ export default function AdminDashboard() {
       <h1 className="panel-header-inline admin-title">
         {lang === "en" ? "Admin panel" : "Admin felület"}
       </h1>
+
+      <section className="admin-card" style={{ marginBottom: 12 }}>
+        <div className="admin-card-body" style={{ padding: "12px 16px" }}>
+          <Link
+            to="/admin/pdf-import"
+            style={{
+              display: "inline-block",
+              padding: "10px 16px",
+              borderRadius: 8,
+              background: "#0f766e",
+              color: "#fff",
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            {lang === "en" ? "Neptun curriculum import (PDF / tanterv)" : "Neptun mintatanterv import (PDF / tanterv)"}
+          </Link>
+          <p style={{ margin: "10px 0 0", color: "#57534e", fontSize: 14 }}>
+            {lang === "en"
+              ? "Expand the public Neptun table (+ rows) and import courses & requirement rules into the database."
+              : "Nyilvános Neptun tanterv lenyitása („+” sorok), kurzusok és követelmény szabályok importálása."}
+          </p>
+        </div>
+      </section>
+
+      <section className="admin-card" style={{ marginBottom: 12 }}>
+        <div className="admin-card-body" style={{ padding: "12px 16px" }}>
+          <Link
+            to="/admin/progress-pdf-check"
+            style={{
+              display: "inline-block",
+              padding: "10px 16px",
+              borderRadius: 8,
+              background: "#1d4ed8",
+              color: "#fff",
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            {lang === "en" ? "PDF what-if progress check" : "PDF mi-lenne-ha progress ellenőrzés"}
+          </Link>
+          <p style={{ margin: "10px 0 0", color: "#57534e", fontSize: 14 }}>
+            {lang === "en"
+              ? "Analyze one or more student PDFs without saving, and see whether diploma requirements would be complete."
+              : "Egy vagy több hallgatói PDF elemzése mentés nélkül: teljesülnének-e a diploma követelményei."}
+          </p>
+        </div>
+      </section>
 
       <section className="admin-card" style={{ marginBottom: 12 }}>
         <div className="admin-card-body">

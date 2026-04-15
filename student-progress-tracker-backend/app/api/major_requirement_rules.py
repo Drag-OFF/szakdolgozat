@@ -1,3 +1,5 @@
+"""Szak követelmény szabályok (dinamikus ``major_requirement_rules``) admin/lista API."""
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -38,3 +40,14 @@ def delete_rule(rule_id: int, db: Session = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="Major requirement rule not found")
     return deleted
+
+
+@router.delete("/bulk/by-major/{major_id}", response_model=dict, dependencies=[Depends(admin_required)])
+def delete_rules_by_major(major_id: int, db: Session = Depends(get_db)):
+    deleted_rules, deleted_course_major = MajorRequirementRulesService(db).delete_by_major_id_with_course_major(major_id)
+    return {
+        "ok": True,
+        "major_id": major_id,
+        "deleted_rules_count": deleted_rules,
+        "deleted_course_major_count": deleted_course_major,
+    }

@@ -1,19 +1,5 @@
 import { useLang } from "../context/LangContext";
 
-/**
- * Egyedi select (legördülő) komponens hitelesítési űrlapokhoz.
- * Megjeleníti a labelt, a selectet, és opcionálisan hibát.
- *
- * @param {Object} props
- * @param {string|Object} props.label - A mező felirata (magyar/angol vagy sima string).
- * @param {string} props.id - A select egyedi azonosítója.
- * @param {string} props.name - A select neve.
- * @param {string} props.value - A kiválasztott érték.
- * @param {function} props.onChange - Változáskezelő függvény.
- * @param {Array} props.options - A választható opciók tömbje (lehet string vagy {hu, en}).
- * @param {string|Object} [props.error] - Hibaszöveg, ha van (magyar/angol vagy sima string).
- * @returns {JSX.Element}
- */
 export default function AuthSelect({
   label,
   id,

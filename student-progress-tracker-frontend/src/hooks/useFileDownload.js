@@ -1,8 +1,10 @@
 import useAuthFetch from "./useAuthFetch";
 
+/** Fájl letöltése auth kéréssel, szerver oldali fájlnév támogatással. */
 export default function useFileDownload() {
   const { authFetch } = useAuthFetch();
 
+  /** URL -> böngészős letöltés; visszatér: `{ success, filename }`. */
   const download = async (url) => {
     const resp = await authFetch(url, { method: "GET" });
     if (!resp.ok) throw new Error(`Download failed: ${resp.status}`);

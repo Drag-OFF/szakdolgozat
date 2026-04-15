@@ -4,6 +4,7 @@ import Autocomplete from "../common/Autocomplete";
 import "../../styles/AdminPanels.css";
 import { useLang } from "../../context/LangContext";
 import { API_BASE } from "../../config";
+import Button from "../Button";
 const PAGE_SIZE = 10;
 
 export default function CourseEquivalencesPanel() {
@@ -17,16 +18,16 @@ export default function CourseEquivalencesPanel() {
         next: "Next",
         total: "records total",
         lfCourse: "Course",
-        lhCourse: "Maps to table column “Course”.",
+        lhCourse: "Select the source course.",
         lfEq: "Equivalent course",
-        lhEq: "Maps to table column “Equivalent”.",
+        lhEq: "Select the equivalent course.",
         lfMajor: "Major",
-        lhMajor: "Maps to table column “Major”.",
+        lhMajor: "Select the major.",
         phCourse: "Type code or name, pick from list…",
         phEq: "Other course treated as equivalent…",
         phMajor: "Major this pair applies to (required)…",
-        tiCourse: "Search by course code or name. The selected course appears in the “Course” column.",
-        tiEq: "Pick the course that counts as equivalent. Appears in the “Equivalent” column.",
+        tiCourse: "Search by course code or name.",
+        tiEq: "Pick the course that counts as equivalent.",
         tiMajor: "Choose the major (specialization) this equivalence applies to. Required."
       }
     : {
@@ -36,16 +37,16 @@ export default function CourseEquivalencesPanel() {
         next: "Következő",
         total: "rekord összesen",
         lfCourse: "Kurzus",
-        lhCourse: "A táblázat „Kurzus” oszlopába kerül.",
+        lhCourse: "Válaszd ki az eredeti kurzust.",
         lfEq: "Ekvivalens kurzus",
-        lhEq: "A táblázat „Ekvivalens” oszlopába kerül.",
+        lhEq: "Válaszd ki az ekvivalens kurzust.",
         lfMajor: "Szak",
-        lhMajor: "A táblázat „Szak” oszlopába kerül.",
+        lhMajor: "Válaszd ki a szakot.",
         phCourse: "Kurzus kód vagy név, válassz a listából…",
         phEq: "Melyik kurzus számít ekvivalensnek…",
         phMajor: "Melyik szakra vonatkozik (kötelező)…",
-        tiCourse: "Keresés kurzus kód vagy név alapján; a kiválasztott kurzus a „Kurzus” oszlopban jelenik meg.",
-        tiEq: "Az a kurzus, amelyik ekvivalensként számít; az „Ekvivalens” oszlopban látszik.",
+        tiCourse: "Keresés kurzus kód vagy név alapján.",
+        tiEq: "Az a kurzus, amelyik ekvivalensként számít.",
         tiMajor: "Válaszd ki a szakot, amelyre ez az ekvivalencia vonatkozik. Kötelező mező."
       };
   const [items, setItems] = useState([]);
@@ -166,10 +167,10 @@ export default function CourseEquivalencesPanel() {
       )}
       <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
         <input className="progress-input" placeholder={t.search} value={query} onChange={e=>setQuery(e.target.value)} style={{flex:1}} />
-        <button onClick={openCreate} disabled={showForm}>Létrehoz</button>
-        <button onClick={openEdit} disabled={showForm || !selectedId}>Szerkeszt</button>
-        <button onClick={remove} disabled={showForm || !selectedId}>Töröl</button>
-        <button onClick={load} disabled={showForm}>↻</button>
+        <Button onClick={openCreate} disabled={showForm} variant="success" size="sm">Létrehoz</Button>
+        <Button onClick={openEdit} disabled={showForm || !selectedId} variant="warning" size="sm">Szerkeszt</Button>
+        <Button onClick={remove} disabled={showForm || !selectedId} variant="danger" size="sm">Töröl</Button>
+        <Button onClick={load} disabled={showForm} variant="ghost" size="sm">↻</Button>
       </div>
 
       {showForm && (
@@ -197,8 +198,8 @@ export default function CourseEquivalencesPanel() {
           </div>
           <div className="admin-form-field admin-form-field--actions admin-form-field--h-actions">
             <div className="admin-form-actions-inner" style={{ display: "flex", gap: 8 }}>
-              <button type="submit">{form.id ? "Módosít" : "Létrehoz"}</button>
-              <button type="button" onClick={()=>setShowForm(false)}>Mégse</button>
+              <Button type="submit" variant={form.id ? "warning" : "success"} size="sm">{form.id ? "Módosít" : "Létrehoz"}</Button>
+              <Button type="button" onClick={()=>setShowForm(false)} variant="ghost" size="sm">Mégse</Button>
             </div>
             <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
           </div>
@@ -227,9 +228,9 @@ export default function CourseEquivalencesPanel() {
       </div>
 
       <div style={{display:"flex",gap:8,alignItems:"center",marginTop:8}}>
-        <button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0}>{t.prev}</button>
+        <Button onClick={()=>setPage(p=>Math.max(0,p-1))} disabled={page===0} variant="ghost" size="sm">{t.prev}</Button>
         <div>{`${t.page} ${page+1} / ${totalPages}`}</div>
-        <button onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={page>=totalPages-1}>{t.next}</button>
+        <Button onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))} disabled={page>=totalPages-1} variant="ghost" size="sm">{t.next}</Button>
         <div style={{marginLeft:"auto"}}>{`${filtered.length} ${t.total}`}</div>
       </div>
     </div>

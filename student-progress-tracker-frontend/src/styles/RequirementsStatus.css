@@ -41,6 +41,27 @@
   overflow: auto;
 }
 
+/* Lapozott lista: max 10 sor, nincs magas belső scroll — admin / progress táblázathoz hasonlóan */
+.user-courselist-card--paged .user-courselist-body {
+  max-height: none;
+  overflow: visible;
+}
+
+.user-courselist-card--paged .user-courselist-table-wrap {
+  max-height: none;
+  overflow: visible;
+}
+
+.user-courselist-pagination {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.user-courselist-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .user-courselist-toolbar.progress-toolbar {
   margin-bottom: 12px;
 }
@@ -60,6 +81,9 @@
 @media (max-width: 720px) {
   .user-courselist-body {
     max-height: 50vh;
+  }
+  .user-courselist-card--paged .user-courselist-body {
+    max-height: none;
   }
   .user-courselist-card .progress-input {
     width: min(100%, 260px);
@@ -354,6 +378,24 @@
   border: 1px solid #e2ecf5;
 }
 
+/* Szülő rule alá csatolt alcsoportok (parent_rule_code), pl. MK-DSZ → MK-DIF-* */
+.req-group-totals-nest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.req-group-totals-subitem--parent {
+  font-weight: 700;
+  color: #0b4f85;
+}
+
+.req-group-totals-sublist--nested {
+  margin: 6px 0 0 0;
+  padding: 4px 0 2px 12px;
+  border-left: 3px solid #4a90d9;
+}
+
 .req-group-totals-cat--sub {
   font-weight: 600;
   font-size: 0.95rem;
@@ -493,6 +535,17 @@
   border-left: 3px solid #8ebce8;
 }
 
+.req-summary-table tr.req-rule-nested-parent td.cat {
+  font-weight: 700;
+  color: #064a8f;
+}
+
+.req-summary-table tr.req-rule-nested-child td.cat.req-cat-indent-dynamic {
+  padding-left: 1.75rem;
+  border-left: 3px solid #8ebce8;
+  background: linear-gradient(90deg, rgba(142, 188, 232, 0.12) 0%, transparent 18px);
+}
+
 .req-summary-table tr.req-rule-elective-block td.req-cat-indent.req-cat-indent--deep {
   padding-left: 2.1rem;
   border-left: 4px solid #4a90d9;
@@ -518,6 +571,85 @@
 .req-missing-ok {
   color: #222;
   font-weight: 600;
+}
+
+.req-spec-fieldset {
+  max-width: 880px;
+  margin: 0 auto 16px auto;
+  padding: 12px 14px;
+  border: 1px solid #cfe4f7;
+  border-radius: 8px;
+  background: #f8fbff;
+  box-sizing: border-box;
+}
+
+.req-spec-fieldset legend {
+  font-weight: 700;
+  color: #155a9a;
+  padding: 0 6px;
+}
+
+.req-spec-hint {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+  color: #4a5a68;
+  line-height: 1.35;
+}
+
+.req-spec-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 6px 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.req-spec-option input {
+  margin-top: 3px;
+}
+
+.req-spec-saving {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: #155a9a;
+}
+
+.req-spec-err {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: #b00020;
+}
+
+/* Dinamikus mód: elérhető kurzusok a követelményfa sorrendjében (spec / differenciált alatt) */
+.req-dynamic-courselists {
+  margin-top: 16px;
+}
+
+.requirements-status--embedded .req-dynamic-courselists .user-courselist-card {
+  margin-bottom: 10px;
+}
+
+.req-dynamic-courselist-nested {
+  margin-bottom: 10px;
+  padding-left: 6px;
+  border-left: 3px solid #cfe4fb;
+}
+
+.req-rule-no-courses {
+  font-size: 0.9rem;
+  color: #5a6b7a;
+  margin: 0 0 10px 0;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e8eef4;
+  max-width: 880px;
+}
+
+.req-rule-no-courses-label {
+  font-weight: 600;
+  color: #334155;
 }
 
 /* kisebb képernyőn sűrítjük a paddingot */

@@ -1,3 +1,5 @@
+"""Elfelejtett jelszó: e-mail küldése reset tokennel (Mailjet)."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db

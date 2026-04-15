@@ -1,3 +1,5 @@
+"""Mintatanterv sorok (kurzus–szak) CRUD — ``CourseMajorService``."""
+
 from sqlalchemy.orm import Session
 from app.db import models, schemas
 
@@ -22,11 +24,11 @@ class CourseMajorService:
         """
         Kapcsolatok lekérdezése.
 
-        Args:
+        Paraméterek:
             skip (int): Hány rekordot hagyjon ki.
             limit (int): Hány rekordot adjon vissza.
 
-        Returns:
+        Visszatérés:
             List[CourseMajor]: Kapcsolatok listája.
         """
         return self.db.query(models.CourseMajor).offset(skip).limit(limit).all()
@@ -35,10 +37,10 @@ class CourseMajorService:
         """
         Egy kapcsolat lekérdezése azonosító alapján.
 
-        Args:
+        Paraméterek:
             cm_id (int): Kapcsolat azonosító.
 
-        Returns:
+        Visszatérés:
             CourseMajor | None: Kapcsolat vagy None.
         """
         return self.db.query(models.CourseMajor).filter(models.CourseMajor.id == cm_id).first()
@@ -47,10 +49,10 @@ class CourseMajorService:
         """
         Új kapcsolat létrehozása.
 
-        Args:
+        Paraméterek:
             cm (CourseMajorCreate): Kapcsolat adatai.
 
-        Returns:
+        Visszatérés:
             CourseMajor: Létrehozott kapcsolat.
         """
         db_cm = models.CourseMajor(**cm.dict())
@@ -63,11 +65,11 @@ class CourseMajorService:
         """
         Kapcsolat frissítése.
 
-        Args:
+        Paraméterek:
             cm_id (int): Kapcsolat azonosító.
             cm (CourseMajorBase): Friss adatok.
 
-        Returns:
+        Visszatérés:
             CourseMajor | None: Frissített kapcsolat vagy None.
         """
         db_cm = self.get_by_id(cm_id)
@@ -83,10 +85,10 @@ class CourseMajorService:
         """
         Kapcsolat törlése.
 
-        Args:
+        Paraméterek:
             cm_id (int): Kapcsolat azonosító.
 
-        Returns:
+        Visszatérés:
             CourseMajor | None: Törölt kapcsolat vagy None.
         """
         db_cm = self.get_by_id(cm_id)
