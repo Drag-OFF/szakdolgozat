@@ -1,4 +1,4 @@
-/* Felső navigáció — egy blokk, változók, egy fő töréspont (mobil fiók). */
+/* Felső navigáció - egy blokk, változók, egy fő töréspont (mobil fiók). */
 
 :root {
   --app-navbar-height: 3.5rem;
@@ -465,7 +465,7 @@ body.app-nav--scroll-lock {
   }
 }
 
-/* Sötét téma — csak a nav lokális változói, nem duplikált szabályblokkok. */
+/* Sötét téma - csak a nav lokális változói, nem duplikált szabályblokkok. */
 html[data-theme="dark"] .app-nav {
   --nav-bg: #0f172a;
   --nav-edge: rgba(148, 163, 184, 0.15);

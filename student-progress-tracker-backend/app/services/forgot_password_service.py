@@ -1,4 +1,4 @@
-"""Elfelejtett jelszó: reset token + Mailjet e-mail küldés — ``ForgotPasswordService``."""
+"""Elfelejtett jelszó: reset token + Mailjet e-mail küldés - ``ForgotPasswordService``."""
 
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session

@@ -1,4 +1,4 @@
-"""Hallgatói előrehaladás rekordok adatbázis műveletei — ``ProgressService``."""
+"""Hallgatói előrehaladás rekordok adatbázis műveletei - ``ProgressService``."""
 
 from sqlalchemy.orm import Session
 from app.db import models

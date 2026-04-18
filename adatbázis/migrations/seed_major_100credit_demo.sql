@@ -13,7 +13,7 @@
 -- Kurzusok: course_major.type + course_major.subgroup illeszkedjen a szabályokhoz;
 -- teljesítés: progress.status = 'completed'.
 --
--- Futtatás: phpMyAdmin / mysql — egy adatbázis, ahol a táblák léteznek.
+-- Futtatás: phpMyAdmin / mysql - egy adatbázis, ahol a táblák léteznek.
 -- Ha újrafuttatod: töröld előtte a szakot és a kapcsolódó sorokat, vagy változtasd a nevet.
 -- =============================================================================
 
@@ -22,7 +22,7 @@ START TRANSACTION;
 INSERT INTO majors (name, name_en)
 VALUES (
   'Példa 100 kredit szak (demo)',
-  'Demo major — 100 credits structure'
+  'Demo major - 100 credits structure'
 );
 SET @mid = LAST_INSERT_ID();
 
@@ -33,11 +33,11 @@ VALUES
   (@mid, 'req_core_30', 'Kötelező kreditek', 'Required credits', 'required', NULL, 'credits', 30, 1),
 
   -- Kötelezően választható: 10+10+10+10 = 40
-  (@mid, 'koteval_info_10', 'Kötelezően választható — informatika blokk (10 kr)', 'Elective — IT block (10 cr)', 'elective', 'demo_koteval_info', 'credits', 10, 1),
-  (@mid, 'koteval_math_10', 'Kötelezően választható — matematika blokk (10 kr)', 'Elective — math block (10 cr)', 'elective', 'demo_koteval_math', 'credits', 10, 1),
-  (@mid, 'koteval_phys_10', 'Kötelezően választható — fizika blokk (10 kr)', 'Elective — physics block (10 cr)', 'elective', 'demo_koteval_physics', 'credits', 10, 1),
+  (@mid, 'koteval_info_10', 'Kötelezően választható - informatika blokk (10 kr)', 'Elective - IT block (10 cr)', 'elective', 'demo_koteval_info', 'credits', 10, 1),
+  (@mid, 'koteval_math_10', 'Kötelezően választható - matematika blokk (10 kr)', 'Elective - math block (10 cr)', 'elective', 'demo_koteval_math', 'credits', 10, 1),
+  (@mid, 'koteval_phys_10', 'Kötelezően választható - fizika blokk (10 kr)', 'Elective - physics block (10 cr)', 'elective', 'demo_koteval_physics', 'credits', 10, 1),
   -- „Bármilyen” kötvál: csak azok a tárgyak, ahol course_major.subgroup IS NULL (és type = elective)
-  (@mid, 'koteval_barmi_10', 'Kötelezően választható — általános (10 kr, nincs alcsoport)', 'Elective — general pool (10 cr, no subgroup)', 'elective', '__NULL__', 'credits', 10, 1),
+  (@mid, 'koteval_barmi_10', 'Kötelezően választható - általános (10 kr, nincs alcsoport)', 'Elective - general pool (10 cr, no subgroup)', 'elective', '__NULL__', 'credits', 10, 1),
 
   -- 30 szabadon választható
   (@mid, 'szabad_30', 'Szabadon választható kreditek', 'Free elective credits', 'optional', NULL, 'credits', 30, 1);
@@ -47,7 +47,7 @@ COMMIT;
 -- Összesen min_value: 30+10+10+10+10+30 = 100 (a fő összesítőben is megjelenik, ha include_in_total = 1)
 
 -- =============================================================================
--- Kurzusok hozzárendelése (példa — kommentként; szükség szerint illeszd be)
+-- Kurzusok hozzárendelése (példa - kommentként; szükség szerint illeszd be)
 --
 -- 1) courses táblába új tárgyak egyedi course_code-dal.
 -- 2) course_major sorok (major_id = a fenti szak id-ja):

@@ -1,4 +1,4 @@
-/* Egyetemi háttér csak auth útvonalakon — ne a globális body-n (főoldal olvashatósága). */
+/* Egyetemi háttér csak auth útvonalakon - ne a globális body-n (főoldal olvashatósága). */
 .auth-page {
   flex: 1;
   width: 100%;

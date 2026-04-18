@@ -1,4 +1,4 @@
-# Hallgatói előrehaladás-követő rendszer — dokumentáció
+# Hallgatói előrehaladás-követő rendszer - dokumentáció
 
 Monorepo: **`student-progress-tracker-backend/`** (FastAPI + MySQL) és **`student-progress-tracker-frontend/`** (React + Vite).
 
@@ -7,7 +7,7 @@ Monorepo: **`student-progress-tracker-backend/`** (FastAPI + MySQL) és **`stude
 ## Tartalomjegyzék
 
 1. [A projekt célja és hatásköre](#1-a-projekt-célja-és-hatásköre)  
-2. [Mit tud a rendszer — funkciók modulonként](#2-mit-tud-a-rendszer--funkciók-modulonként)  
+2. [Mit tud a rendszer - funkciók modulonként](#2-mit-tud-a-rendszer--funkciók-modulonként)  
 3. [Technológiai architektúra](#3-technológiai-architektúra)  
 4. [Előfeltételek és telepítés](#4-előfeltételek-és-telepítés)  
 5. [Konfiguráció (`.env`, API URL)](#5-konfiguráció-env-api-url)  
@@ -28,11 +28,11 @@ Monorepo: **`student-progress-tracker-backend/`** (FastAPI + MySQL) és **`stude
 
 - Nem helyettesíti a hivatalos egyetemi nyilvántartást.
 - A pontosság a **bevitt / importált adattól** és a **követelményszabályok helyes beállításától** függ.
-- Éles, több ezer egyidejű felhasználós **nagyvállalati SLA** nem része a jelen kódnak — lásd [§8](#8-skálázhatóság-terhelhetőség-megbízhatóság).
+- Éles, több ezer egyidejű felhasználós **nagyvállalati SLA** nem része a jelen kódnak - lásd [§8](#8-skálázhatóság-terhelhetőség-megbízhatóság).
 
 ---
 
-## 2. Mit tud a rendszer — funkciók modulonként
+## 2. Mit tud a rendszer - funkciók modulonként
 
 ### 2.1. Hallgatói / bejelentkezett felhasználói felület
 
@@ -84,7 +84,7 @@ A **pontos jogosultság** (pl. csak saját `user_id` előrehaladása) a megfelel
 | **Frontend** | React 19, Vite 7, React Router | SPA; API hívások `fetch` + JWT `Authorization` header |
 | **Backend** | Python, FastAPI, Uvicorn | REST + WebSocket; OpenAPI generált dokumentáció |
 | **Adatbázis** | MySQL (PyMySQL driver, SQLAlchemy) | Relációs modell; pool `pool_pre_ping` |
-| **Auth** | JWT (Bearer), jelszó hash (bcrypt/passlib) | Cookie helyett header — lásd CORS beállítás |
+| **Auth** | JWT (Bearer), jelszó hash (bcrypt/passlib) | Cookie helyett header - lásd CORS beállítás |
 | **E-mail** | Mailjet (opcionális) | Üres kulcs esetén küldés kihagyva |
 | **Fájlok** | XLSX/CSV import, PDF feldolgozás (admin) | pandas, openpyxl, pypdf/pdfplumber a backend függőségek szerint |
 
@@ -136,7 +136,7 @@ npm install
 
 ### 5.1. Hol van a `.env`?
 
-A backend `app/config.py` a **monorepo gyökerében** (`szakdolgozat/`) keresi a **`.env`** fájlt — nem a `student-progress-tracker-backend` mappában.
+A backend `app/config.py` a **monorepo gyökerében** (`szakdolgozat/`) keresi a **`.env`** fájlt - nem a `student-progress-tracker-backend` mappában.
 
 ### 5.2. Példa változók (backend, gyökér `.env`)
 
@@ -144,16 +144,16 @@ A backend `app/config.py` a **monorepo gyökerében** (`szakdolgozat/`) keresi a
 # Kötelező jellegű: MySQL
 DATABASE_URL=mysql+pymysql://felhasznalo:jelszo@127.0.0.1:3306/adatbazis_nev
 
-# JWT — élesben erős, véletlenszerű titok
+# JWT - élesben erős, véletlenszerű titok
 JWT_SECRET_KEY=...
 
-# CORS — fejlesztésben példa:
+# CORS - fejlesztésben példa:
 # CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 
 # Publikus URL (e-mailekben lévő linkek)
 PUBLIC_SITE_URL=http://localhost:5173
 
-# Mailjet — opcionális; üres = nincs levélküldés
+# Mailjet - opcionális; üres = nincs levélküldés
 # MAILJET_API_KEY=
 # MAILJET_API_SECRET=
 ```
@@ -198,7 +198,7 @@ cd student-progress-tracker-frontend
 npm run build
 ```
 
-A `package.json`-ban lévő **`postbuild`** jelenleg **Windows + XAMPP** útvonalra másol — éles szerveren cseréld le vagy távolítsd el.
+A `package.json`-ban lévő **`postbuild`** jelenleg **Windows + XAMPP** útvonalra másol - éles szerveren cseréld le vagy távolítsd el.
 
 ---
 
@@ -210,10 +210,10 @@ A `package.json`-ban lévő **`postbuild`** jelenleg **Windows + XAMPP** útvona
 | **Jelszó** | Nem plain text tárolás; hash (bcrypt jellegű) |
 | **Szerepkörök** | Legalább `user` és `admin` (Enum a modellben) |
 | **Hozzáférés** | Előrehaladás: admin más userhez is hozzáférhet; hallgató tipikusan csak saját adataihoz (router logika) |
-| **CORS** | `allow_credentials=False` + JWT header — összhangban a FastAPI dokumentációval |
+| **CORS** | `allow_credentials=False` + JWT header - összhangban a FastAPI dokumentációval |
 | **E-mail** | Verifikáció / jelszó reset linkek; **Mailjet kulcsok** ne kerüljenek verziókezelésbe |
-| **`.env`** | **Ne commitold** — `.gitignore`-ban legyen; éles `JWT_SECRET_KEY` rotálása |
-| **Adatvédelem / GDPR** | A kód önmagában nem minősül „GDPR tanúsítványnak”: szükséges **jogi háttér**, **adatkezelési tájékoztató**, **retenciós szabályok**, **export/törlés** igények — ezek részben üzleti/folyamat kérdések, nem csak technikai |
+| **`.env`** | **Ne commitold** - `.gitignore`-ban legyen; éles `JWT_SECRET_KEY` rotálása |
+| **Adatvédelem / GDPR** | A kód önmagában nem minősül „GDPR tanúsítványnak”: szükséges **jogi háttér**, **adatkezelési tájékoztató**, **retenciós szabályok**, **export/törlés** igények - ezek részben üzleti/folyamat kérdések, nem csak technikai |
 
 **Ajánlott éles környezetben:** HTTPS (TLS), reverse proxy, rate limiting, naplózás, biztonsági frissítések (`pip` / `npm audit`).
 
@@ -225,8 +225,8 @@ A `package.json`-ban lévő **`postbuild`** jelenleg **Windows + XAMPP** útvona
 |----------|-----------|
 | **Vertikális skálázás** | A FastAPI + Uvicorn egy gépen növelhető workerrel / erőforrással; MySQL szerver memória / lemez I/O szűk keresztmetszet lehet. |
 | **Horizontális skálázás** | Több Uvicorn példány mögött load balancer **session nélkül** működhet, ha az **JWT stateless** marad és az **adatbázis** közös; **WebSocket** (chat) esetén sticky session vagy külön üzenetbusz (Redis stb.) nélkül korlátozott. |
-| **Adatbázis** | Egy MySQL példány nagy egyidejű írással bottleneck; olvasás replikáció, sharding — nem része ennek a repónak. |
-| **Neptun / külső import** | A backendben **rate limit / késleltetés** (pl. `NEPTUN_INTER_POST_DELAY_MS`, `NEPTUN_MAX_BFS_STEPS`) védi a túl agresszív hívásoktól — skálázhatóság helyett **biztonságos külső használat**. |
+| **Adatbázis** | Egy MySQL példány nagy egyidejű írással bottleneck; olvasás replikáció, sharding - nem része ennek a repónak. |
+| **Neptun / külső import** | A backendben **rate limit / késleltetés** (pl. `NEPTUN_INTER_POST_DELAY_MS`, `NEPTUN_MAX_BFS_STEPS`) védi a túl agresszív hívásoktól - skálázhatóság helyett **biztonságos külső használat**. |
 | **Statikus frontend** | Jól skálázható CDN-nel; a korlát főleg az **API** és az **adatbázis**. |
 
 **Összegzés:** a rendszer **kis–közepes** egyetemi / oktatási környezetre alkalmas; **nagy létszámú, SLA-s** éles üzemhez további architektúra- és terhelésesztetek szükségesek.
@@ -269,7 +269,7 @@ A repó **nem tartalmaz kötelező, teljes körű pytest** csomagot minden modul
 
 - **Adatpontosság:** importált Neptun / PDF adat és admin által bevitt szabályok minőségétől függ.  
 - **Skálázás:** lásd [§8](#8-skálázhatóság-terhelhetőség-megbízhatóság); WebSocket és egyetlen MySQL nem „végtelen”.  
-- **Közvetlen egyetemi integráció:** nincs hivatalos Neptun API-szerű garantált interfész a repó leírása szerint — külső scraping/import logika változhat.  
+- **Közvetlen egyetemi integráció:** nincs hivatalos Neptun API-szerű garantált interfész a repó leírása szerint - külső scraping/import logika változhat.  
 - **Deploy:** a frontend `postbuild` gépspecifikus lehet; éles pipeline-t külön kell definiálni.
 
 ---

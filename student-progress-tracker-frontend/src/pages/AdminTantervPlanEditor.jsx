@@ -374,10 +374,10 @@ export default function AdminTantervPlanEditor() {
             }}
           >
             <td style={{ padding: 6, textAlign: "center", color: "#64748b", fontSize: 11 }} title="◼ mélység (Neptun)">
-              {r.depth != null ? Number(r.depth) : "—"}
+              {r.depth != null ? Number(r.depth) : "-"}
             </td>
             <td style={{ padding: 6, fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }} title="Szülő a Neptun szerint">
-              {r.parent_code || "—"}
+              {r.parent_code || "-"}
             </td>
             <td style={{ padding: 6 }}>
               <div
@@ -563,7 +563,7 @@ export default function AdminTantervPlanEditor() {
                       cursor: "pointer",
                       fontSize: 13,
                     }}
-                    title="rules + rows + parse meta — bemásolható hibajelentéshez / elemzéshez"
+                    title="rules + rows + parse meta - bemásolható hibajelentéshez / elemzéshez"
                     variant="primary"
                     size="sm"
                   >
@@ -610,7 +610,7 @@ export default function AdminTantervPlanEditor() {
                     listStyle: "none",
                   }}
                 >
-                  Követelményszabályok (szülő–gyerek láncolat) — {(plan?.rules || []).length} db · fő:{" "}
+                  Követelményszabályok (szülő–gyerek láncolat) - {(plan?.rules || []).length} db · fő:{" "}
                   {primaryRulesFlat.length} (kattints a megnyitáshoz)
                 </summary>
                 <div style={{ marginTop: 10 }}>
@@ -681,8 +681,8 @@ export default function AdminTantervPlanEditor() {
                     <tbody>
                       {filteredRulesFlat.map((r) => (
                         <tr key={r.code}>
-                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "—"}</td>
-                          <td style={{ padding: 6, fontSize: 11 }}>{r.parent_code || "—"}</td>
+                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
+                          <td style={{ padding: 6, fontSize: 11 }}>{r.parent_code || "-"}</td>
                           <td style={{ padding: 6, whiteSpace: "nowrap" }}>{r.code}</td>
                           <td style={{ padding: 6 }}>{r.label_hu}</td>
                           <td style={{ padding: 6 }}>{r.requirement_type}</td>
@@ -712,15 +712,15 @@ export default function AdminTantervPlanEditor() {
                         <tr key={r.code}>
                           <td style={{ padding: 6, fontWeight: 700, whiteSpace: "nowrap" }}>{r.code}</td>
                           <td style={{ padding: 6 }}>{r.label_hu}</td>
-                          <td style={{ padding: 6, fontSize: 11, color: "#64748b" }}>{r.parent_code || "—"}</td>
-                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "—"}</td>
+                          <td style={{ padding: 6, fontSize: 11, color: "#64748b" }}>{r.parent_code || "-"}</td>
+                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
                           <td style={{ padding: 6 }}>{r.requirement_type}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                   {primaryRulesFlat.length === 0 ? (
-                    <div style={{ padding: 12, color: "#64748b", fontSize: 12 }}>Egyik sor sincs „fő”-nak jelölve — pipázz a Teljes fa nézetben.</div>
+                    <div style={{ padding: 12, color: "#64748b", fontSize: 12 }}>Egyik sor sincs „fő”-nak jelölve - pipázz a Teljes fa nézetben.</div>
                   ) : null}
                 </div>
               ) : (
@@ -736,13 +736,13 @@ export default function AdminTantervPlanEditor() {
                       <th style={{ padding: 4 }} title="Fő követelménycsoport">
                         fő
                       </th>
-                      <th style={{ padding: 4 }} title="Specializációs fa gyökér — hallgatói választó / NONE szűrés">
+                      <th style={{ padding: 4 }} title="Specializációs fa gyökér - hallgatói választó / NONE szűrés">
                         spec
                       </th>
                       <th style={{ padding: 4 }}>code</th>
                       <th style={{ padding: 4 }}>label</th>
                       <th style={{ padding: 4 }}>type</th>
-                      <th style={{ padding: 4 }} title="Követelmény minimum (kredit / darab / óra — value_type szerint)">
+                      <th style={{ padding: 4 }} title="Követelmény minimum (kredit / darab / óra - value_type szerint)">
                         min
                       </th>
                       <th style={{ padding: 4 }}>actions</th>
@@ -867,7 +867,7 @@ export default function AdminTantervPlanEditor() {
                             />
                           </td>
                           <td style={{ padding: 6, textAlign: "center", color: "#64748b", fontSize: 11 }}>
-                            {row.block_depth != null ? row.block_depth : "—"}
+                            {row.block_depth != null ? row.block_depth : "-"}
                           </td>
                           <td
                             style={{ padding: 6, fontSize: 11, color: "#334155", whiteSpace: "nowrap" }}
@@ -877,16 +877,16 @@ export default function AdminTantervPlanEditor() {
                                 : undefined
                             }
                           >
-                            {row.parent_rule_code || "—"}
+                            {row.parent_rule_code || "-"}
                             {row.parent_rule_is_neptun_group ? (
                               <span style={{ color: "#64748b", fontWeight: 600, marginLeft: 4 }}>(csoport)</span>
                             ) : null}
                           </td>
                           <td style={{ padding: 6, textAlign: "right", fontSize: 11 }}>
-                            {row.weekly_hours != null ? row.weekly_hours : "—"}
+                            {row.weekly_hours != null ? row.weekly_hours : "-"}
                           </td>
                           <td style={{ padding: 6, textAlign: "right", fontSize: 11 }}>
-                            {row.semester_hours != null ? row.semester_hours : "—"}
+                            {row.semester_hours != null ? row.semester_hours : "-"}
                           </td>
                           <td style={{ padding: 6, whiteSpace: "nowrap" }}>
                             {row.course_code}
@@ -910,7 +910,7 @@ export default function AdminTantervPlanEditor() {
                               onChange={(e) => updateRowSubgroup(row.course_code, e.target.value)}
                               disabled={row.import_as_course === false}
                             >
-                              <option value="">— nincs —</option>
+                              <option value="">- nincs -</option>
                               {enabledRuleCodes.map((code) => (
                                 <option key={code} value={code}>
                                   {code}
@@ -943,7 +943,7 @@ export default function AdminTantervPlanEditor() {
               {saving ? "Import folyamatban…" : "Import az adatbázisba (jóváhagyás)"}
             </Button>
             <p style={{ margin: "8px 0 0", fontSize: 12, color: "#64748b" }}>
-              Ugyanaz a művelet, mint felül a kártyában és lent a rögzített sávban — a terv íródik az adatbázisba.
+              Ugyanaz a művelet, mint felül a kártyában és lent a rögzített sávban - a terv íródik az adatbázisba.
             </p>
           </div>
 

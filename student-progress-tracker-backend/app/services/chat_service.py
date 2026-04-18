@@ -1,4 +1,4 @@
-"""Chat üzenetek és reakciók perzisztencia — ``ChatService``."""
+"""Chat üzenetek és reakciók perzisztencia - ``ChatService``."""
 
 from sqlalchemy.orm import Session
 from app.db.models import ChatMessage, ChatReaction, User

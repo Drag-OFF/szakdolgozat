@@ -279,7 +279,7 @@ class MajorUpdate(BaseModel):
     """
     Szak frissítési séma. Opcionális mezők: csak a módosítandó mezőket küldd.
 
-    ``model_config``: Pydantic v2 — ORM példányokból is képezhető a modell (``from_attributes``).
+    ``model_config``: Pydantic v2 - ORM példányokból is képezhető a modell (``from_attributes``).
     """
     name: Optional[str] = None
     name_en: Optional[str] = None
@@ -356,7 +356,7 @@ class MajorRequirementRuleBase(BaseModel):
     """
     Szak követelmény szabály API réteg (egyedi ``code``, típus, rollup ``parent_rule_code``).
 
-    ``value_type``: ``credits`` (kredit), ``count`` (darab) vagy ``hours`` (óra) — a ``min_value`` mértéke.
+    ``value_type``: ``credits`` (kredit), ``count`` (darab) vagy ``hours`` (óra) - a ``min_value`` mértéke.
     """
     major_id: int
     code: str

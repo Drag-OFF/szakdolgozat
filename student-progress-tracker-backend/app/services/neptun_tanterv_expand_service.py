@@ -7,7 +7,7 @@ Neptun mintatanterv HTML kibontása (``tanterv.aspx``).
     3. BFS a maradék „+” gombok ``NyitZar`` értékein: minden lépés új HTML-t ad, a soron következő
        plusz formok indexe frissül (szekvenciális, nem párhuzamosítható).
 
-**Konfiguráció:** ``NEPTUN_INTER_POST_DELAY_MS``, ``NEPTUN_MAX_BFS_STEPS`` — lásd ``app.config``.
+**Konfiguráció:** ``NEPTUN_INTER_POST_DELAY_MS``, ``NEPTUN_MAX_BFS_STEPS`` - lásd ``app.config``.
 
 **Biztonság:** csak ``https://oktweb.neptun.u-szeged.hu`` és ``/tanterv/`` alatti URL-ek engedélyezettek.
 
@@ -133,7 +133,7 @@ def _form_inner_has_open_all_submit(form_inner: str) -> bool:
 
 def _filter_open_all_post_data(fields: dict[str, str], form_inner: str) -> dict[str, str]:
     """
-    Csak a „Összes nyit” (Nyit) submit menjen — a „Zár” submitot ne (a böngésző sem küldi el mindkettőt).
+    Csak a „Összes nyit” (Nyit) submit menjen - a „Zár” submitot ne (a böngésző sem küldi el mindkettőt).
     """
     out = dict(fields)
     for m in re.finditer(r"<input\s+([^>]+)>", form_inner, flags=re.I | re.S):
@@ -169,7 +169,7 @@ def _filter_open_all_post_data(fields: dict[str, str], form_inner: str) -> dict[
 
 
 def _find_open_all_form(html: str) -> dict[str, Any] | None:
-    """Első <form>, amelyben van „Összes nyit” submit — action + mezők (ViewState stb.)."""
+    """Első <form>, amelyben van „Összes nyit” submit - action + mezők (ViewState stb.)."""
     for fm in _FORM_RE.finditer(html):
         head, inner = fm.group(1), fm.group(2)
         if not _form_inner_has_open_all_submit(inner):
@@ -249,7 +249,7 @@ def _iter_submit_inputs(form_inner: str) -> list[dict[str, str]]:
 def _expand_plus_forms_index(html: str) -> tuple[dict[str, dict[str, Any]], int]:
     """
     Egy HTML-bejárás: NyitZar kulcs → + form (első előfordulás nyer).
-    Vissza: (index, hány + form egyezett — a régi len(lista) számlálóval kompatibilis).
+    Vissza: (index, hány + form egyezett - a régi len(lista) számlálóval kompatibilis).
     """
     out: dict[str, dict[str, Any]] = {}
     n_matched = 0

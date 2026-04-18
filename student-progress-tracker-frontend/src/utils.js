@@ -111,7 +111,7 @@ export async function authFetch(url, options = {}) {
 export function formatChosenSpecDisplay(code, lang = "hu") {
   const c = code == null || String(code).trim() === "" ? null : String(code).trim().toUpperCase();
   const hu = {
-    ALL: "—",
+    ALL: "-",
     NONE: "Spec nélkül",
     "MK-S-MA": "MA",
     "MK-S-BMR": "BMR",
@@ -119,7 +119,7 @@ export function formatChosenSpecDisplay(code, lang = "hu") {
     "MK-S-IA": "IA"
   };
   const en = {
-    ALL: "—",
+    ALL: "-",
     NONE: "No spec",
     "MK-S-MA": "MA",
     "MK-S-BMR": "BMR",

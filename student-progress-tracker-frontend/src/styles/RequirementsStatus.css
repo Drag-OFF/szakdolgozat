@@ -41,7 +41,7 @@
   overflow: auto;
 }
 
-/* Lapozott lista: max 10 sor, nincs magas belső scroll — admin / progress táblázathoz hasonlóan */
+/* Lapozott lista: max 10 sor, nincs magas belső scroll - admin / progress táblázathoz hasonlóan */
 .user-courselist-card--paged .user-courselist-body {
   max-height: none;
   overflow: visible;
@@ -223,7 +223,7 @@
 /* Kiegészített stílusok: admin-panel jellegű fül háttér + görgetés és footer védés */
 .requirements-status {
   padding: 16px;
-  padding-bottom: 200px; /* több hely a footer számára — csökkenthető ha szükséges */
+  padding-bottom: 200px; /* több hely a footer számára - csökkenthető ha szükséges */
   box-sizing: border-box;
 }
 
@@ -248,7 +248,7 @@
   width: 100%;
 }
 
-/* Fő panel címsorok (Kurzusok / Követelmények állapota) — admin‑szerű, nem olvad bele a háttérbe */
+/* Fő panel címsorok (Kurzusok / Követelmények állapota) - admin‑szerű, nem olvad bele a háttérbe */
 .panel-main-header,
 .requirements-status > h2,
 .requirements-status > h3 {

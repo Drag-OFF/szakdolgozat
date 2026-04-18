@@ -893,7 +893,7 @@ export default function AdminProgressPdfCheck() {
                         <option value="">{t.manualSelectLabel}</option>
                         {(manualCandidates[p.person_key || "unknown"] || []).map((u) => (
                           <option key={u.id} value={u.id}>
-                            {u.name} — {t.manualMotherLabel}: {u.mothers_name || "-"} (#{u.id})
+                            {u.name} - {t.manualMotherLabel}: {u.mothers_name || "-"} (#{u.id})
                           </option>
                         ))}
                       </select>
@@ -1093,7 +1093,7 @@ export default function AdminProgressPdfCheck() {
                             </td>
                             <td>
                               {isDb ? (
-                                <span className="admin-pdf-check-dash">—</span>
+                                <span className="admin-pdf-check-dash">-</span>
                               ) : (
                                 <div className="admin-pdf-check-row-actions">
                                   <Button
@@ -1228,7 +1228,7 @@ export default function AdminProgressPdfCheck() {
       {activeEdit && (
         <div className="admin-pdf-check-sticky-edit">
           <div className="admin-pdf-check-sticky-text">
-            <strong>{t.editingNow}:</strong> {activeEdit.personLabel} — {activeEdit.code || "-"} {activeEdit.name ? `(${activeEdit.name})` : ""}
+            <strong>{t.editingNow}:</strong> {activeEdit.personLabel} - {activeEdit.code || "-"} {activeEdit.name ? `(${activeEdit.name})` : ""}
           </div>
           <Button
             type="button"

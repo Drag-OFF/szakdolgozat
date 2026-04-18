@@ -34,7 +34,7 @@ export default function UsersPanel() {
         grantAdmin: "Grant admin role",
         lfSpec: "MK specialization",
         lhSpec: "From major requirement rules (same as student picker). Empty = no filter.",
-        specOptAll: "— Not set (show all branches)",
+        specOptAll: "- Not set (show all branches)",
         specOptNone: "No specialization (NONE)",
         specNoBranches: "No MK specialization roots in rules for this major.",
         colSpec: "MK spec"
@@ -61,7 +61,7 @@ export default function UsersPanel() {
         grantAdmin: "Admin jogosultság",
         lfSpec: "MK specializáció",
         lhSpec: "A szakhoz importált szabályokból (ugyanaz, mint a hallgatói választó). Üres = nincs szűrés.",
-        specOptAll: "— Nincs megadva (minden ág)",
+        specOptAll: "- Nincs megadva (minden ág)",
         specOptNone: "Specializáció nélkül (NONE)",
         specNoBranches: "Ehhez a szakhoz nincs MK specializáció a szabályokban.",
         colSpec: "MK spec"

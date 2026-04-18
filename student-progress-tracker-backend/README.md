@@ -1,7 +1,7 @@
-# Backend — FastAPI (hallgatói előrehaladás-követő)
+# Backend - FastAPI (hallgatói előrehaladás-követő)
 
 > **Teljes projektdokumentáció** (cél, funkciók, biztonság, skálázás, tesztelési javaslatok):  
-> **[../README.md](../README.md)** — a monorepo gyökerében.
+> **[../README.md](../README.md)** - a monorepo gyökerében.
 
 ---
 
@@ -33,4 +33,4 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Tesztek
 
-Automatikus tesztkészlet a repóban nem garantált — javasolt pytest + HTTP `TestClient`; részletek a gyökér **README.md** „Tesztelés” szakaszában.
+Automatikus tesztkészlet a repóban nem garantált - javasolt pytest + HTTP `TestClient`; részletek a gyökér **README.md** „Tesztelés” szakaszában.

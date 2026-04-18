@@ -158,7 +158,7 @@ def _normalize_pdf_text(s: str) -> str:
     t = re.sub(r"(?<=\d)\s*\n\s*(?=\d)", "", t)
     
     t = re.sub(r"(?<=[_-])\s*\n\s*(?=\d)", "", t)
-    t = t.replace("–", "-").replace("—", "-").replace("−", "-")
+    t = t.replace("\u2013", "-").replace("\u2014", "-").replace("\u2212", "-")
     
     t = re.sub(r"\s*_\s*", "_", t)
     t = re.sub(r"\s*-\s*", "-", t)

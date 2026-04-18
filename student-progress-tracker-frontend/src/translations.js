@@ -120,8 +120,8 @@ export const EQUIVALENCES_LABELS = {
     loading: "Betöltés...",
     searchPlaceholder: "Keresés kurzus / szak név alapján...",
     refresh: "Frissít",
-    selectCoursePlaceholder: "Kurzus — válassz...",
-    selectMajorPlaceholder: "Szak — válassz..."
+    selectCoursePlaceholder: "Kurzus - válassz...",
+    selectMajorPlaceholder: "Szak - válassz..."
   },
   en: {
     title: "Equivalences",
@@ -134,8 +134,8 @@ export const EQUIVALENCES_LABELS = {
     loading: "Loading...",
     searchPlaceholder: "Search by course / major name...",
     refresh: "Refresh",
-    selectCoursePlaceholder: "Course — choose...",
-    selectMajorPlaceholder: "Major — choose..."
+    selectCoursePlaceholder: "Course - choose...",
+    selectMajorPlaceholder: "Major - choose..."
   }
 };
 
@@ -313,7 +313,7 @@ export const HOME_LABELS = {
   hu: {
     title: "Hallgatói előrehaladás-követő",
     lead:
-      "Egyetemi hallgatóknak készült webes alkalmazás a tanulmányi előrehaladás átlátható követésére — a mintatantervhez és a szakodhoz tartozó követelmény-szabályokhoz igazítva.",
+      "Egyetemi hallgatóknak készült webes alkalmazás a tanulmányi előrehaladás átlátható követésére - a mintatantervhez és a szakodhoz tartozó követelmény-szabályokhoz igazítva.",
     langAria: "Nyelv választása",
     langHu: "Magyar",
     langEn: "English",
@@ -333,12 +333,12 @@ export const HOME_LABELS = {
       "Külön jogosultsággal elérhetők tanterv- és adatkezelő funkciók (például mintatanterv import, PDF-alapú ellenőrzések). Ezek a szakdolgozatban bemutatott háttér-folyamatok részei; a mindennapi hallgatói használat a fenti funkciókra épül.",
     thesisTitle: "A szakdolgozat és a technikai keret",
     thesisText:
-      "A munka egy önálló webalkalmazást valósít meg: a böngészőben futó React-alapú felület egy FastAPI háttér-szolgáltatással és relációs adatbázissal kommunikál. A téma a tanulmányi haladás modellezése, megjelenítése és — jogosultságtól függően — tantervi adatok betöltése köré épül.",
+      "A munka egy önálló webalkalmazást valósít meg: a böngészőben futó React-alapú felület egy FastAPI háttér-szolgáltatással és relációs adatbázissal kommunikál. A téma a tanulmányi haladás modellezése, megjelenítése és - jogosultságtól függően - tantervi adatok betöltése köré épül.",
   },
   en: {
     title: "Student Progress Tracker",
     lead:
-      "A web application for university students who want a clear view of academic progress — aligned with the curriculum structure and major-specific requirement rules.",
+      "A web application for university students who want a clear view of academic progress - aligned with the curriculum structure and major-specific requirement rules.",
     langAria: "Choose language",
     langHu: "Magyar",
     langEn: "English",
@@ -358,7 +358,7 @@ export const HOME_LABELS = {
       "Separate privileged tools exist for curriculum and data maintenance (e.g. syllabus import, PDF-based checks). They are part of the thesis demo’s back-office workflows; everyday student use is centred on the features above.",
     thesisTitle: "Thesis scope and stack",
     thesisText:
-      "The project delivers a standalone web app: a React front end talks to a FastAPI backend and a relational database. The work focuses on modelling and presenting study progress, and — where authorised — loading curricular data.",
+      "The project delivers a standalone web app: a React front end talks to a FastAPI backend and a relational database. The work focuses on modelling and presenting study progress, and - where authorised - loading curricular data.",
   },
 };
 

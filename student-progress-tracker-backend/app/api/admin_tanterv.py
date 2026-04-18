@@ -429,7 +429,7 @@ async def tanterv_import_html(
     _admin: dict = Depends(admin_required),
 ):
     """
-    Böngészőben mentett teljes tanterv HTML (.html) — egy parse, 0 Neptun HTTP.
+    Böngészőben mentett teljes tanterv HTML (.html) - egy parse, 0 Neptun HTTP.
     A Neptunban minden „+” sort nyiss ki, majd Mentés másként → feltöltés.
     """
     raw = await file.read(_HTML_UPLOAD_MAX_BYTES + 1)

@@ -1,4 +1,4 @@
-"""Mintatanterv sorok (kurzus–szak) CRUD — ``CourseMajorService``."""
+"""Mintatanterv sorok (kurzus–szak) CRUD - ``CourseMajorService``."""
 
 from sqlalchemy.orm import Session
 from app.db import models, schemas

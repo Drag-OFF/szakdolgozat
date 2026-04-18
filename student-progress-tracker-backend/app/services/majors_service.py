@@ -1,4 +1,4 @@
-"""Szakok tábla CRUD — ``MajorsService``."""
+"""Szakok tábla CRUD - ``MajorsService``."""
 
 from sqlalchemy.orm import Session
 from app.db import models, schemas

@@ -1,4 +1,4 @@
-"""Kurzus ekvivalencia párok CRUD — ``CourseEquivalenceService``."""
+"""Kurzus ekvivalencia párok CRUD - ``CourseEquivalenceService``."""
 
 from sqlalchemy.orm import Session
 from app.db import models, schemas

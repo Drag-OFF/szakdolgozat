@@ -82,7 +82,7 @@ export default function CourseEquivalencesPanel() {
 
   const courseLabel = id => {
     const c = courses.find(x=>String(x.id)===String(id)||String(x.course_code)===String(id));
-    return c ? `${c.course_code} — ${c.name||""}` : "";
+    return c ? `${c.course_code} - ${c.name||""}` : "";
   };
   const majorLabel = id => {
     const m = majors.find(x=>String(x.id)===String(id));
@@ -178,14 +178,14 @@ export default function CourseEquivalencesPanel() {
           <div className="admin-form-field admin-form-field--h">
             <div className="admin-form-label-text">{t.lfCourse}</div>
             <div className="admin-form-control-wrap">
-              <Autocomplete items={courses} idKey="id" value={form.course_id} onChange={v=>setForm(f=>({...f,course_id:v}))} labelFn={c=>`${c.course_code} — ${c.name||""}`} placeholder={t.phCourse} title={t.tiCourse} minChars={1} />
+              <Autocomplete items={courses} idKey="id" value={form.course_id} onChange={v=>setForm(f=>({...f,course_id:v}))} labelFn={c=>`${c.course_code} - ${c.name||""}`} placeholder={t.phCourse} title={t.tiCourse} minChars={1} />
             </div>
             <div className="admin-form-col-hint">{t.lhCourse}</div>
           </div>
           <div className="admin-form-field admin-form-field--h">
             <div className="admin-form-label-text">{t.lfEq}</div>
             <div className="admin-form-control-wrap">
-              <Autocomplete items={courses} idKey="id" value={form.equivalent_course_id} onChange={v=>setForm(f=>({...f,equivalent_course_id:v}))} labelFn={c=>`${c.course_code} — ${c.name||""}`} placeholder={t.phEq} title={t.tiEq} minChars={1} />
+              <Autocomplete items={courses} idKey="id" value={form.equivalent_course_id} onChange={v=>setForm(f=>({...f,equivalent_course_id:v}))} labelFn={c=>`${c.course_code} - ${c.name||""}`} placeholder={t.phEq} title={t.tiEq} minChars={1} />
             </div>
             <div className="admin-form-col-hint">{t.lhEq}</div>
           </div>

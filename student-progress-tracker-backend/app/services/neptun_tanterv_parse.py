@@ -212,9 +212,9 @@ def _parse_int_cell(s: str) -> int:
 
 
 def _parse_hours_cell(s: str) -> int:
-    """Heti / féléves óra cella — első pozitív egész (pl. „2”, „2/0”)."""
+    """Heti / féléves óra cella: első pozitív egész (pl. „2”, „2/0”)."""
     t = (s or "").strip().replace(",", ".")
-    if not t or t in "-–—·":
+    if not t or t in "-\u2013\u2014·":
         return 0
     m = re.search(r"(\d+)", t)
     return int(m.group(1)) if m else 0
@@ -575,11 +575,11 @@ def _resolve_credit_value(cells: list[str], cri: int | None) -> int:
 
 
 def _felv_is_emptyish(felv: str) -> bool:
-    """Felvétel típus üres / csak elválasztó — folytatás-sorban gyakori zaj."""
+    """Felvétel típus üres / csak elválasztó; folytatás-sorban gyakori zaj."""
     s = (felv or "").strip()
     if not s:
         return True
-    if s in ("-", "–", "—", "·", "*"):
+    if s in ("-", "\u2013", "\u2014", "·", "*"):
         return True
     return False
 

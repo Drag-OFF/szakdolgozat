@@ -21,7 +21,7 @@ export default function CourseMajorPanel() {
           "To tag a course as e.g. math elective: (1) Add an elective rule with a custom subgroup key (e.g. elective_math). (2) Here set Type = compulsory elective and Subgroup = the same key. Empty subgroup here only matches rules without subgroup filtering.",
         mustMatch: "Spelling must match exactly; typos hide the course from students (even if not completed).",
         fromRules: "Subgroup keys from rules for this major + type (click to fill):",
-        noRuleKeys: "No custom subgroup keys in rules for this major and type yet — create the rule first, or type the key manually.",
+        noRuleKeys: "No custom subgroup keys in rules for this major and type yet - create the rule first, or type the key manually.",
         lfCourse: "Course",
         lhCourse: "Select the course.",
         tiCourse: "Search by code or name, then pick from the list.",
@@ -53,7 +53,7 @@ export default function CourseMajorPanel() {
           "Matek (vagy bármilyen) kötvál így kötődik össze: (1) a szabályoknál legyen egy kötvál szabály egyedi alcsoport kulccsal (pl. elective_math). (2) Itt a Típus = kötelezően választható, az Alcsoport mezőbe pedig pontosan ugyanaz a kulcs kerüljön. Üres alcsoport itt csak olyan szabályhoz jó, ahol nincs alcsoport szűrés.",
         mustMatch: "Betűre egyeznie kell; elütésnél a hallgatónál nem látszik elérhetőként (akkor sem, ha még nem teljesítette).",
         fromRules: "Egyedi kulcsok a szabályokból ehhez a szakhoz és típushoz (kattintás = beírás):",
-        noRuleKeys: "Ehhez a szakhoz és típushoz még nincs egyedi kulcs a szabályokban — előbb vedd fel a szabályt, vagy írd kézzel az alcsoportot.",
+        noRuleKeys: "Ehhez a szakhoz és típushoz még nincs egyedi kulcs a szabályokban - előbb vedd fel a szabályt, vagy írd kézzel az alcsoportot.",
         lfCourse: "Kurzus",
         lhCourse: "Válaszd ki a kurzust.",
         tiCourse: "Keresés kód vagy név alapján, majd választás a listából.",
@@ -139,7 +139,7 @@ export default function CourseMajorPanel() {
 
   const courseLabel = id => {
     const c = courses.find(x => String(x.id) === String(id) || String(x.course_code) === String(id));
-    return c ? `${c.course_code} — ${c.name || ""}` : String(id || "");
+    return c ? `${c.course_code} - ${c.name || ""}` : String(id || "");
   };
   const majorLabel = id => {
     const m = majors.find(x => String(x.id) === String(id));
@@ -238,7 +238,7 @@ export default function CourseMajorPanel() {
                 {t.lfCourse}
                 <span className="admin-form-col-hint">{t.lhCourse}</span>
               </label>
-              <Autocomplete items={courses} idKey="id" value={form.course_id} onChange={v=>setForm(f=>({...f,course_id:v}))} labelFn={c=>`${c.course_code} — ${c.name||""}`} placeholder={t.phCourse} title={t.tiCourse} minChars={1} />
+              <Autocomplete items={courses} idKey="id" value={form.course_id} onChange={v=>setForm(f=>({...f,course_id:v}))} labelFn={c=>`${c.course_code} - ${c.name||""}`} placeholder={t.phCourse} title={t.tiCourse} minChars={1} />
             </div>
             <div className="admin-form-field course-major-field--wide">
               <label className="admin-form-label">

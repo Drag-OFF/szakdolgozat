@@ -1,4 +1,4 @@
-/* Globális téma: html[data-theme] — Chat, admin táblák, progress, követelmények. */
+/* Globális téma: html[data-theme] - Chat, admin táblák, progress, követelmények. */
 
 html[data-theme="dark"] {
   color-scheme: dark;
@@ -55,7 +55,7 @@ html[data-theme="dark"] {
   --admin-th-solid: #0c4a6e;
   --admin-th-solid-border: rgba(56, 189, 248, 0.25);
 
-  /* Követelmények állapota — gyors összegzés + összesítő tábla */
+  /* Követelmények állapota - gyors összegzés + összesítő tábla */
   --req-surface-bg: linear-gradient(180deg, #0c1424 0%, #0a101c 100%);
   --req-surface-border: rgba(100, 116, 139, 0.38);
   --req-item-bg: #0f172a;

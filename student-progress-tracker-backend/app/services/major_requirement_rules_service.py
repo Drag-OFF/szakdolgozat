@@ -1,4 +1,4 @@
-"""Dinamikus szabály sorok CRUD — ``MajorRequirementRulesService``."""
+"""Dinamikus szabály sorok CRUD - ``MajorRequirementRulesService``."""
 
 from sqlalchemy.orm import Session
 from app.db import models, schemas

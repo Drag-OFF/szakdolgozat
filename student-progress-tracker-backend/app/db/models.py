@@ -103,7 +103,7 @@ class MajorRequirementRule(Base):
         subgroup: Egyedi kulcs, amire a ``course_major.subgroup`` hivatkozhat (pl. ``elective_info_credits``).
         parent_rule_code: Rollup szülő kódja; a gyerek szabály kreditjei a főcsoportba számítanak.
             A ``course_major.subgroup`` továbbra is a levél szabály kódjára mutat.
-        value_type: ``credits``, ``count`` vagy ``hours`` — a ``min_value`` mértéke.
+        value_type: ``credits``, ``count`` vagy ``hours`` - a ``min_value`` mértéke.
         is_specialization_root: Ha igaz, ez a szabály egy kölcsönösen kizáró specializációs fa gyökere
             (hallgatói választó + NONE szűrés); a kód prefixe tetszőleges (MK-S-*, SP-*, stb.).
     """

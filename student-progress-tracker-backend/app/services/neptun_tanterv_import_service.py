@@ -95,7 +95,7 @@ def _load_min_by_code_from_runtime_json(path: Path) -> dict[str, int]:
 
 
 def _seed_row_missing_explicit_min_value(item: dict[str, Any]) -> bool:
-    """True = nincs kézzel megadott minimum (hiányzó / null / üres string) — lehet kitölteni referenciából."""
+    """True = nincs kézzel megadott minimum (hiányzó / null / üres string) - lehet kitölteni referenciából."""
     if "min_value" not in item:
         return True
     v = item.get("min_value")
@@ -920,16 +920,16 @@ def _run_import_pipeline(
     if from_neptun_http and stopped_early and queue_left > 0:
         warnings.append(
             f"A lenyitási lépések száma elérte a max_steps limitet ({expand_meta.get('steps')} lépés), "
-            f"még {queue_left} „+” sor volt a sorban — a tanterv csak részben lett kibontva. "
+            f"még {queue_left} „+” sor volt a sorban - a tanterv csak részben lett kibontva. "
             "Állíts magasabb „Max. lépés” értéket (pl. 1500–3000), és futtasd újra (előnézet vagy import)."
         )
     if from_neptun_http and steps == 0 and init_plus == 0 and not bulk_used:
         warnings.append(
-            "A Neptun HTML-ben nem volt „+” lenyitó form (és „Összes nyit” sem futott) — tárgyak nélkül. "
+            "A Neptun HTML-ben nem volt „+” lenyitó form (és „Összes nyit” sem futott) - tárgyak nélkül. "
             "Ellenőrizd a kódot és a hálózatot."
         )
     elif from_neptun_http and steps == 0 and init_plus > 0:
-        warnings.append("0 lenyitási lépés történt, pedig volt + gomb — próbáld újra; nézd expand.errors.")
+        warnings.append("0 lenyitási lépés történt, pedig volt + gomb - próbáld újra; nézd expand.errors.")
     elif len(rows) == 0:
         if from_neptun_http:
             warnings.append(
@@ -1020,12 +1020,12 @@ def import_html_string_to_db(
     kod_hint: str | None = None,
 ) -> dict[str, Any]:
     """
-    Már letöltött / böngészőben mentett teljes tanterv HTML — **egyetlen** parse, 0 Neptun HTTP.
+    Már letöltött / böngészőben mentett teljes tanterv HTML - **egyetlen** parse, 0 Neptun HTTP.
     A felhasználó a Neptunban kézzel kibontja az összes „+” sort, majd „Mentés másként” → .html.
     """
     raw = html or ""
     if len(raw) < 80:
-        raise ValueError("A HTML túl rövid — valószínűleg nem teljes tanterv oldal.")
+        raise ValueError("A HTML túl rövid - valószínűleg nem teljes tanterv oldal.")
     if len(raw.encode("utf-8")) > _HTML_IMPORT_MAX_BYTES:
         raise ValueError(f"A HTML túl nagy (max. {_HTML_IMPORT_MAX_BYTES // (1024*1024)} MB).")
 

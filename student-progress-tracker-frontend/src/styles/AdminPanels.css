@@ -42,7 +42,7 @@
   min-height: 36px;
 }
 
-/* Előrehaladás / kurzuslista: ovális kereső — ne legyen belső téglalap (admin input szabály felülírása) */
+/* Előrehaladás / kurzuslista: ovális kereső - ne legyen belső téglalap (admin input szabály felülírása) */
 .admin-panel .progress-input-wrap .progress-input {
   border: none;
   background: transparent;
@@ -345,7 +345,7 @@
   font-size: 11px;
 }
 
-/* Kurzus–szak űrlap: egy sorban ne zsugorodjon 2 cm-re az input — függőleges mezők, tördelés */
+/* Kurzus–szak űrlap: egy sorban ne zsugorodjon 2 cm-re az input - függőleges mezők, tördelés */
 .course-major-form-grid {
   display: flex;
   flex-wrap: wrap;
@@ -380,7 +380,7 @@
   max-width: 300px;
 }
 
-/* Autocomplete belső inputja nem kapja a .progress-input osztályt — egységes méret */
+/* Autocomplete belső inputja nem kapja a .progress-input osztályt - egységes méret */
 .admin-form-inline-row input[type="text"] {
   font-size: 13px;
   min-height: 36px;
@@ -497,7 +497,7 @@ h1.admin-title {
   overflow: visible;
 }
 
-/* Dinamikus szabályok: rács, egyenlő oszlopok — ne zsugorodjon össze a 3. mező */
+/* Dinamikus szabályok: rács, egyenlő oszlopok - ne zsugorodjon össze a 3. mező */
 .major-rules-form__grid {
   display: grid;
   gap: 12px 16px;
@@ -527,7 +527,7 @@ h1.admin-title {
   }
 }
 
-/* Második sor: mindhárom mező ugyanúgy — címke felül, vezérlő alul (nem címke|mező vízszintesen) */
+/* Második sor: mindhárom mező ugyanúgy - címke felül, vezérlő alul (nem címke|mező vízszintesen) */
 .major-rules-form__grid--metrics > .admin-form-field.admin-form-field--h {
   display: flex;
   flex-direction: column;

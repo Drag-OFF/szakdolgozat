@@ -1,4 +1,4 @@
-"""Felhasználó regisztráció, belépés, profil CRUD — ``UsersService``."""
+"""Felhasználó regisztráció, belépés, profil CRUD - ``UsersService``."""
 
 from sqlalchemy.orm import Session
 from app.db.models import User as UserModel

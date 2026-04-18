@@ -202,7 +202,7 @@ function renderDynamicCourseListNodes(r, childLists, depth, lang, labels, embedd
     out.push(
       <div key={`noc-${key}`} className="req-rule-no-courses" style={{ marginLeft: Math.min(depth * 14, 42) }}>
         <span className="req-rule-no-courses-label">{r.label || r.code}</span>
-        {" — "}
+        {" - "}
         {lang === "en"
           ? "No courses are currently listed for this rule."
           : "Ehhez a szabályhoz jelenleg nincs listázható kurzus."}
@@ -287,14 +287,14 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
   const groups = groupRequirementsBySection(rows);
   const t = lang === "en"
     ? {
-        title: "At a glance — main categories",
+        title: "At a glance - main categories",
         missing: "Missing (total)",
         over: "Over (total)",
         noneShort: "Nothing missing",
         foot: "Per-rule breakdown is in the table below."
       }
     : {
-        title: "Gyors összesítés — fő kategóriák",
+        title: "Gyors összesítés - fő kategóriák",
         missing: "Hiány összesen",
         over: "Túlteljesítés összesen",
         noneShort: "Nincs hiány",

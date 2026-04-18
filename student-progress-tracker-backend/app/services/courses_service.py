@@ -1,4 +1,4 @@
-"""Kurzustár CRUD — ``CoursesService``."""
+"""Kurzustár CRUD - ``CoursesService``."""
 
 from sqlalchemy.orm import Session
 from app.db.models import Course as CourseModel

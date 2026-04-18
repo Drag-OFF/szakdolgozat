@@ -1,4 +1,4 @@
-/* ProgressTable.css — színek: app-theme.css */
+/* ProgressTable.css - színek: app-theme.css */
 .progress-table {
   width: 100%;
   border-collapse: collapse;
@@ -147,7 +147,7 @@
   line-height: 1.25;
 }
 
-/* Kurzus táblázat lapozás — ugyanaz a sorrend mint az admin Kurzusok panelen */
+/* Kurzus táblázat lapozás - ugyanaz a sorrend mint az admin Kurzusok panelen */
 .progress-courses-pagination {
   display: flex;
   gap: 8px;
@@ -300,7 +300,7 @@
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
 }
 
-/* régi globális .progress-input második blokk — a wrapen belüli input felülírja a szélességet */
+/* régi globális .progress-input második blokk - a wrapen belüli input felülírja a szélességet */
 .progress-input {
   width: 340px;
   height: 36px;
@@ -322,7 +322,7 @@
   flex-wrap: wrap;
 }
 
-/* Vizuális csoportok: kereső | feltöltés | letöltés — nem olvadnak össze */
+/* Vizuális csoportok: kereső | feltöltés | letöltés - nem olvadnak össze */
 .progress-toolbar-group {
   display: flex;
   align-items: center;
@@ -427,7 +427,7 @@ html[data-theme="dark"] .progress-toolbar-group {
   font-weight: 600;
 }
 
-/* Toolbar csoport már kap keretet — ne legyen dupla doboz a filewrap-on */
+/* Toolbar csoport már kap keretet - ne legyen dupla doboz a filewrap-on */
 .progress-toolbar-group .progress-filewrap {
   padding: 0;
   background: transparent;

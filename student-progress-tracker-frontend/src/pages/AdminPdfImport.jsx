@@ -539,10 +539,10 @@ export default function AdminPdfImport() {
                 value={majorId}
                 onChange={(e) => setMajorId(e.target.value)}
               >
-                <option value="">{majors.length ? (lang === "en" ? "—" : "—") : t.majorPlaceholder}</option>
+                <option value="">{majors.length ? (lang === "en" ? "-" : "-") : t.majorPlaceholder}</option>
                 {majors.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.id} — {m.name}
+                    {m.id} - {m.name}
                   </option>
                 ))}
               </select>
@@ -597,7 +597,7 @@ export default function AdminPdfImport() {
                                 list="rules-seed-parent-suggestions"
                                 value={row.parent_code}
                                 onChange={(e) => updateRuleRow(row.id, { parent_code: e.target.value.toUpperCase() })}
-                                placeholder="—"
+                                placeholder="-"
                                 spellCheck={false}
                                 style={{ width: "100%", minWidth: 120, fontSize: 13 }}
                               />

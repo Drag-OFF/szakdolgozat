@@ -118,7 +118,7 @@ export default function Autocomplete({
             left: 0,
             top: "100%",
             marginTop: 2,
-            /* Szélesebb, mint a keskeny input — ne vágja el a szöveget */
+            /* Szélesebb, mint a keskeny input - ne vágja el a szöveget */
             width: `min(max(100%, ${Number(dropdownMinWidth) || 280}px), min(560px, calc(100vw - 16px)))`,
             maxHeight: 260,
             overflowY: "auto",

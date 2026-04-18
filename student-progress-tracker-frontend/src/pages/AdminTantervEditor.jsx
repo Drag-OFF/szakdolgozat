@@ -155,7 +155,7 @@ export default function AdminTantervEditor() {
                         onChange={(e) => setCourseSubgroup(r.course_id, e.target.value)}
                         style={{ width: "100%", padding: "6px 8px" }}
                       >
-                        <option value="">— nincs —</option>
+                        <option value="">- nincs -</option>
                         {(data?.rules || []).map((rr) => (
                           <option key={rr.code} value={rr.code}>
                             {rr.code} - {rr.label_hu}

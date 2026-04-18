@@ -5,7 +5,7 @@ elérhető kurzusainak kiszámításához szükséges segédfüggvényeket és a
 
 Dinamikus mód: egy szabály teljesítése (kredit / darab / óra) és az elérhető tárgyak listája
 a fa alatt lévő összes leszármazott szabály course_major.subgroup értékére vonatkozó tárgyak
-uniójából számolódik — így a szülő sor magában foglalja a közvetlen és a gyerek alá sorolt tárgyakat.
+uniójából számolódik - így a szülő sor magában foglalja a közvetlen és a gyerek alá sorolt tárgyakat.
 
 **Specializációs fák:** A ``major_requirement_rules.is_specialization_root`` jelöli a kölcsönösen kizáró fa gyökereket
 (bármilyen ``code`` lehet: MK-S-*, SP-*, JR-*, stb.); a hallgató egy ágat vagy NONE-t választhat.
@@ -340,7 +340,7 @@ def get_completed_courses(user_id: int, db: Session) -> set:
 
 def _pe_course_major_where(subgroup) -> tuple[str, dict]:
     """
-    Testnevelés (PE) sorok szűrése a course_major táblán — összhangban a get_pe_semesters logikájával:
+    Testnevelés (PE) sorok szűrése a course_major táblán - összhangban a get_pe_semesters logikájával:
     (type = 'pe' OR subgroup = 'pe'). Ha a szabály subgroupja 'pe', de a kurzus csak type='pe'
     üres subgroupbal van felvéve, az is ide tartozik (tipikus admin-beállítás).
     """
