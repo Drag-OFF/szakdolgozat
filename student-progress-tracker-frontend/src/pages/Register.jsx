@@ -130,7 +130,7 @@ export default function Register() {
   }
 
   return (
-    
+    <div className="auth-page">
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <h3>{texts[lang].title}</h3>
@@ -218,6 +218,7 @@ export default function Register() {
           {texts[lang].resend} <Link to="/resend-verify">{texts[lang].resendBtn}</Link>
         </div>
       </form>
+    </div>
     </div>
   );
 }

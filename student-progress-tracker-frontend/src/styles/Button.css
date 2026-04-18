@@ -114,6 +114,13 @@
   --btn-hover-fg: #ffffff;
 }
 
+html[data-theme="dark"] .ui-btn--ghost {
+  --btn-fg: #cbd5e1;
+  --btn-border: rgba(148, 163, 184, 0.45);
+  --btn-hover-bg: rgba(148, 163, 184, 0.18);
+  --btn-hover-fg: #f8fafc;
+}
+
 .ui-btn--neutral {
   --btn-bg: transparent;
   --btn-fg: #3b3b3b;

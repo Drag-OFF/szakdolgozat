@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import PasswordResetForm from "../components/PasswordResetForm";
 import { useLang } from "../context/LangContext";
+import "../styles/Auth.css";
 import { authFetch } from "../utils";
 import { apiUrl } from "../config";
 
@@ -59,12 +60,14 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="auth-container" style={{ justifyContent: "center", alignItems: "center" }}>
-      <PasswordResetForm
-        onSubmit={handlePasswordReset}
-        texts={texts}
-        sent={sent}
-      />
+    <div className="auth-page">
+      <div className="auth-container" style={{ justifyContent: "center", alignItems: "center" }}>
+        <PasswordResetForm
+          onSubmit={handlePasswordReset}
+          texts={texts}
+          sent={sent}
+        />
+      </div>
     </div>
   );
 }

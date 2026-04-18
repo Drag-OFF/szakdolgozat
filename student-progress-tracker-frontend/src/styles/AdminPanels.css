@@ -1,20 +1,11 @@
-/* design tokens */
-:root{
-  --accent: #1e6fbf;
-  --accent-dark: #155a9a;
-  --panel-bg: #ffffff;
-  --panel-border: #e6eef6;
-  --row-alt: #f7fbfd;
-  --muted: #6b7785;
-  --gap: 10px;
-}
+/* design tokens: app-theme.css → html[data-theme] */
 
 /* admin card wrapper */
 .admin-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  border-radius: 8px;
+  box-shadow: var(--admin-card-outer-shadow);
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -43,11 +34,31 @@
 .admin-panel select,
 .admin-panel .progress-input {
   padding: 8px 10px;
-  border: 1px solid #dbeaf8;
+  border: 1px solid var(--admin-input-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--admin-input-bg);
+  color: var(--admin-table-fg);
   box-sizing: border-box;
   min-height: 36px;
+}
+
+/* Előrehaladás / kurzuslista: ovális kereső — ne legyen belső téglalap (admin input szabály felülírása) */
+.admin-panel .progress-input-wrap .progress-input {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  box-shadow: none;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 6px 12px;
+  min-height: 36px;
+}
+
+.admin-panel .progress-input-wrap .progress-input:focus,
+.admin-panel .progress-input-wrap .progress-input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 /* unify table style: use same look as ProgressTable */
@@ -56,16 +67,16 @@
   border-collapse: collapse;
   table-layout: auto;
   font-size: 14px;
-  color: #222;
-  background: #fff;
+  color: var(--admin-table-fg);
+  background: var(--panel-bg);
 }
 
 .progress-table thead th {
   position: sticky;
   top: 0;
   z-index: 3;
-  background: linear-gradient(180deg,#eef8ff,#ffffff);
-  color: var(--accent);
+  background: var(--admin-thead-bg);
+  color: var(--admin-thead-fg);
   font-weight: 700;
   padding: 10px 12px;
   text-align: left;
@@ -78,39 +89,38 @@
   white-space: normal;
   overflow: hidden;
   text-overflow: clip;
-  border-bottom: 1px solid #f1f6fb;
+  border-bottom: 1px solid var(--admin-cell-divider);
 }
 
 /* alternate row colors + hover */
 .progress-table tbody tr:nth-child(even) { background: var(--row-alt); }
-.progress-table tbody tr:hover { background: #f3fbff; }
+.progress-table tbody tr:hover { background: var(--admin-row-hover); }
 
-/* Kijelölt sor: erősebb, jól látható (cellákra is, hogy felülírja a csíkozást) */
+/* Kijelölt sor */
 .progress-table tbody tr.row-selected > td,
 .progress-table tbody tr[aria-selected="true"] > td,
 .progress-table tbody tr.selected > td {
-  background: #cfe5ff !important;
-  box-shadow: inset 4px 0 0 0 #0d47a1;
+  background: var(--admin-selected-row-bg) !important;
+  box-shadow: inset 4px 0 0 0 var(--admin-selected-bar);
   font-weight: 600;
-  color: #0a2a4a;
-  border-bottom-color: #b3d4fc;
+  color: var(--admin-selected-row-text);
+  border-bottom-color: var(--admin-cell-divider);
 }
 .progress-table tbody tr.row-selected:hover > td,
 .progress-table tbody tr[aria-selected="true"]:hover > td,
 .progress-table tbody tr.selected:hover > td {
-  background: #c5e0ff !important;
+  background: var(--admin-selected-row-bg-hover) !important;
 }
 
-/* Ugyanaz a kijelölés: sima <table> admin panelben (pl. ProgressPanel felhasználó lista) */
 .admin-panel table tbody tr.row-selected > td {
-  background: #cfe5ff !important;
-  box-shadow: inset 4px 0 0 0 #0d47a1;
+  background: var(--admin-selected-row-bg) !important;
+  box-shadow: inset 4px 0 0 0 var(--admin-selected-bar);
   font-weight: 600;
-  color: #0a2a4a;
-  border-bottom-color: #b3d4fc;
+  color: var(--admin-selected-row-text);
+  border-bottom-color: var(--admin-cell-divider);
 }
 .admin-panel table tbody tr.row-selected:hover > td {
-  background: #c5e0ff !important;
+  background: var(--admin-selected-row-bg-hover) !important;
 }
 
 /* narrow columns: let first column be small */
@@ -153,9 +163,9 @@
 .admin-panel button {
   padding: 8px 10px;
   border-radius: 6px;
-  border: 1px solid #cfe3f7;
-  background: #fff;
-  color: var(--accent-dark);
+  border: 1px solid var(--admin-btn-border);
+  background: var(--admin-btn-bg);
+  color: var(--admin-btn-fg);
   cursor: pointer;
 }
 .admin-panel button:disabled { opacity: 0.5; cursor: default; }
@@ -164,21 +174,6 @@
 :where(.progress-table, .admin-card) { box-sizing: border-box; }
 
 /* end of AdminPanels.css additions */
-
-/* egyszerű kártya stílus admin panelekhez (fehér háttér, árnyék) */
-.admin-card {
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.13);
-  overflow: hidden;
-  border: 1px solid #eee;
-  margin-bottom: 12px;
-}
-
-.admin-card-body {
-  padding: 8px;
-}
-
 
 /* --- admin panel table styles (kizárólag admin felületre) --- */
 .admin-card .admin-table {
@@ -193,26 +188,23 @@
 .admin-card .admin-table td {
   padding: 10px;
   text-align: left;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--admin-cell-divider);
   font-size: 14px;
   vertical-align: middle;
 }
 
-/* hover a soron */
 .admin-card .admin-table tbody tr:hover {
-  background: #f7f7ee;
+  background: var(--admin-row-hover);
 }
 
-/* rikító kijelölt sor (admin felület) */
 .admin-card .admin-table tbody tr.selected {
-  background: linear-gradient(90deg, rgba(255,250,140,1) 0%, rgba(255,230,90,1) 100%); /* rikító sárga */
-  color: #000;
-  box-shadow: inset 4px 0 0 0 rgba(255,180,0,0.25);
+  background: var(--admin-yellow-row);
+  color: var(--admin-yellow-row-text);
+  box-shadow: inset 4px 0 0 0 rgba(234, 179, 8, 0.45);
 }
 
-/* biztosítsuk a jó kontrasztot cellákban */
 .admin-card .admin-table tbody tr.selected td {
-  color: #000;
+  color: var(--admin-yellow-row-text);
 }
 
 /* kurzor */
@@ -222,12 +214,12 @@
 
 /* Accordion / mobile friendly styles (append or merge into your AdminPanels.css) */
 
-.accordion { margin-bottom: 12px; border: 1px solid #e6eef6; border-radius: 6px; overflow: hidden; background: #fff; }
+.accordion { margin-bottom: 12px; border: 1px solid var(--panel-border); border-radius: 6px; overflow: hidden; background: var(--panel-bg); }
 .accordion-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:12px 14px; background: linear-gradient(180deg,#f7fbff,#ffffff);
-  cursor:pointer; color: #0b3a66; font-weight:600;
-  border-bottom:1px solid #eef6fb;
+  padding:12px 14px; background: var(--admin-accordion-bg);
+  cursor:pointer; color: var(--admin-accordion-fg); font-weight:600;
+  border-bottom:1px solid var(--panel-border);
 }
 .accordion-caret { font-size:18px; opacity:0.9; }
 
@@ -237,7 +229,7 @@
 .sub-accordion { margin-bottom: 8px; border-radius:4px; overflow:visible; }
 .sub-header {
   display:flex; align-items:center; justify-content:space-between;
-  padding:8px 12px; background:#f3f8ff; cursor:pointer; border:1px solid #e8f2fb; color:#0b4f85; font-weight:600;
+  padding:8px 12px; background: var(--admin-sub-header-bg); cursor:pointer; border:1px solid var(--admin-sub-header-border); color: var(--accent-dark); font-weight:600;
 }
 .sub-content { padding:10px 12px; background:transparent; }
 
@@ -246,23 +238,22 @@
 .admin-card { margin-top: 8px; }
 .admin-card-body { max-height: none; overflow: visible; }
 
-/* keep table style consistent (blue theme) */
-.progress-table thead th { background: #eef8ff; color: #1e6fbf; position: sticky; top: 0; z-index: 2; }
-.progress-table tbody tr:hover { background: #f6fbff; }
+.progress-table thead th { background: var(--admin-thead-bg); color: var(--admin-thead-fg); position: sticky; top: 0; z-index: 2; }
+.progress-table tbody tr:hover { background: var(--admin-row-hover); }
 
 /* --- add these desktop-specific styles to the existing AdminPanels.css --- */
 
 /* Desktop navigation (visible on wide screens) */
 .desktop-nav { display:flex; gap:10px; justify-content:center; margin-bottom:12px; }
 .nav-btn {
-  padding:8px 14px; border-radius:8px; border:1px solid #dbeaf8; background:#fff; color:#0b3a66; cursor:pointer;
+  padding:8px 14px; border-radius:8px; border:1px solid var(--admin-input-border); background: var(--admin-nav-inactive-bg); color: var(--admin-nav-inactive-fg); cursor:pointer;
 }
-.nav-btn.active { background:#1e6fbf; color:#fff; border-color:#155a9a; box-shadow:0 2px 6px rgba(30,111,191,0.12); }
+.nav-btn.active { background: var(--admin-nav-active-bg); color: var(--admin-nav-active-fg); border-color: var(--accent); box-shadow:0 2px 6px rgba(0,0,0,0.12); }
 
 /* Desktop subnav for Kurzusok */
 .desktop-subnav { display:flex; gap:8px; margin-bottom:8px; justify-content:center; flex-wrap:wrap; }
-.sub-btn { padding:6px 12px; border-radius:6px; border:1px solid #e4f0fb; background:#f7fbff; color:#0b4f85; cursor:pointer; }
-.sub-btn.active { background:#1e6fbf; color:#fff; border-color:#155a9a; }
+.sub-btn { padding:6px 12px; border-radius:6px; border:1px solid var(--panel-border); background: var(--admin-sub-btn-bg); color: var(--accent-dark); cursor:pointer; }
+.sub-btn.active { background: var(--admin-nav-active-bg); color: var(--admin-nav-active-fg); border-color: var(--accent); }
 
 /* Desktop content wrapper */
 .desktop-content { min-height: 200px; }
@@ -424,7 +415,7 @@
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: #5a6b7a;
+  color: var(--muted);
   margin-top: 2px;
   line-height: 1.35;
   white-space: normal;

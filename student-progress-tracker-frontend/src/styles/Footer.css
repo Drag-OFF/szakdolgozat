@@ -1,25 +1,11 @@
 .footer {
-  background: #003366;
-  color: #fff;
+  background: var(--app-footer-bg);
+  color: var(--app-footer-text);
   text-align: center;
-  padding: 1rem 0;
-  width: 100vw;
-  box-shadow: 0 -2px 12px #00336622;
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  z-index: 100;
-}
-
-/* Mobil nézet */
-@media (max-width: 1400px) {
-  .footer {
-    width: 100%;
-  }
-}
-
-@media (max-width: 399px) {
-  .footer {
-    width: 100vw;
-  }
+  padding: 1rem 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
 }

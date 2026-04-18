@@ -1,8 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useLang } from "../context/LangContext";
-import useFileDownload from "../hooks/useFileDownload";
 import useFileUpload from "../hooks/useFileUpload.js";
-import { apiUrl } from "../config";
 import Button from "./Button";
 
 export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userId }) {
@@ -10,7 +8,6 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
   const fileInputRef = useRef();
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
-  const { download } = useFileDownload();
   const { upload } = useFileUpload();
 
   const texts = {
@@ -18,15 +15,13 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
       select: "Fájl kiválasztása",
       browse: "Tallózás",
       noFile: "Nincs kiválasztva fájl",
-      upload: "Feltöltés",
-      template: "Szakos sablon letöltése"
+      upload: "Feltöltés"
     },
     en: {
       select: "Select file",
       browse: "Browse",
       noFile: "No file selected",
-      upload: "Upload",
-      template: "Download template"
+      upload: "Upload"
     }
   };
 
@@ -60,33 +55,9 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
     })();
   };
 
-  const handleTemplateDownload = async () => {
-    if (!userId) return;
-    try {
-      await download(apiUrl(`/api/progress/${userId}/template-xlsx?lang=${lang}`));
-    } catch (e) {
-      console.error(e);
-      alert(lang === "en" ? "Failed to download the template!" : "Nem sikerült letölteni a sablont!");
-    }
-  };
-
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-      <label
-        style={{
-          background: "#1976d2",
-          color: "#fff",
-          border: "none",
-          borderRadius: "6px",
-          padding: "0.3rem 0.9rem",
-          fontWeight: 500,
-          fontSize: "1rem",
-          cursor: "pointer",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 8
-        }}
-      >
+    <div className="progress-upload-inner">
+      <label className="file-btn progress-upload-browse">
         {texts[lang]?.select || "Fájl kiválasztása"}
         <input
           type="file"
@@ -96,7 +67,7 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
           onChange={handleFileChange}
         />
       </label>
-      <span>
+      <span className="progress-upload-filename">
         {fileName || texts[lang]?.noFile || "Nincs fájl"}
         {fileName && (
           <Button
@@ -106,7 +77,7 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
               setFileName("");
               if (fileInputRef.current) fileInputRef.current.value = "";
             }}
-            style={{ marginLeft: 6, minHeight: "2rem", minWidth: "2rem", padding: "0.15em 0.45em" }}
+            className="progress-upload-clear"
             variant="danger"
             size="sm"
             aria-label="Fájl törlése"
@@ -122,20 +93,10 @@ export default function FileUpload({ onUpload, accept = ".csv,.xlsx,.xls", userI
         disabled={!file}
         variant="success"
         size="md"
+        className="progress-upload-submit"
       >
         {texts[lang]?.upload || "Feltöltés"}
       </Button>
-      {userId && (
-        <Button
-          type="button"
-          onClick={handleTemplateDownload}
-          style={{ marginLeft: 8 }}
-          variant="primary"
-          size="md"
-        >
-          {texts[lang]?.template || "Szakos sablon letöltése"}
-        </Button>
-      )}
     </div>
   );
 }

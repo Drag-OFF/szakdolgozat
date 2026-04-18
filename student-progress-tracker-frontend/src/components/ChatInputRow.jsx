@@ -1,6 +1,7 @@
 import Picker from "emoji-picker-react";
 import React, { useRef, useState } from "react";
 import { useLang } from "../context/LangContext";
+import { useTheme } from "../context/ThemeContext";
 import Button from "./Button";
 export default function ChatInputRow({
   input,
@@ -20,6 +21,7 @@ export default function ChatInputRow({
   const emojiBtnRef = useRef(null);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
   const { lang } = useLang();
+  const { theme } = useTheme();
 
   const texts = {
     hu: {
@@ -39,11 +41,6 @@ export default function ChatInputRow({
       emoji: "Emoji"
     }
   };
-
-  const theme =
-    (document.body.getAttribute("data-theme") || "light") === "dark"
-      ? "dark"
-      : "light";
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

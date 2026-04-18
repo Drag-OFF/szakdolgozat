@@ -44,7 +44,7 @@ body {
     overflow: hidden;
 }
 
-:root {
+html[data-theme="light"] {
   --bg: #fff;
   --bg-user-leader: #fff;
   --panel: #fff;
@@ -63,8 +63,11 @@ body {
   --leaderboard: #f5f7fa;
   --nav: white;
   --item-hover: #d3d3d3;
+  --chat-header-bg: #f1f5f9;
+  --chat-header-text: #0f172a;
 }
-[data-theme="dark"] {
+
+html[data-theme="dark"] {
   --bg: #161616;
   --bg-user-leader: #121214;
   --panel: #121214;
@@ -83,6 +86,8 @@ body {
   --leaderboard: #23272f;
   --nav: rgb(12, 12, 12);
   --item-hover: #1976d227;
+  --chat-header-bg: #1e293b;
+  --chat-header-text: #e2e8f0;
 }
 
 /* Users sidebar */
@@ -363,7 +368,7 @@ body {
   border-radius: 1em;
 }
 
-[data-theme="dark"] .chat-emoji-picker-floating {
+html[data-theme="dark"] .chat-emoji-picker-floating {
   background: var(--panel, #23272f);
 }
 
@@ -401,14 +406,6 @@ body {
   justify-content: flex-end;
 }
 
-.chat-header-center {
-  flex: 2;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  align-items: center;
-}
-
 .chat-header-btn {
   background-color: #e3f0ff;
   background-color: transparent;
@@ -426,12 +423,12 @@ body {
   color: #fff;
 }
 
-[data-theme="dark"] .chat-header-btn {
+html[data-theme="dark"] .chat-header-btn {
   background-color: #23272f;
   color: var(--primary);
 }
 
-[data-theme="dark"] .chat-header-btn:hover {
+html[data-theme="dark"] .chat-header-btn:hover {
   background-color: #fff !important;
   color: var(--primary) !important;
 }
@@ -529,7 +526,7 @@ chat-input-controllers {
   transition: box-shadow 0.2s;
 }
 
-[data-theme="dark"] .chat-anon-checkbox {
+html[data-theme="dark"] .chat-anon-checkbox {
   box-shadow: 0 0 0 2px var(--primary, #1976d2);
   background: #23272f;
 }
@@ -683,25 +680,6 @@ chat-input-controllers {
   color: #ffb300;
   font-weight: bold;
 }
-.theme-switcher, .lang-switcher {
-  margin-left: 0.7em;
-  font-size: 1em;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 0.7em;
-  padding: 0.3em 0.8em;
-  cursor: pointer;
-  color: var(--primary);
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s, border 0.2s;
-  outline: none;
-}
-.theme-switcher:hover, .lang-switcher:hover {
-  background: var(--bubble-reply);
-  color: var(--primary-dark);
-  border-color: var(--primary);
-}
-
 /* Slide panel alap */
 .slide-panel {
   opacity: 0;
@@ -743,7 +721,7 @@ chat-input-controllers {
   z-index: 1003;
 }
 
-@media (min-width: 1001x) {
+@media (min-width: 1001px) {
   .slide-panel {
     display: none !important;
   }

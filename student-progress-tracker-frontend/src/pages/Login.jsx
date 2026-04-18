@@ -96,7 +96,8 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
+      <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h3>{texts[lang].title}</h3>
         <AuthInput
@@ -121,6 +122,7 @@ export default function Login() {
           <Link to="/forgot-password">{texts[lang].forgot}</Link>
         </div>
       </form>
+      </div>
     </div>
   );
 }

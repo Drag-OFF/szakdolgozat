@@ -1,9 +1,9 @@
 /* CourseList (hallgatói elérhető kurzusok): admin-szerű kártya + progress-toolbar kereső */
 .user-courselist-card {
-  background: #ffffff;
-  border: 1px solid #e6eef6;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--admin-card-outer-shadow);
   overflow: hidden;
   margin: 0 auto 12px auto;
   max-width: 880px;
@@ -21,9 +21,9 @@
   align-items: center;
   padding: 10px 12px;
   margin: -10px -10px 0 -10px;
-  background: linear-gradient(180deg, #f7fbff, #eef6ff);
-  border-bottom: 1px solid #e6f6ff;
-  color: #155a9a;
+  background: var(--admin-section-title-bg);
+  border-bottom: 1px solid var(--admin-toolbar-border);
+  color: var(--admin-section-title-fg);
   font-weight: 700;
   cursor: pointer;
   user-select: none;
@@ -31,7 +31,7 @@
 
 .user-courselist-header .toggle-icon {
   font-size: 1.15rem;
-  color: #0b66c3;
+  color: var(--admin-link-blue);
   font-weight: 600;
 }
 
@@ -68,7 +68,7 @@
 
 .user-courselist-empty {
   padding: 8px 4px 12px;
-  color: #5a6b7a;
+  color: var(--muted);
   font-size: 0.95rem;
 }
 
@@ -94,25 +94,25 @@
 .course-table-section {
   width: 100%;
   margin: 12px 0;
-  background: #fff;
+  background: var(--panel-bg);
   border-radius: 8px;
-  box-shadow: 0 1px 6px rgba(30,60,90,0.05);
+  box-shadow: var(--req-course-section-shadow);
   overflow: hidden;
-  border: 1px solid #e6f0fa;
+  border: 1px solid var(--panel-border);
 }
 
 /* Szekció fejlécek (lenyitható) */
 .course-table-header {
   padding: 12px 16px;
-  background: linear-gradient(180deg, #f2f9ff, #eaf4ff);
-  color: #0b66c3;
+  background: var(--admin-section-title-bg);
+  color: var(--admin-link-blue);
   font-weight: 600;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
   user-select: none;
-  border-bottom: 1px solid #e6f0fa;
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .course-table-header .toggle-icon {
@@ -136,9 +136,9 @@
 
 /* Alcsoport alcímek */
 .course-table-subheader {
-  background: linear-gradient(180deg,#fbfdff,#f4f8ff);
-  border-bottom: 1px solid #e9f3ff;
-  color: #1976d2;
+  background: var(--admin-toolbar-bg);
+  border-bottom: 1px solid var(--admin-toolbar-border);
+  color: var(--admin-link-blue);
   font-size: 1.08rem;
   font-weight: 500;
   padding: 10px 24px;
@@ -163,33 +163,33 @@
 .course-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--panel-bg);
 }
 
 .course-table th, .course-table td {
   padding: 0.7rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e3eafc;
+  border-bottom: 1px solid var(--admin-cell-divider);
   font-size: 1.05rem;
 }
 
 .course-table th {
-  background: #1976d2;
-  color: #fff;
+  background: var(--admin-thead-bg);
+  color: var(--admin-thead-fg);
   font-weight: 600;
-  border-bottom: 2px solid #1565c0;
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .course-table tr:nth-child(even) td {
-  background: #f4f8ff;
+  background: var(--admin-progress-zebra);
 }
 
 .course-table tr:hover td {
-  background: #e3eafc;
+  background: var(--admin-progress-zebra-hover);
 }
 
 .course-table td {
-  color: #222;
+  color: var(--admin-table-fg);
 }
 
 /* Kereső input */
@@ -204,19 +204,20 @@
 .course-search-input {
   width: 100%;
   height: 40px;
-  border: 1px solid #dbeaf8;
+  border: 1px solid var(--admin-input-border);
   border-radius: 6px;
   box-sizing: border-box;
   padding: 8px 10px;
   letter-spacing: 0.8px;
-  color: #222;
+  color: var(--admin-table-fg);
+  background: var(--admin-input-bg);
   font-size: 14px;
-  box-shadow: 2px 2px 10px #1976d222;
+  box-shadow: 2px 2px 10px var(--admin-table-shadow);
 }
 
 .course-search-input:focus {
-  border-color: #1976d2;
-  box-shadow: 0 0 0 2px #e3eafc88;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
 }
 
 /* Kiegészített stílusok: admin-panel jellegű fül háttér + görgetés és footer védés */
@@ -254,19 +255,13 @@
   display: inline-block;
   padding: 10px 14px;
   margin: 6px 0 12px 0;
-  background: linear-gradient(180deg, #f7fbff, #eef6ff);
-  color: #0b66c3;
+  background: var(--admin-section-title-bg);
+  color: var(--admin-section-title-fg);
   font-weight: 700;
   border-radius: 8px;
-  border: 1px solid #e6f6ff;
-  box-shadow: 0 2px 6px rgba(10,60,120,0.04);
+  border: 1px solid var(--admin-toolbar-border);
+  box-shadow: 0 2px 6px rgba(10, 60, 120, 0.04);
   line-height: 1;
-}
-
-/* Kis árnyék a lenyíló fülön belüli alcímeknek is */
-.course-table-subheader {
-  background: linear-gradient(180deg,#fbfdff,#f4f8ff);
-  border-bottom: 1px solid #e9f3ff;
 }
 
 /* ha mindkét panel (Kurzusok + Követelmények) nyitva van, a belső görgetés működik és a footernek marad hely */
@@ -309,17 +304,17 @@
   max-width: 880px;
   margin: 0 auto 16px auto;
   padding: 14px 16px;
-  background: linear-gradient(180deg, #f8fbff, #f0f6fc);
-  border: 1px solid #c9dff0;
+  background: var(--req-surface-bg);
+  border: 1px solid var(--req-surface-border);
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(10, 60, 120, 0.05);
+  box-shadow: var(--req-summary-shadow);
 }
 
 .req-group-totals-title {
   margin: 0 0 10px 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #064a8f;
+  color: var(--req-heading-fg);
 }
 
 .req-group-totals-list {
@@ -337,9 +332,9 @@
   align-items: baseline;
   gap: 8px 12px;
   padding: 8px 10px;
-  background: #fff;
+  background: var(--req-item-bg);
   border-radius: 6px;
-  border: 1px solid #e2ecf5;
+  border: 1px solid var(--req-item-border);
 }
 
 /* Több szabály egy fő kategóriában: fejléc + behúzott alcsoportok (pl. matek / sima kötvál) */
@@ -351,17 +346,17 @@
 
 .req-group-totals-group-head {
   font-weight: 700;
-  color: #064a8f;
+  color: var(--req-heading-fg);
   font-size: 0.92rem;
   padding-bottom: 4px;
-  border-bottom: 1px solid #e2ecf5;
+  border-bottom: 1px solid var(--req-group-head-border);
 }
 
 .req-group-totals-sublist {
   list-style: none;
   margin: 0;
   padding: 0 0 0 14px;
-  border-left: 3px solid #8ebce8;
+  border-left: 3px solid var(--req-nested-accent);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -373,9 +368,9 @@
   align-items: baseline;
   gap: 8px 12px;
   padding: 6px 8px;
-  background: linear-gradient(180deg, #fdfeff, #f8fbff);
+  background: var(--req-subitem-bg);
   border-radius: 6px;
-  border: 1px solid #e2ecf5;
+  border: 1px solid var(--req-subitem-border);
 }
 
 /* Szülő rule alá csatolt alcsoportok (parent_rule_code), pl. MK-DSZ → MK-DIF-* */
@@ -387,13 +382,13 @@
 
 .req-group-totals-subitem--parent {
   font-weight: 700;
-  color: #0b4f85;
+  color: var(--req-cat-fg);
 }
 
 .req-group-totals-sublist--nested {
   margin: 6px 0 0 0;
   padding: 4px 0 2px 12px;
-  border-left: 3px solid #4a90d9;
+  border-left: 3px solid var(--req-nested-accent-strong);
 }
 
 .req-group-totals-cat--sub {
@@ -405,34 +400,34 @@
 
 .req-group-totals-cat {
   font-weight: 700;
-  color: #0b4f85;
+  color: var(--req-cat-fg);
   min-width: 10rem;
 }
 
 .req-group-totals-nums {
   font-size: 0.95rem;
-  color: #333;
+  color: var(--req-nums-fg);
 }
 
 .req-group-totals-miss {
-  color: #c62828;
+  color: var(--req-miss-fg);
   font-weight: 700;
 }
 
 .req-group-totals-ok {
-  color: #5a6b7a;
+  color: var(--req-ok-muted);
   font-weight: 500;
 }
 
 .req-group-totals-over {
-  color: #0d7a3b;
+  color: var(--req-over-fg);
   font-weight: 700;
 }
 
 .req-group-totals-foot {
   margin: 10px 0 0 0;
   font-size: 0.82rem;
-  color: #6a7a88;
+  color: var(--req-foot-fg);
 }
 
 @media (max-width: 720px) {
@@ -455,10 +450,10 @@
 .req-summary {
   max-width: 880px;
   margin: 6px auto 18px auto;
-  background: linear-gradient(180deg,#ffffff,#fbfdff);
-  border: 1px solid #e6f6ff;
+  background: var(--req-summary-outer-bg);
+  border: 1px solid var(--req-summary-outer-border);
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(10,60,120,0.03);
+  box-shadow: var(--req-summary-shadow);
   overflow: hidden;
 }
 
@@ -471,38 +466,38 @@
 .req-summary-table thead th {
   text-align: left;
   padding: 10px 14px;
-  background: #eef7ff;
-  color: #0b66c3;
+  background: var(--req-summary-th-bg);
+  color: var(--req-summary-th-fg);
   font-weight: 700;
-  border-bottom: 1px solid #e6f6ff;
+  border-bottom: 1px solid var(--req-summary-cell-border);
 }
 
 .req-summary-table td {
   padding: 10px 14px;
-  border-bottom: 1px solid #f3f8ff;
-  color: #222;
+  border-bottom: 1px solid var(--req-summary-cell-border);
+  color: var(--req-summary-td-fg);
 }
 
 .req-summary-table:not(.req-summary-table--grouped) tbody tr:nth-child(even) td {
-  background: #fbfeff;
+  background: var(--req-summary-zebra);
 }
 
 .req-summary-table--grouped tbody tr.req-data-row td {
-  background: #fdfeff;
+  background: var(--req-summary-grouped-row-bg);
 }
 
 .req-summary-table .req-section-header-row td {
-  background: linear-gradient(180deg, #e3f0fb 0%, #d4e8f8 100%);
-  color: #064a8f;
+  background: var(--req-summary-section-bg);
+  color: var(--req-summary-section-fg);
   font-weight: 800;
   font-size: 0.95rem;
   letter-spacing: 0.02em;
   padding: 10px 14px;
-  border-bottom: 1px solid #c5daf0;
+  border-bottom: 1px solid var(--req-summary-section-border);
 }
 
 .req-summary-table .cat {
-  color: #0b66c3;
+  color: var(--req-summary-cat-emphasis);
   font-weight: 600;
 }
 
@@ -513,7 +508,7 @@
 }
 
 .req-summary-table .missing {
-  color: #d33;
+  color: var(--req-summary-missing);
   font-weight: 700;
 }
 
@@ -525,51 +520,56 @@
   margin-top: 4px;
   font-size: 0.8rem;
   font-weight: 400;
-  color: #5a6b7a;
+  color: var(--req-ok-muted);
   line-height: 1.3;
   max-width: 40rem;
 }
 
 .req-summary-table tr.req-rule-subgroup-row td.req-cat-indent {
-  padding-left: 1.25rem;
-  border-left: 3px solid #8ebce8;
+  padding-left: 1.6rem;
+  border-left: 3px solid var(--req-nested-accent);
 }
 
 .req-summary-table tr.req-rule-nested-parent td.cat {
   font-weight: 700;
-  color: #064a8f;
+  color: var(--req-nested-parent-fg);
 }
 
+/* Gradiens + ugyanaz a sor-háttér mint a többi cellán (különben éles „doboz” / eltérő sáv) */
 .req-summary-table tr.req-rule-nested-child td.cat.req-cat-indent-dynamic {
-  padding-left: 1.75rem;
-  border-left: 3px solid #8ebce8;
-  background: linear-gradient(90deg, rgba(142, 188, 232, 0.12) 0%, transparent 18px);
+  padding-left: 2.65rem;
+  border-left: 3px solid var(--req-nested-accent);
+  background: var(--req-indent-gradient), var(--req-summary-grouped-row-bg);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 100%, 100% 100%;
 }
 
 .req-summary-table tr.req-rule-elective-block td.req-cat-indent.req-cat-indent--deep {
-  padding-left: 2.1rem;
-  border-left: 4px solid #4a90d9;
-  background: linear-gradient(90deg, rgba(74, 144, 217, 0.07) 0%, transparent 14px);
+  padding-left: 3.1rem;
+  border-left: 4px solid var(--req-nested-accent-strong);
+  background: var(--req-elective-block-gradient), var(--req-summary-grouped-row-bg);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 100%, 100% 100%;
 }
 
 .req-summary-table tr.req-rule-elective-inner td.cat {
-  padding-left: 1.25rem;
-  border-left: 3px dashed #b0c9e0;
+  padding-left: 1.75rem;
+  border-left: 3px dashed var(--req-elective-dash-color);
 }
 
 /* Túlteljesítés: hiányzik oszlopban +x (zöld) */
 .req-over-fulfill {
-  color: #0d7a3b;
+  color: var(--req-over-fg);
   font-weight: 700;
 }
 
 .req-missing-short {
-  color: #d33;
+  color: var(--req-summary-missing);
   font-weight: 700;
 }
 
 .req-missing-ok {
-  color: #222;
+  color: var(--req-missing-ok-fg);
   font-weight: 600;
 }
 
@@ -577,22 +577,22 @@
   max-width: 880px;
   margin: 0 auto 16px auto;
   padding: 12px 14px;
-  border: 1px solid #cfe4f7;
+  border: 1px solid var(--req-spec-field-border);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--req-spec-field-bg);
   box-sizing: border-box;
 }
 
 .req-spec-fieldset legend {
   font-weight: 700;
-  color: #155a9a;
+  color: var(--req-spec-legend-fg);
   padding: 0 6px;
 }
 
 .req-spec-hint {
   margin: 0 0 10px 0;
   font-size: 0.9rem;
-  color: #4a5a68;
+  color: var(--req-spec-hint-fg);
   line-height: 1.35;
 }
 
@@ -612,13 +612,13 @@
 .req-spec-saving {
   margin-top: 8px;
   font-size: 0.88rem;
-  color: #155a9a;
+  color: var(--req-spec-saving-fg);
 }
 
 .req-spec-err {
   margin-top: 8px;
   font-size: 0.88rem;
-  color: #b00020;
+  color: var(--req-spec-err-fg);
 }
 
 /* Dinamikus mód: elérhető kurzusok a követelményfa sorrendjében (spec / differenciált alatt) */
@@ -633,23 +633,23 @@
 .req-dynamic-courselist-nested {
   margin-bottom: 10px;
   padding-left: 6px;
-  border-left: 3px solid #cfe4fb;
+  border-left: 3px solid var(--req-dynamic-nested-bar);
 }
 
 .req-rule-no-courses {
   font-size: 0.9rem;
-  color: #5a6b7a;
+  color: var(--req-ok-muted);
   margin: 0 0 10px 0;
   padding: 8px 10px;
-  background: #f8fafc;
+  background: var(--req-no-courses-bg);
   border-radius: 6px;
-  border: 1px solid #e8eef4;
+  border: 1px solid var(--req-no-courses-border);
   max-width: 880px;
 }
 
 .req-rule-no-courses-label {
   font-weight: 600;
-  color: #334155;
+  color: var(--req-no-courses-label-fg);
 }
 
 /* kisebb képernyőn sűrítjük a paddingot */

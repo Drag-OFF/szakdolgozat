@@ -1,42 +1,42 @@
-/* ProgressTable.css */
+/* ProgressTable.css — színek: app-theme.css */
 .progress-table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: var(--panel-bg);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 12px #1976d222;
+  box-shadow: 0 2px 12px var(--admin-table-shadow);
   table-layout: auto;
 }
 
 .progress-table th, .progress-table td {
   padding: 0.7rem 1rem;
   text-align: left;
-  border-bottom: 1px solid #e3eafc;
+  border-bottom: 1px solid var(--admin-cell-divider);
   font-size: 1.05rem;
   padding: 8px 10px;
-  border-top: 1px solid #f1f6fb;
+  border-top: 1px solid var(--admin-cell-divider);
   vertical-align: middle;
   box-sizing: border-box;
 }
 
 .progress-table th {
-  background: #1976d2;
-  color: #fff;
+  background: var(--admin-thead-bg);
+  color: var(--admin-thead-fg);
   font-weight: 600;
-  border-bottom: 2px solid #1565c0;
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .progress-table tr:nth-child(even) td {
-  background: #f4f8ff;
+  background: var(--admin-progress-zebra);
 }
 
 .progress-table tr:hover td {
-  background: #e3eafc;
+  background: var(--admin-progress-zebra-hover);
 }
 
 .progress-table td {
-  color: #222;
+  color: var(--admin-table-fg);
 }
 
 /* Progress search/filter input design */
@@ -72,9 +72,10 @@
 .progress-select {
   width: 210px;
   height: 50px;
-  border: 2px solid rgb(200, 200, 200);
+  border: 2px solid var(--admin-input-border);
   border-radius: 20px;
-  color: #222;
+  color: var(--admin-table-fg);
+  background: var(--admin-input-bg);
   font-size: 1rem;
   padding-left: 15px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.075);
@@ -91,8 +92,8 @@
 }
 
 .progress-select option {
-  color: #222;
-  background: #fff;
+  color: var(--admin-table-fg);
+  background: var(--panel-bg);
   border-radius: 0;
 }
 
@@ -103,17 +104,17 @@
   gap: 8px;
   cursor: pointer;
   padding: 8px 12px;
-  background: linear-gradient(180deg, #f7fbff, #eef6ff);
-  color: #0b66c3;
+  background: var(--admin-section-title-bg);
+  color: var(--admin-link-blue);
   font-weight: 700;
   border-radius: 8px;
-  border: 1px solid #e6f6ff;
-  box-shadow: 0 2px 6px rgba(10,60,120,0.04);
+  border: 1px solid var(--admin-toolbar-border);
+  box-shadow: 0 2px 6px rgba(10, 60, 120, 0.04);
   user-select: none;
   margin: 0 0 12px 0;
 }
 
-.panel-header-inline .toggle-icon { font-weight: 600; color: #0b66c3; }
+.panel-header-inline .toggle-icon { font-weight: 600; color: var(--admin-link-blue); }
 
 /* védelem: ha mindkét panel nyitva van, legyen elég hely a footer fölött (nem a teljes boxra vonatkozik) */
 .progress-tracker-container { padding-bottom: 220px; }
@@ -138,9 +139,9 @@
   padding: 10px 14px;
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--accent-dark, #155a9a);
-  background: linear-gradient(180deg, #f7fbff, #eef6ff);
-  border: 1px solid #e6f6ff;
+  color: var(--admin-section-title-fg);
+  background: var(--admin-section-title-bg);
+  border: 1px solid var(--admin-toolbar-border);
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(10, 60, 120, 0.04);
   line-height: 1.25;
@@ -167,7 +168,7 @@
   white-space: nowrap;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
   font-weight: 600;
-  color: #0b66c3;
+  color: var(--admin-link-blue);
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 110px;
@@ -246,17 +247,17 @@
   margin-bottom: 12px;
   box-sizing: border-box;
   padding: 8px 12px;
-  background: linear-gradient(180deg,#ffffff,#fbfdff);
-  border: 1px solid #e6f6ff;
+  background: var(--admin-toolbar-bg);
+  border: 1px solid var(--admin-toolbar-border);
   border-radius: 10px;
-  box-shadow: 0 1px 6px rgba(10,60,120,0.03);
+  box-shadow: 0 1px 6px rgba(10, 60, 120, 0.03);
 }
 
 /* bal oldal: kereső + feltöltés */
 .progress-toolbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0; /* lehetővé teszi a flex-gyermekek zsugorodását */
 }
 
@@ -264,13 +265,42 @@
 .progress-input-wrap {
   display: flex;
   align-items: center;
-  background: #fff;
+  background: var(--admin-input-bg);
   border-radius: 999px;
   padding: 6px;
-  box-shadow: 0 1px 4px rgba(10,60,120,0.03);
-  border: 1px solid #e9f3ff;
+  box-shadow: 0 1px 4px rgba(10, 60, 120, 0.03);
+  border: 1px solid var(--admin-input-border);
+  overflow: hidden; /* belső input ne törjön szögletesre */
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.progress-input-wrap .progress-input {
+  width: 340px;
+  max-width: min(340px, 52vw);
+  height: 36px;
+  padding: 6px 12px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: var(--admin-table-fg);
+  box-sizing: border-box;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.progress-input-wrap .progress-input:focus,
+.progress-input-wrap .progress-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.progress-input-wrap:focus-within {
+  border-color: rgba(29, 78, 216, 0.45);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.18);
+}
+
+/* régi globális .progress-input második blokk — a wrapen belüli input felülírja a szélességet */
 .progress-input {
   width: 340px;
   height: 36px;
@@ -279,7 +309,7 @@
   outline: none;
   background: transparent;
   font-size: 0.95rem;
-  color: #112;
+  color: var(--admin-table-fg);
   box-sizing: border-box;
 }
 
@@ -288,8 +318,99 @@
   margin-left: auto; /* tolja a művelet gombokat a sor jobb szélére */
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
+}
+
+/* Vizuális csoportok: kereső | feltöltés | letöltés — nem olvadnak össze */
+.progress-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--admin-toolbar-border);
+  background: var(--admin-toolbar-bg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.progress-toolbar-group--search {
+  flex: 0 1 auto;
+}
+
+.progress-toolbar-group--files {
+  flex: 1 1 280px;
+}
+
+.progress-toolbar-group--download {
+  padding: 4px 8px;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.progress-upload-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+}
+
+.progress-upload-filename {
+  flex: 1 1 120px;
+  min-width: 0;
+  font-size: 0.92rem;
+  color: var(--admin-table-fg);
+}
+
+.progress-upload-browse {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.progress-upload-clear.ui-btn {
+  min-height: 2rem;
+  min-width: 2rem;
+  padding: 0.15em 0.45em;
+  margin-left: 6px;
+}
+
+.progress-toolbar-download-btn.ui-btn {
+  height: 36px;
+  min-width: 160px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Előrehaladás toolbar: sötétben jobban elkülönülő elsődleges / siker gombok */
+html[data-theme="dark"] .progress-toolbar .ui-btn--primary:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .progress-toolbar .ui-btn--success:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.42),
+    0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .progress-toolbar .ui-btn--success:disabled {
+  opacity: 1;
+  filter: saturate(0.65);
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.22);
+}
+
+html[data-theme="dark"] .progress-toolbar-group {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* fájl feltöltő wrapper */
@@ -298,12 +419,21 @@
   align-items: center;
   gap: 8px;
   padding: 6px 10px;
-  background: linear-gradient(180deg,#ffffff,#f6fbff);
-  border: 1px solid #e6f6ff;
+  background: var(--admin-toolbar-bg);
+  border: 1px solid var(--admin-toolbar-border);
   border-radius: 10px;
-  box-shadow: 0 1px 4px rgba(10,60,120,0.03);
-  color: #0b66c3;
+  box-shadow: 0 1px 4px rgba(10, 60, 120, 0.03);
+  color: var(--admin-link-blue);
   font-weight: 600;
+}
+
+/* Toolbar csoport már kap keretet — ne legyen dupla doboz a filewrap-on */
+.progress-toolbar-group .progress-filewrap {
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--admin-link-blue);
 }
 
 /* kiegészítések a fájl kiválasztó kinézetéhez */
@@ -311,7 +441,7 @@
 
 /* ha nincs még ilyen, biztosítsunk erősebb gomb hátteret */
 .progress-filewrap .file-btn {
-  background: linear-gradient(180deg,#1976d2,#1565c0);
+  background: linear-gradient(180deg, var(--admin-th-solid), var(--admin-th-solid-border));
   color: #fff;
   padding: 6px 12px;
   border-radius: 8px;
@@ -324,7 +454,7 @@
 /* megjelenítjük a kiválasztott fájl nevét, rövidebbre vágva */
 .progress-filewrap .file-name {
   margin-left: 10px;
-  color: #234;
+  color: var(--admin-table-fg);
   font-size: 0.95rem;
   max-width: 260px;
   overflow: hidden;
@@ -355,7 +485,11 @@
     width: 100%;
     justify-content: space-between;
   }
-  .progress-input { width: 60%; min-width: 180px; }
+  .progress-input-wrap .progress-input {
+    width: 100%;
+    min-width: 180px;
+    max-width: none;
+  }
   .progress-toolbar-actions { margin-left: 0; justify-content: flex-end; width: 100%; }
   .progress-filewrap { width: 100%; justify-content: flex-start; }
 }
@@ -372,4 +506,126 @@
   .progress-tracker-container {
     padding-top: calc(var(--app-navbar-height, 56px) + 8px);
   }
+}
+
+/* Régi „világos” kereső-doboz: sötét témában illeszkedjen */
+html[data-theme="dark"] .progress-input-container {
+  background: var(--admin-input-bg);
+  border: 1px solid var(--admin-input-border);
+  box-shadow: none;
+}
+
+html[data-theme="dark"] .progress-input-container .progress-input {
+  color: var(--admin-table-fg);
+  caret-color: var(--accent);
+}
+
+/* Kereső: sötétben lekerekített fókuszgyűrű (ne legyen szögletes outline) */
+html[data-theme="dark"] .progress-input-wrap:focus-within {
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+/* Haladás / admin: fájl drop zóna */
+.progress-drop-zone {
+  border: 2px dashed var(--admin-input-border);
+  border-radius: 8px;
+  padding: 18px;
+  text-align: center;
+  background: var(--panel-bg);
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.progress-drop-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--admin-row-hover);
+}
+
+.progress-panel-user-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+}
+
+.progress-error-cell {
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .progress-error-cell {
+  color: #f87171;
+}
+
+.progress-muted-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.progress-file-status--ok {
+  font-size: 12px;
+  color: #15803d;
+}
+
+html[data-theme="dark"] .progress-file-status--ok {
+  color: #4ade80;
+}
+
+.progress-file-status--bad {
+  font-size: 12px;
+  color: #b91c1c;
+}
+
+html[data-theme="dark"] .progress-file-status--bad {
+  color: #f87171;
+}
+
+.progress-panel-toolbar-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.progress-panel-search-field {
+  flex: 1;
+  min-width: 240px;
+}
+
+.progress-panel-search-field .progress-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.progress-panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.progress-drop-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-drop-file-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-drop-remove-btn {
+  margin-left: 12px;
+}
+
+.progress-drop-assign-wrap {
+  margin-top: 6px;
+}
+
+.progress-drop-title {
+  margin-bottom: 6px;
 }

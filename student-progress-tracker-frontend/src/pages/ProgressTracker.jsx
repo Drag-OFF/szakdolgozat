@@ -11,6 +11,7 @@ import "../styles/AdminPanels.css";
 import { apiUrl } from "../config";
 import { getUserObject, getAccessToken } from "../authStorage";
 import Button from "../components/Button";
+import useFileDownload from "../hooks/useFileDownload";
 
 const COURSES_PAGE_SIZE = 10;
 
@@ -26,6 +27,7 @@ export default function ProgressTracker() {
   const [coursesPage, setCoursesPage] = useState(0);
   const { lang } = useLang(); // <-- aktuális nyelv
   const t = PROGRESS_TRACKER_LABELS[lang] || PROGRESS_TRACKER_LABELS.hu;
+  const { download } = useFileDownload();
 
   useEffect(() => {
     if (!user.id) return;
@@ -68,6 +70,15 @@ export default function ProgressTracker() {
     );
   }, [filtered.length, coursesTotalPages]);
 
+  const handleTemplateDownload = async () => {
+    try {
+      await download(apiUrl(`/api/progress/${user.id}/template-xlsx?lang=${lang}`));
+    } catch (e) {
+      console.error(e);
+      alert(t.templateDownloadFailed);
+    }
+  };
+
   return (
     <div className="progress-tracker-container progress-tracker-layout">
       <section className="admin-card">
@@ -75,57 +86,71 @@ export default function ProgressTracker() {
           <h2 className="progress-section-title">{t.coursesTitle}</h2>
           <div className="progress-toolbar">
             <div className="progress-toolbar-left">
-              <div className="progress-input-wrap">
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder}
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="progress-input"
-                />
+              <div className="progress-toolbar-group progress-toolbar-group--search">
+                <div className="progress-input-wrap">
+                  <input
+                    type="text"
+                    placeholder={t.searchPlaceholder}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="progress-input"
+                    autoComplete="off"
+                  />
+                </div>
               </div>
-              <div className="progress-filewrap">
-                <FileUpload
-                  userId={user.id}
-                  lang={lang}
-                  onUpload={async (file) => {
-                    const formData = new FormData();
-                    formData.append("file", file);
-                    try {
-                      const res = await authFetch(
-                        apiUrl(`/api/progress/${user.id}/import?lang=${lang}`),
-                        {
-                          method: "POST",
-                          headers: {
-                            Authorization: `Bearer ${getAccessToken()}`,
-                          },
-                          body: formData,
+              <div className="progress-toolbar-group progress-toolbar-group--files">
+                <div className="progress-filewrap">
+                  <FileUpload
+                    userId={user.id}
+                    lang={lang}
+                    onUpload={async (file) => {
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      try {
+                        const res = await authFetch(
+                          apiUrl(`/api/progress/${user.id}/import?lang=${lang}`),
+                          {
+                            method: "POST",
+                            headers: {
+                              Authorization: `Bearer ${getAccessToken()}`,
+                            },
+                            body: formData,
+                          }
+                        );
+                        const data = await res.json();
+                        if (!res.ok) {
+                          console.error("Import failed:", data);
+                          alert(t.uploadFailed);
+                          return;
                         }
-                      );
-                      const data = await res.json();
-                      if (!res.ok) {
-                        console.error("Import failed:", data);
+                        const fullRes = await authFetch(
+                          apiUrl(`/api/progress/${user.id}/full?lang=${lang}`),
+                          { headers: { Authorization: `Bearer ${getAccessToken()}` } }
+                        );
+                        const fullData = await fullRes.json();
+                        setProgressFull(Array.isArray(fullData) ? fullData : []);
+                        alert(t.uploadSuccess);
+                      } catch (err) {
+                        console.error("Upload error:", err);
                         alert(t.uploadFailed);
-                        return;
                       }
-                      const fullRes = await authFetch(
-                        apiUrl(`/api/progress/${user.id}/full?lang=${lang}`),
-                        { headers: { Authorization: `Bearer ${getAccessToken()}` } }
-                      );
-                      const fullData = await fullRes.json();
-                      setProgressFull(Array.isArray(fullData) ? fullData : []);
-                      alert(t.uploadSuccess);
-                    } catch (err) {
-                      console.error("Upload error:", err);
-                      alert(t.uploadFailed);
-                    }
-                  }}
-                />
+                    }}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="progress-toolbar-actions">
-              <div className="action-btn">
+              <div className="progress-toolbar-group progress-toolbar-group--download">
+                <Button
+                  type="button"
+                  onClick={handleTemplateDownload}
+                  variant="primary"
+                  size="sm"
+                  className="btn-compact progress-toolbar-download-btn"
+                >
+                  {t.downloadTemplate}
+                </Button>
                 <DownloadProgressButton userId={user.id} />
               </div>
             </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import AuthInput from "./AuthInput";
 import { isValidEmail } from "../utils";
 import { useLang } from "../context/LangContext";
+import "../styles/Auth.css";
 
 export default function EmailActionForm({
   apiUrl,
@@ -35,6 +36,7 @@ export default function EmailActionForm({
   }
 
   return (
+    <div className="auth-page">
     <div className="auth-container" style={{ justifyContent: "center", alignItems: "center" }}>
       <form className="auth-form" onSubmit={handleSubmit} style={{ margin: "0 auto" }}>
         <h3>{texts[lang].title}</h3>
@@ -50,6 +52,7 @@ export default function EmailActionForm({
         <button type="submit" disabled={sent}>{texts[lang].btn}</button>
         <div className="auth-msg">{msg}</div>
       </form>
+    </div>
     </div>
   );
 }

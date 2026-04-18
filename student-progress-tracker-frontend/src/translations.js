@@ -312,12 +312,54 @@ export const COURSE_RECOMMENDER_LABELS = {
 export const HOME_LABELS = {
   hu: {
     title: "Hallgatói előrehaladás-követő",
-    subtitle: "Üdvözlünk a szakdolgozati projekt főoldalán!"
+    lead:
+      "Egyetemi hallgatóknak készült webes alkalmazás a tanulmányi előrehaladás átlátható követésére — a mintatantervhez és a szakodhoz tartozó követelmény-szabályokhoz igazítva.",
+    langAria: "Nyelv választása",
+    langHu: "Magyar",
+    langEn: "English",
+    aboutTitle: "Miről szól ez az oldal?",
+    aboutText:
+      "A rendszer összekapcsolja a kurzusokat, a szakhoz rendelt követelmény-szabályokat és a hallgató által rögzített teljesítéseket. Egy helyen láthatod, miből mennyi van még hátra, és hogyan illeszkednek a tantárgyaid a szabályokhoz. A fejlesztés egy BSc szakdolgozat keretében készült: célja bemutatni, hogyan lehet a Neptunhoz és a tantervi struktúrához kapcsolódó adatokat felhasználni egy követhető, interaktív felületen.",
+    userTitle: "Mit tudsz a hallgatói felületről?",
+    userItems: [
+      "Regisztráció és bejelentkezés, e-mail megerősítés, profil és jelszó kezelése.",
+      "Előrehaladás-követés: teljesített és folyamatban lévő kurzusok, kredit- és követelmény-szempontú áttekintés a választott szakhoz.",
+      "Szakonkénti chat: üzenetek és reakciók a hallgatótársakkal.",
+      "Kurzusajánló: a haladásod és a követelmény-szabályok alapján személyre szabott javaslatok.",
+      "A felület magyar és angol nyelven használható; a nyelvet itt felül, illetve a menüben is válthatod.",
+    ],
+    adminTitle: "Adminisztráció (nem hallgatói szerepkör)",
+    adminText:
+      "Külön jogosultsággal elérhetők tanterv- és adatkezelő funkciók (például mintatanterv import, PDF-alapú ellenőrzések). Ezek a szakdolgozatban bemutatott háttér-folyamatok részei; a mindennapi hallgatói használat a fenti funkciókra épül.",
+    thesisTitle: "A szakdolgozat és a technikai keret",
+    thesisText:
+      "A munka egy önálló webalkalmazást valósít meg: a böngészőben futó React-alapú felület egy FastAPI háttér-szolgáltatással és relációs adatbázissal kommunikál. A téma a tanulmányi haladás modellezése, megjelenítése és — jogosultságtól függően — tantervi adatok betöltése köré épül.",
   },
   en: {
     title: "Student Progress Tracker",
-    subtitle: "Welcome to the thesis project's home page!"
-  }
+    lead:
+      "A web application for university students who want a clear view of academic progress — aligned with the curriculum structure and major-specific requirement rules.",
+    langAria: "Choose language",
+    langHu: "Magyar",
+    langEn: "English",
+    aboutTitle: "What is this site?",
+    aboutText:
+      "The app connects courses, major requirement rules, and the progress you record. In one place you can see what is still outstanding and how your subjects map onto the rules. It was built as part of a BSc thesis to show how Neptun-related and curriculum data can power an interactive, trackable interface.",
+    userTitle: "What can you do as a student?",
+    userItems: [
+      "Sign up and sign in, verify your email, manage your profile and password.",
+      "Track progress: completed and in-progress courses, with a credit- and requirement-oriented overview for your major.",
+      "Major-scoped chat: messages and reactions with fellow students.",
+      "Course recommendations tailored to your progress and requirement rules.",
+      "The UI is available in Hungarian and English; switch language here at the top or from the navigation bar.",
+    ],
+    adminTitle: "Administration (non-student role)",
+    adminText:
+      "Separate privileged tools exist for curriculum and data maintenance (e.g. syllabus import, PDF-based checks). They are part of the thesis demo’s back-office workflows; everyday student use is centred on the features above.",
+    thesisTitle: "Thesis scope and stack",
+    thesisText:
+      "The project delivers a standalone web app: a React front end talks to a FastAPI backend and a relational database. The work focuses on modelling and presenting study progress, and — where authorised — loading curricular data.",
+  },
 };
 
 export const PROFILE_LABELS = {
@@ -397,7 +439,9 @@ export const PROGRESS_TRACKER_LABELS = {
     prev: "Előző",
     page: "Oldal",
     next: "Következő",
-    total: "rekord összesen"
+    total: "rekord összesen",
+    downloadTemplate: "Szakos sablon letöltése",
+    templateDownloadFailed: "Nem sikerült letölteni a sablont!"
   },
   en: {
     loginRequired: "Sign in to view your progress!",
@@ -410,6 +454,8 @@ export const PROGRESS_TRACKER_LABELS = {
     prev: "Prev",
     page: "Page",
     next: "Next",
-    total: "records total"
+    total: "records total",
+    downloadTemplate: "Download major template",
+    templateDownloadFailed: "Failed to download the template!"
   }
 };

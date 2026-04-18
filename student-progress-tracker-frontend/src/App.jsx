@@ -17,12 +17,14 @@ import AdminTantervEditor from "./pages/AdminTantervEditor";
 import AdminTantervPlanEditor from "./pages/AdminTantervPlanEditor";
 import AdminProgressPdfCheck from "./pages/AdminProgressPdfCheck";
 import { LangProvider } from "./context/LangContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import "./App.css";
 
 export default function App() {
   const location = useLocation();
 
   return (
+    <ThemeProvider>
     <LangProvider>
       <div className="app-wrapper">
         <Navbar />
@@ -48,5 +50,6 @@ export default function App() {
         {location.pathname !== "/chat" && <Footer />}
       </div>
     </LangProvider>
+    </ThemeProvider>
   );
 }

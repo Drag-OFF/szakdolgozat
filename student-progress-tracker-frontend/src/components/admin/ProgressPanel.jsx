@@ -172,8 +172,8 @@ export default function ProgressPanel() {
     <div className="admin-panel" style={{ padding: 12 }}>
       <h3>{t.title}</h3>
 
-      <div style={{ display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 12, flexWrap: "wrap" }}>
-        <div className="admin-form-field" style={{ flex: 1, minWidth: 240 }}>
+      <div className="progress-panel-toolbar-row">
+        <div className="admin-form-field progress-panel-search-field">
           <label className="admin-form-label">
             {t.searchLabel}
             <span className="admin-form-col-hint">{t.searchHint}</span>
@@ -183,10 +183,9 @@ export default function ProgressPanel() {
             placeholder={t.searchPlaceholder}
             value={query}
             onChange={e => setQuery(e.target.value)}
-            style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
           />
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="progress-panel-actions">
           <Button onClick={() => { if (!selectedId) return alert(t.chooseUser); downloadTemplateFor(selectedId); }} disabled={!selectedId || loadingTemplate} variant="primary" size="sm">
             {loadingTemplate ? t.downloading : t.downloadTemplate}
           </Button>
@@ -194,26 +193,26 @@ export default function ProgressPanel() {
         </div>
       </div>
 
-      <div style={{ border: "1px solid #eee", maxHeight: 300, overflowY: "auto", marginBottom: 12 }}>
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead style={{ position: "sticky", top: 0, background: "#fafafa" }}>
+      <div className="progress-table-wrapper progress-panel-user-scroll">
+        <table className="progress-table">
+          <thead>
             <tr>
-              <th style={{ textAlign: "left", padding: 8, width: 60 }}>#</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{lang === "hu" ? "Név" : "Name"}</th>
-              <th style={{ textAlign: "left", padding: 8, width: 140 }}>{lang === "hu" ? "Neptun" : "Neptun"}</th>
-              <th style={{ textAlign: "left", padding: 8, width: 160 }}>{lang === "hu" ? "Szak" : "Major"}</th>
-              <th style={{ textAlign: "left", padding: 8, width: 88 }}>{t.colSpec}</th>
-              <th style={{ textAlign: "left", padding: 8 }}>{lang === "hu" ? "Email" : "Email"}</th>
-              <th style={{ textAlign: "left", padding: 8, width: 160 }}>{lang === "hu" ? "Létrehozva" : "Created"}</th>
+              <th style={{ width: 60 }}>#</th>
+              <th>{lang === "hu" ? "Név" : "Name"}</th>
+              <th style={{ width: 140 }}>{lang === "hu" ? "Neptun" : "Neptun"}</th>
+              <th style={{ width: 160 }}>{lang === "hu" ? "Szak" : "Major"}</th>
+              <th style={{ width: 88 }}>{t.colSpec}</th>
+              <th>{lang === "hu" ? "Email" : "Email"}</th>
+              <th style={{ width: 160 }}>{lang === "hu" ? "Létrehozva" : "Created"}</th>
             </tr>
           </thead>
           <tbody>
             {loadingUsers ? (
-              <tr><td colSpan={7} style={{ padding: 8 }}>{t.loadingUsers}</td></tr>
+              <tr><td colSpan={7}>{t.loadingUsers}</td></tr>
             ) : loadError ? (
-              <tr><td colSpan={7} style={{ padding: 8, color: "darkred" }}>{t.loadErrorPrefix} {String(loadError)}</td></tr>
+              <tr><td colSpan={7} className="progress-error-cell">{t.loadErrorPrefix} {String(loadError)}</td></tr>
             ) : filtered.length === 0 ? (
-              <tr><td colSpan={7} style={{ padding: 8 }}>{t.noResults}</td></tr>
+              <tr><td colSpan={7}>{t.noResults}</td></tr>
             ) : filtered.map((u, i) => {
               const id = u?.id ?? u?.user_id ?? String(i);
               const isSel = String(id) === String(selectedId);
@@ -224,15 +223,15 @@ export default function ProgressPanel() {
                   onClick={() => selectRow(id)}
                   style={{ cursor: "pointer" }}
                 >
-                  <td style={{ padding: 8 }}>{id}</td>
-                  <td style={{ padding: 8 }}>{u?.name || "-"}</td>
-                  <td style={{ padding: 8 }}>{u?.uid || "-"}</td>
-                  <td style={{ padding: 8 }}>{u?.major || "-"}</td>
-                  <td style={{ padding: 8, fontSize: 13 }} title={u?.chosen_specialization_code || ""}>
+                  <td>{id}</td>
+                  <td>{u?.name || "-"}</td>
+                  <td>{u?.uid || "-"}</td>
+                  <td>{u?.major || "-"}</td>
+                  <td style={{ fontSize: 13 }} title={u?.chosen_specialization_code || ""}>
                     {formatChosenSpecDisplay(u?.chosen_specialization_code, lang)}
                   </td>
-                  <td style={{ padding: 8 }}>{u?.email || "-"}</td>
-                  <td style={{ padding: 8 }}>{fmtDate(u?.created_at)}</td>
+                  <td>{u?.email || "-"}</td>
+                  <td>{fmtDate(u?.created_at)}</td>
                 </tr>
               );
             })}
@@ -242,44 +241,36 @@ export default function ProgressPanel() {
 
       <div
         ref={dropRef}
+        className="progress-drop-zone"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        style={{
-          border: "2px dashed #ccc",
-          borderRadius: 8,
-          padding: 18,
-          textAlign: "center",
-          background: "#fafafa",
-          marginBottom: 12,
-          cursor: "pointer"
-        }}
         title={t.dropHint}
         onClick={() => document.getElementById("progress-file-input")?.click()}
       >
         {file ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="progress-drop-inner">
+            <div className="progress-drop-file-row">
               <strong>{file.name}</strong>
-              <Button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); setFileOwner(null); }} style={{ marginLeft: 12 }} variant="danger" size="sm">{t.removeFile}</Button>
+              <Button type="button" onClick={(e) => { e.stopPropagation(); setFile(null); setFileOwner(null); }} className="progress-drop-remove-btn" variant="danger" size="sm">{t.removeFile}</Button>
             </div>
             {fileOwner ? (
-              <div style={{ fontSize: 12, color: fileOwner === selectedId ? "#080" : "#a00" }}>
+              <div className={fileOwner === selectedId ? "progress-file-status--ok" : "progress-file-status--bad"}>
                 {fileOwner === selectedId ? t.fileAssignedTo.replace("{id}", fileOwner) : t.fileAssignedOther.replace("{id}", fileOwner)}
               </div>
             ) : (
-              <div style={{ fontSize: 12, color: "#666" }}>{selectedId ? t.dropSubSelected : t.dropSubNoSelect}</div>
+              <div className="progress-muted-hint">{selectedId ? t.dropSubSelected : t.dropSubNoSelect}</div>
             )}
             {fileOwner && String(fileOwner) !== String(selectedId) && (
-              <div style={{ marginTop: 6 }}>
+              <div className="progress-drop-assign-wrap">
                 <Button onClick={(e) => { e.stopPropagation(); setFileOwner(selectedId); }} variant="warning" size="sm">{t.assignToSelected}</Button>
               </div>
             )}
           </div>
         ) : (
           <div>
-            <div style={{ marginBottom: 6 }}>{t.dropHint}</div>
-            <div style={{ fontSize: 12, color: "#666" }}>{selectedId ? t.dropSubSelected : t.dropSubNoSelect}</div>
+            <div className="progress-drop-title">{t.dropHint}</div>
+            <div className="progress-muted-hint">{selectedId ? t.dropSubSelected : t.dropSubNoSelect}</div>
           </div>
         )}
         <input id="progress-file-input" type="file" accept=".xlsx,.xls,.csv" style={{ display: "none" }} onChange={e => handleFileChange(e.target.files?.[0] ?? null)} />

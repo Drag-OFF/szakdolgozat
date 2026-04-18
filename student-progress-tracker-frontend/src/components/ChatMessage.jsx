@@ -2,6 +2,7 @@ import { shortMsg, getUserName, findMessageById, groupReactions, formatDate } fr
 import Picker from "emoji-picker-react";
 import React, { useState, useEffect } from "react";
 import { useLang } from "../context/LangContext";
+import { useTheme } from "../context/ThemeContext";
 import Button from "./Button";
 
 export default function ChatMessage({
@@ -19,6 +20,7 @@ export default function ChatMessage({
   userName
 }) {
   const { lang } = useLang();
+  const { theme } = useTheme();
 
   const texts = {
     hu: {
@@ -42,11 +44,6 @@ export default function ChatMessage({
   const repliedMsg = msg.reply_to_id ? findMessageById(messages, msg.reply_to_id) : null;
   const [hovered, setHovered] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-
-  const theme =
-    (document.body.getAttribute("data-theme") || "light") === "dark"
-      ? "dark"
-      : "light";
 
   function handleReactionBtn(e) {
     const pickerWidth = 350;

@@ -9,6 +9,7 @@ import MajorRequirementsPanel from "./MajorRequirementsPanel";
 import MajorsPanel from "./MajorsPanel";
 import "../../styles/ProgressTable.css";
 import "../../styles/AdminPanels.css"; // <-- import the card styles globally for admin
+import "../../styles/AdminDashboard.css";
 import { useLang } from "../../context/LangContext";
 
 export default function AdminDashboard() {
@@ -25,28 +26,17 @@ export default function AdminDashboard() {
   const toggle = (k) => setOpen(o => ({ ...o, [k]: !o[k] }));
 
   return (
-    <div style={{ padding: 12, marginBottom: 48 }}>
+    <div className="admin-dashboard">
       <h1 className="panel-header-inline admin-title">
         {lang === "en" ? "Admin panel" : "Admin felület"}
       </h1>
 
       <section className="admin-card" style={{ marginBottom: 12 }}>
-        <div className="admin-card-body" style={{ padding: "12px 16px" }}>
-          <Link
-            to="/admin/pdf-import"
-            style={{
-              display: "inline-block",
-              padding: "10px 16px",
-              borderRadius: 8,
-              background: "#0f766e",
-              color: "#fff",
-              fontWeight: 700,
-              textDecoration: "none",
-            }}
-          >
+        <div className="admin-card-body admin-quick-card-body">
+          <Link to="/admin/pdf-import" className="admin-quick-link admin-quick-link--teal">
             {lang === "en" ? "Neptun curriculum import (PDF / tanterv)" : "Neptun mintatanterv import (PDF / tanterv)"}
           </Link>
-          <p style={{ margin: "10px 0 0", color: "#57534e", fontSize: 14 }}>
+          <p className="admin-quick-hint">
             {lang === "en"
               ? "Expand the public Neptun table (+ rows) and import courses & requirement rules into the database."
               : "Nyilvános Neptun tanterv lenyitása („+” sorok), kurzusok és követelmény szabályok importálása."}
@@ -55,22 +45,11 @@ export default function AdminDashboard() {
       </section>
 
       <section className="admin-card" style={{ marginBottom: 12 }}>
-        <div className="admin-card-body" style={{ padding: "12px 16px" }}>
-          <Link
-            to="/admin/progress-pdf-check"
-            style={{
-              display: "inline-block",
-              padding: "10px 16px",
-              borderRadius: 8,
-              background: "#1d4ed8",
-              color: "#fff",
-              fontWeight: 700,
-              textDecoration: "none",
-            }}
-          >
+        <div className="admin-card-body admin-quick-card-body">
+          <Link to="/admin/progress-pdf-check" className="admin-quick-link admin-quick-link--blue">
             {lang === "en" ? "PDF what-if progress check" : "PDF mi-lenne-ha progress ellenőrzés"}
           </Link>
-          <p style={{ margin: "10px 0 0", color: "#57534e", fontSize: 14 }}>
+          <p className="admin-quick-hint">
             {lang === "en"
               ? "Analyze one or more student PDFs without saving, and see whether diploma requirements would be complete."
               : "Egy vagy több hallgatói PDF elemzése mentés nélkül: teljesülnének-e a diploma követelményei."}
@@ -114,9 +93,9 @@ export default function AdminDashboard() {
             {lang === "en" ? "Courses" : "Kurzusok"} <span className="toggle-icon">{open.courses ? "▲" : "▼"}</span>
           </header>
            {open.courses && (
-             <div style={{ paddingLeft: 8 }}>
+             <div className="admin-courses-nested">
                <CoursesPanel />
-               <div style={{ height: 12 }} />
+               <div className="admin-spacer-h12" />
               <header
                 className="panel-header-inline"
                 onClick={() => toggle("courseMajor")}
@@ -125,7 +104,7 @@ export default function AdminDashboard() {
                 {lang === "en" ? "Course-major mappings" : "Kurzus-szak kapcsolatok"} <span className="toggle-icon">{open.courseMajor ? "▲" : "▼"}</span>
               </header>
                {open.courseMajor && <CourseMajorPanel />}
-               <div style={{ height: 12 }} />
+               <div className="admin-spacer-h12" />
               <header
                 className="panel-header-inline"
                 onClick={() => toggle("equivalences")}
@@ -167,7 +146,7 @@ export default function AdminDashboard() {
       </section>
 
         {/* Extra space to prevent footer overlap */}
-        <div style={{ height: 64 }} />
+        <div className="admin-footer-spacer" />
       
     </div>
   );

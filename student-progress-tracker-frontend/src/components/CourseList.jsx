@@ -73,15 +73,17 @@ export default function CourseList({ courses, title, defaultOpen, setDefaultOpen
           <div className="user-courselist-body">
             <div className="progress-toolbar user-courselist-toolbar">
               <div className="progress-toolbar-left">
-                <div className="progress-input-wrap">
-                  <input
-                    type="search"
-                    className="progress-input"
-                    placeholder={t.search}
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    aria-label={t.search}
-                  />
+                <div className="progress-toolbar-group progress-toolbar-group--search">
+                  <div className="progress-input-wrap">
+                    <input
+                      type="search"
+                      className="progress-input"
+                      placeholder={t.search}
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      aria-label={t.search}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

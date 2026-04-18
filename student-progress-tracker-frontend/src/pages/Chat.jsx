@@ -141,14 +141,6 @@ export default function Chat() {
   const admins = users.filter(u => u.role === "admin");
   const normalUsers = users.filter(u => u.role !== "admin");
 
-  function toggleTheme() {
-    const body = document.body;
-    body.setAttribute(
-      "data-theme",
-      body.getAttribute("data-theme") === "dark" ? "light" : "dark"
-    );
-  }
-
   useEffect(() => {
     const el = chatListRef.current;
     if (!el) return;
@@ -179,19 +171,6 @@ export default function Chat() {
               <span />
               <span />
               <span />
-            </Button>
-            <div className={`navbar-links`}></div>
-          </div>
-
-          <div className="chat-header-center">
-            <Button
-              className="chat-header-btn"
-              onClick={toggleTheme}
-              title={lang === "en" ? "Toggle theme" : "Téma váltás"}
-              variant="ghost"
-              size="sm"
-            >
-              🌙 / ☀️
             </Button>
           </div>
 

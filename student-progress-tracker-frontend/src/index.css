@@ -1,13 +1,50 @@
-html, body, #root, .app-wrapper {
-  min-height: 100vh;
-  height: 100%;
+@import "./styles/app-theme.css";
+
+html, body, #root {
   max-width: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* Ne legyen height:100% a láncon: a flex main fix magasságú maradna, a footer a „viewport alja”
+   után jönne, és a hosszú tartalommal együtt a lábléc a tartalom közepére csúszna / ráfogna. */
+body {
+  min-height: 100vh;
+  background-color: var(--app-page-bg);
+  color: var(--app-page-text);
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--app-page-bg);
+}
+
+html::-webkit-scrollbar {
+  width: 10px;
+}
+html::-webkit-scrollbar-track {
+  background: var(--app-page-bg);
+}
+html::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+}
+
+#root {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-main {
+.app-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+
+main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
 }

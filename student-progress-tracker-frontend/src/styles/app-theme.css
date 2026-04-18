@@ -1,0 +1,230 @@
+/* Globális téma: html[data-theme] — Chat, admin táblák, progress, követelmények. */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  /* Egységes, mély sötét: kevés „fehér kártya” érzet */
+  --app-page-bg: #020617;
+  --app-page-text: #e2e8f0;
+  --app-footer-bg: #020617;
+  --app-footer-text: #94a3b8;
+  --scrollbar-thumb: #475569;
+
+  /* Admin / táblázat / panel */
+  --accent: #38bdf8;
+  --accent-dark: #bae6fd;
+  --panel-bg: #0c1424;
+  --panel-border: rgba(148, 163, 184, 0.14);
+  --row-alt: rgba(255, 255, 255, 0.03);
+  --muted: #94a3b8;
+
+  --admin-thead-bg: #070d18;
+  --admin-thead-fg: #94a3b8;
+  --admin-table-fg: #e2e8f0;
+  --admin-cell-divider: rgba(51, 65, 85, 0.55);
+  --admin-row-hover: rgba(56, 189, 248, 0.1);
+  --admin-selected-row-bg: rgba(59, 130, 246, 0.32);
+  --admin-selected-row-bg-hover: rgba(59, 130, 246, 0.42);
+  --admin-selected-row-text: #f8fafc;
+  --admin-selected-bar: #38bdf8;
+  --admin-input-bg: #0f172a;
+  --admin-input-border: rgba(148, 163, 184, 0.38);
+  --admin-btn-bg: #1e293b;
+  --admin-btn-border: rgba(56, 189, 248, 0.35);
+  --admin-btn-fg: var(--accent-dark);
+  --admin-card-outer-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
+  --admin-nav-active-bg: #0ea5e9;
+  --admin-nav-active-fg: #0f172a;
+  --admin-nav-inactive-bg: #0c1424;
+  --admin-nav-inactive-fg: #e2e8f0;
+  --admin-sub-btn-bg: #0a101c;
+  --admin-accordion-bg: #0c1424;
+  --admin-accordion-fg: #e2e8f0;
+  --admin-sub-header-bg: rgba(15, 23, 42, 0.9);
+  --admin-sub-header-border: rgba(148, 163, 184, 0.22);
+  --admin-yellow-row: rgba(234, 179, 8, 0.28);
+  --admin-yellow-row-text: #fef9c3;
+  --admin-toolbar-bg: #0c1424;
+  --admin-toolbar-border: rgba(148, 163, 184, 0.16);
+  --admin-section-title-bg: #0c1424;
+  --admin-section-title-fg: #cbd5e1;
+  --admin-link-blue: #7dd3fc;
+  --admin-table-shadow: rgba(0, 0, 0, 0.45);
+  --admin-progress-zebra: rgba(30, 41, 59, 0.65);
+  --admin-progress-zebra-hover: rgba(56, 189, 248, 0.12);
+  /* Haladás oldal táblázat fejléc: visszafogott, nem neon */
+  --admin-th-solid: #0c4a6e;
+  --admin-th-solid-border: rgba(56, 189, 248, 0.25);
+
+  /* Követelmények állapota — gyors összegzés + összesítő tábla */
+  --req-surface-bg: linear-gradient(180deg, #0c1424 0%, #0a101c 100%);
+  --req-surface-border: rgba(100, 116, 139, 0.38);
+  --req-item-bg: #0f172a;
+  --req-item-border: rgba(148, 163, 184, 0.2);
+  --req-group-head-border: rgba(148, 163, 184, 0.22);
+  --req-heading-fg: #bae6fd;
+  --req-subitem-bg: rgba(15, 23, 42, 0.55);
+  --req-subitem-border: rgba(148, 163, 184, 0.18);
+  --req-nested-accent: rgba(56, 189, 248, 0.42);
+  --req-nested-accent-strong: #38bdf8;
+  --req-cat-fg: #7dd3fc;
+  --req-nums-fg: #e2e8f0;
+  --req-miss-fg: #f87171;
+  --req-ok-muted: #94a3b8;
+  --req-over-fg: #4ade80;
+  --req-foot-fg: #94a3b8;
+  --req-summary-outer-bg: #0c1424;
+  --req-summary-outer-border: rgba(148, 163, 184, 0.22);
+  --req-summary-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --req-summary-th-bg: #070d18;
+  --req-summary-th-fg: #94a3b8;
+  --req-summary-td-fg: #e2e8f0;
+  --req-summary-cell-border: rgba(51, 65, 85, 0.5);
+  --req-summary-zebra: rgba(255, 255, 255, 0.035);
+  --req-summary-grouped-row-bg: #080e18;
+  --req-summary-section-bg: linear-gradient(180deg, #111c2e 0%, #0c1424 100%);
+  --req-summary-section-fg: #cbd5e1;
+  --req-summary-section-border: rgba(71, 85, 105, 0.55);
+  --req-summary-cat-emphasis: #7dd3fc;
+  --req-summary-missing: #f87171;
+  --req-missing-ok-fg: #e2e8f0;
+  --req-nested-parent-fg: #bae6fd;
+  /* Behúzott sor: a teljes Kategória cellán át futó fade (ne legyen éles „kocka” szél ~18px-nél) */
+  --req-indent-gradient: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.18) 0%,
+    rgba(56, 189, 248, 0.07) 40%,
+    rgba(56, 189, 248, 0.02) 72%,
+    transparent 100%
+  );
+  --req-elective-block-gradient: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.14) 0%,
+    rgba(56, 189, 248, 0.05) 42%,
+    rgba(56, 189, 248, 0.015) 76%,
+    transparent 100%
+  );
+  --req-elective-dash-color: rgba(148, 163, 184, 0.42);
+  --req-spec-field-bg: #0a101c;
+  --req-spec-field-border: rgba(148, 163, 184, 0.22);
+  --req-spec-legend-fg: #7dd3fc;
+  --req-spec-hint-fg: #94a3b8;
+  --req-spec-saving-fg: #7dd3fc;
+  --req-spec-err-fg: #f87171;
+  --req-no-courses-bg: #0a101c;
+  --req-no-courses-border: rgba(148, 163, 184, 0.2);
+  --req-no-courses-label-fg: #cbd5e1;
+  --req-dynamic-nested-bar: rgba(56, 189, 248, 0.28);
+  --req-course-section-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --app-page-bg: #eef2f7;
+  --app-page-text: #0f172a;
+  --app-footer-bg: #003366;
+  --app-footer-text: #ffffff;
+  --scrollbar-thumb: #94a3b8;
+
+  --accent: #1e6fbf;
+  --accent-dark: #155a9a;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+  --row-alt: #f8fafc;
+  --muted: #64748b;
+
+  --admin-thead-bg: linear-gradient(180deg, #eef6ff 0%, #ffffff 100%);
+  --admin-thead-fg: #1e6fbf;
+  --admin-table-fg: #1e293b;
+  --admin-cell-divider: #f1f5f9;
+  --admin-row-hover: #f0f9ff;
+  --admin-selected-row-bg: #cfe5ff;
+  --admin-selected-row-bg-hover: #c5e0ff;
+  --admin-selected-row-text: #0a2a4a;
+  --admin-selected-bar: #0d47a1;
+  --admin-input-bg: #ffffff;
+  --admin-input-border: #cbd5e1;
+  --admin-btn-bg: #ffffff;
+  --admin-btn-border: #bae6fd;
+  --admin-btn-fg: var(--accent-dark);
+  --admin-card-outer-shadow: 0 2px 14px rgba(25, 118, 210, 0.12);
+  --admin-nav-active-bg: #1e6fbf;
+  --admin-nav-active-fg: #ffffff;
+  --admin-nav-inactive-bg: #ffffff;
+  --admin-nav-inactive-fg: #0f172a;
+  --admin-sub-btn-bg: #f8fafc;
+  --admin-accordion-bg: linear-gradient(180deg, #f7fbff, #ffffff);
+  --admin-accordion-fg: #0f172a;
+  --admin-sub-header-bg: #f1f5f9;
+  --admin-sub-header-border: #e2e8f0;
+  --admin-yellow-row: linear-gradient(90deg, rgba(255, 250, 140, 1) 0%, rgba(255, 230, 90, 1) 100%);
+  --admin-yellow-row-text: #0f172a;
+  --admin-toolbar-bg: linear-gradient(180deg, #ffffff, #fbfdff);
+  --admin-toolbar-border: #e2e8f0;
+  --admin-section-title-bg: linear-gradient(180deg, #f7fbff, #eef6ff);
+  --admin-section-title-fg: #155a9a;
+  --admin-link-blue: #0b66c3;
+  --admin-table-shadow: #1976d222;
+  --admin-progress-zebra: #f4f8ff;
+  --admin-progress-zebra-hover: #e3eafc;
+  --admin-th-solid: #1976d2;
+  --admin-th-solid-border: #1565c0;
+
+  --req-surface-bg: linear-gradient(180deg, #f8fbff, #f0f6fc);
+  --req-surface-border: #c9dff0;
+  --req-item-bg: #ffffff;
+  --req-item-border: #e2ecf5;
+  --req-group-head-border: #e2ecf5;
+  --req-heading-fg: #064a8f;
+  --req-subitem-bg: linear-gradient(180deg, #fdfeff, #f8fbff);
+  --req-subitem-border: #e2ecf5;
+  --req-nested-accent: #8ebce8;
+  --req-nested-accent-strong: #4a90d9;
+  --req-cat-fg: #0b4f85;
+  --req-nums-fg: #333333;
+  --req-miss-fg: #c62828;
+  --req-ok-muted: #5a6b7a;
+  --req-over-fg: #0d7a3b;
+  --req-foot-fg: #6a7a88;
+  --req-summary-outer-bg: linear-gradient(180deg, #ffffff, #fbfdff);
+  --req-summary-outer-border: #e6f6ff;
+  --req-summary-shadow: 0 2px 8px rgba(10, 60, 120, 0.03);
+  --req-summary-th-bg: #eef7ff;
+  --req-summary-th-fg: #0b66c3;
+  --req-summary-td-fg: #222222;
+  --req-summary-cell-border: #f3f8ff;
+  --req-summary-zebra: #fbfeff;
+  --req-summary-grouped-row-bg: #fdfeff;
+  --req-summary-section-bg: linear-gradient(180deg, #e3f0fb 0%, #d4e8f8 100%);
+  --req-summary-section-fg: #064a8f;
+  --req-summary-section-border: #c5daf0;
+  --req-summary-cat-emphasis: #0b66c3;
+  --req-summary-missing: #dd3333;
+  --req-missing-ok-fg: #222222;
+  --req-nested-parent-fg: #064a8f;
+  --req-indent-gradient: linear-gradient(
+    90deg,
+    rgba(142, 188, 232, 0.22) 0%,
+    rgba(142, 188, 232, 0.08) 42%,
+    rgba(142, 188, 232, 0.02) 74%,
+    transparent 100%
+  );
+  --req-elective-block-gradient: linear-gradient(
+    90deg,
+    rgba(74, 144, 217, 0.14) 0%,
+    rgba(74, 144, 217, 0.05) 44%,
+    rgba(74, 144, 217, 0.02) 76%,
+    transparent 100%
+  );
+  --req-elective-dash-color: #b0c9e0;
+  --req-spec-field-bg: #f8fbff;
+  --req-spec-field-border: #cfe4f7;
+  --req-spec-legend-fg: #155a9a;
+  --req-spec-hint-fg: #4a5a68;
+  --req-spec-saving-fg: #155a9a;
+  --req-spec-err-fg: #b00020;
+  --req-no-courses-bg: #f8fafc;
+  --req-no-courses-border: #e8eef4;
+  --req-no-courses-label-fg: #334155;
+  --req-dynamic-nested-bar: #cfe4fb;
+  --req-course-section-shadow: 0 1px 6px rgba(30, 60, 90, 0.05);
+}
