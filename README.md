@@ -14,7 +14,7 @@ Monorepo: **`student-progress-tracker-backend/`** (FastAPI + MySQL) és **`stude
 6. [Indítás fejlesztői módban](#6-indítás-fejlesztői-módban)  
 7. [Biztonság és adatvédelem](#7-biztonság-és-adatvédelem)  
 8. [Skálázhatóság, terhelhetőség, megbízhatóság](#8-skálázhatóság-terhelhetőség-megbízhatóság)  
-9. [Tesztelés — mit érdemes és mit kellene mérni](#9-tesztelés--mit-érdemes-és-mit-kellene-mérni)  
+9. [Tesztelési stratégia](#9-tesztelési-stratégia)  
 10. [Ismert korlátok](#10-ismert-korlátok)  
 11. [További olvasmány](#11-további-olvasmány)
 
@@ -107,9 +107,9 @@ A **pontos jogosultság** (pl. csak saját `user_id` előrehaladása) a megfelel
 
 ### 4.2. Adatbázis
 
-1. Telepítsd a MySQL szervert.  
-2. Hozz létre egy **adatbázist** és felhasználót, és állítsd össze a **`DATABASE_URL`**-t (lásd [§5](#5-konfiguráció-env-api-url)).  
-3. A séma létrehozása **Alembic migrációkkal** és/vagy a projektben lévő SQL dumpokkal / dokumentációval történhet — ezt a konkrét oktatási anyaghoz igazítsd.
+1. **MySQL szerver** telepítése és elindítása.  
+2. **Adatbázis** és **felhasználó** létrehozása; a kapcsolódó **`DATABASE_URL`** összeállítása ([§5](#5-konfiguráció-env-api-url)).  
+3. **Séma:** előállítás **Alembic migrációkkal**; ha a repóban SQL állomány vagy külön séma-leírás szerepel, az a projekt dokumentációja szerint alkalmazható.
 
 ### 4.3. Függőségek telepítése
 
@@ -233,29 +233,29 @@ A `package.json`-ban lévő **`postbuild`** jelenleg **Windows + XAMPP** útvona
 
 ---
 
-## 9. Tesztelés — mit érdemes és mit kellene mérni
+## 9. Tesztelési stratégia
 
-A repóban **automatikus tesztkészlet** (pytest) **nem garantált** — érdemes bevezetni.
+A repó **nem tartalmaz kötelező, teljes körű pytest** csomagot minden modulra; az alábbiak **opcionálisan** bevezethetők vagy kiegészíthetők.
 
-### 9.1. Amit érdemes manuálisan végigpróbálni
+### 9.1. Manuális ellenőrzések (átfogás)
 
-- Regisztráció, e-mail link (ha Mailjet aktív), bejelentkezés, kijelentkezés.  
-- Hallgató: előrehaladás megjelenítése, XLSX letöltés / feltöltés.  
+- Regisztráció, e-mail link (Mailjet beállítás esetén), bejelentkezés.  
+- Hallgatói nézet: előrehaladás, XLSX letöltés / feltöltés.  
 - Admin: kurzus / szabály szerkesztés, PDF import útvonalak.  
-- Chat: két böngészőben egyszerre üzenet.  
-- Jogosultság: nem admin felhasználó nem éri el az admin API-t (HTTP 403/401).
+- Chat: párhuzamos üzenetküldés több kliensen.  
+- Jogosultság: nem admin API hozzáférés elutasítása (HTTP 403/401).
 
-### 9.2. Amit érdemes automatizálni (pytest + HTTP kliens)
+### 9.2. Automatizált tesztek (pytest, HTTP kliens)
 
-- **Egységtesztek:** `verify_password`, JWT encode/decode, séma helper.  
-- **API tesztek:** `TestClient` (FastAPI) + teszt adatbázis (SQLite in-memory *vagy* docker MySQL).  
-- **Szerződéses tesztek:** OpenAPI séma és válaszkódok.
+- **Egységtesztek:** jelszó ellenőrzés, JWT, séma-segédfüggvények.  
+- **API tesztek:** FastAPI `TestClient`, teszt adatbázis (in-memory SQLite vagy konténeres MySQL).  
+- **Szerződéses tesztek:** OpenAPI séma és HTTP válaszkódok.
 
-### 9.3. Terhelés- és stresszteszt (opcionális, pl. szakdolgozat méréshez)
+### 9.3. Terhelés- és stresszteszt (opcionális)
 
-- **Locust** vagy **k6**: bejelentkezés után ismétlődő GET `/api/progress/...`.  
-- **Cél:** válaszidő percentilis (p95), hibaszázalék, MySQL CPU.  
-- **Figyelem:** etikus használat — csak saját / engedélyezett környezetben.
+- **Locust** vagy **k6:** autentikált ismétlődő kérések (pl. GET `/api/progress/...`).  
+- **Mérendő:** válaszidő percentilis (p95), hibarát, adatbázis terhelés.  
+- Terheléses próbák csak **engedélyezett** tesztkörnyezetben futtathatók.
 
 ### 9.4. Biztonsági ellenőrzések
 
@@ -285,4 +285,4 @@ A repóban **automatikus tesztkészlet** (pytest) **nem garantált** — érdeme
 
 ---
 
-*Dokumentum verzió: a repó aktuális állapotához igazítva. A szakdolgozat szövegében hivatkozhatsz erre a fájlra, és kiegészítheted saját mérési eredményeiddel (terheléseszt, kérdőívek, adatvédelmi nyilatkozatok).*
+*A dokumentáció a tárolt forráskód adott verziójához igazodik.*
