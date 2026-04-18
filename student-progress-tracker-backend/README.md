@@ -1,66 +1,36 @@
-# Hallgatói Előrehaladás-követő Webes Alkalmazás
+# Backend — FastAPI (hallgatói előrehaladás-követő)
 
-Ez a projekt egy webes alkalmazás, amely lehetővé teszi a hallgatók számára tanulmányi előrehaladásuk nyomon követését és a szakhoz kapcsolódó közösségi kommunikációt. Az alkalmazás független az egyetemi rendszerektől, így önállóan kezelhető.
+> **Teljes projektdokumentáció** (cél, funkciók, biztonság, skálázás, tesztelési javaslatok):  
+> **[../README.md](../README.md)** — a monorepo gyökerében.
 
-## Tartalomjegyzék
+---
 
-1. [Projekt célja](#projekt-célja)
-2. [Funkcionális követelmények](#funkcionális-követelmények)
-3. [Technikai specifikációk](#technikai-specifikációk)
-4. [Adatmodellek](#adatmodellek)
-5. [Telepítési útmutató](#telepítési-útmutató)
-6. [Jövőbeli fejlesztési lehetőségek](#jövőbeli-fejlesztési-lehetőségek)
+## Rövid összefoglaló
 
-## Projekt célja
+- **Framework:** FastAPI + Uvicorn  
+- **Adatbázis:** MySQL (SQLAlchemy, `DATABASE_URL`)  
+- **Auth:** JWT Bearer token, `admin` / `user` szerepkör  
+- **API lista:** futó szerveren **http://127.0.0.1:8000/docs**
 
-A cél egy modern, reszponzív, intuitív webalkalmazás kifejlesztése, amely lehetővé teszi a hallgatók számára tanulmányi előrehaladásuk követését és a szakhoz kapcsolódó közösségi kommunikációt.
+## `.env` helye
 
-## Funkcionális követelmények
+A `app/config.py` a **repó gyökerében** (a `student-progress-tracker-backend` **szülő mappájában**) tölti a `.env` fájlt. Példa változók: a gyökér **README.md** „Konfiguráció” szakasza és `app/config.py`.
 
-- Regisztráció és hitelesítés
-- Kurzuskezelés
-- Tanulmányi előrehaladás nyomon követése
-- Közösségi chat
-- Jogosultságkezelés
+## Telepítés és futtatás
 
-## Technikai specifikációk
+```bash
+cd student-progress-tracker-backend
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-- **Frontend:** React + TypeScript
-- **Backend:** Python (FastAPI)
-- **Adatbázis:** MySQL
-- **Hosztolás:** Saját VPS
+## Routerek (belépési pont)
 
-## Adatmodellek
+`app/main.py`: chat, courses, progress, users (forgot/reset password), course_major, course_equivalence, majors, major_requirement_rules, course_recommendations, admin (tanterv, PDF ellenőrzés).
 
-- **users**: Felhasználói adatok
-- **courses**: Kurzusok adatai
-- **progress**: Hallgatói előrehaladás
-- **chat_messages**: Chat üzenetek
+## Tesztek
 
-## Telepítési útmutató
-
-1. Klónozd a repót:
-   ```
-   git clone <repository-url>
-   ```
-2. Navigálj a projekt mappájába:
-   ```
-   cd student-progress-tracker-backend
-   ```
-3. Telepítsd a szükséges csomagokat:
-   ```
-   pip install -r requirements.txt
-   ```
-4. Indítsd el az alkalmazást:
-   ```
-   uvicorn app.main:app --reload
-   ```
-
-## Jövőbeli fejlesztési lehetőségek
-
-- Badge rendszer
-- Toplista
-- Push értesítések
-- Statisztikai modul
-
-Ez a README.md fájl tartalmazza a projekt alapvető információit és útmutatót a telepítéshez.
+Automatikus tesztkészlet a repóban nem garantált — javasolt pytest + HTTP `TestClient`; részletek a gyökér **README.md** „Tesztelés” szakaszában.
