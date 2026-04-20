@@ -145,14 +145,17 @@ export default function Navbar() {
       setIsAdmin(getRoleFromToken() === "admin");
       setTokenExpMs(getTokenExpMs());
       setIdleDeadlineMs(token ? Date.now() + IDLE_WINDOW_MS : null);
+      if (!token) setMenuOpen(false);
     };
     updateAuth();
     window.addEventListener("storage", updateAuth);
     window.addEventListener("user-login", updateAuth);
+    window.addEventListener("auth-changed", updateAuth);
     window.addEventListener("auth-activity", refreshIdleDeadline);
     return () => {
       window.removeEventListener("storage", updateAuth);
       window.removeEventListener("user-login", updateAuth);
+      window.removeEventListener("auth-changed", updateAuth);
       window.removeEventListener("auth-activity", refreshIdleDeadline);
     };
   }, [IDLE_WINDOW_MS]);

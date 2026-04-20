@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
-import { authFetch, isValidEmail, isValidNeptun } from "../utils";
+import { isValidEmail, isValidNeptun } from "../utils";
 import AuthInput from "../components/AuthInput";
 import { useLang } from "../context/LangContext";
 import { apiUrl } from "../config";
-import { setAccessToken, setUserJson } from "../authStorage";
+import { setAccessToken, setUserJson, clearAuth } from "../authStorage";
 
 export default function Login() {
   const [uid, setUid] = useState("");
@@ -15,6 +15,15 @@ export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { lang } = useLang();
+
+  /**
+   * Bejelentkezési nézet = tiszta session: korábbi JWT / user a tárolóban maradhat
+   * (pl. törölt fiók, 401 utáni navigate, közvetlen /login link), ezért a Navbar
+   * „bejelentkezve” marad, ha nem töröljük. clearAuth + auth-changed szinkronban fut.
+   */
+  useLayoutEffect(() => {
+    clearAuth();
+  }, []);
 
   function safeNextPath(raw) {
     if (!raw || typeof raw !== "string") return null;

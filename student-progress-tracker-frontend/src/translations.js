@@ -453,6 +453,59 @@ export const PROFILE_LABELS = {
   }
 };
 
+/**
+ * Regisztráció: kliens oldali mezőhibák + szerverről jövő magyar üzenetek angol megfelelői.
+ */
+export const REGISTER_I18N = {
+  formErrors: {
+    hu: {
+      uid: "A Neptun kód 6 karakteres, csak betű és szám lehet.",
+      email: "Érvényes e-mail címet adj meg!",
+      password: "A jelszónak legalább 8 karakter hosszúnak kell lennie.",
+      name: "Add meg a teljes neved!",
+      birth_date: "Add meg a születési dátumodat!",
+      id_card_number: "Add meg a személyi igazolvány számodat!",
+      address_card_number: "Add meg a lakcímkártya számodat!",
+      mothers_name: "Add meg az anyád nevét!",
+      major: "Válassz szakot!"
+    },
+    en: {
+      uid: "Neptun code must be 6 alphanumeric characters.",
+      email: "Please enter a valid email address.",
+      password: "Password must be at least 8 characters.",
+      name: "Please enter your full name.",
+      birth_date: "Please enter your date of birth.",
+      id_card_number: "Please enter your ID card number.",
+      address_card_number: "Please enter your address card number.",
+      mothers_name: "Please enter your mother's full name.",
+      major: "Please select a major."
+    }
+  },
+  /** Szerver ugyanezt a magyar szöveget adja vissza; EN nézetben leképezzük. */
+  apiHuToEn: {
+    "A felhasználó már létezik ezzel az e-mail címmel vagy NEPTUN kóddal.":
+      "A user with this email or Neptun code already exists.",
+    "A NEPTUN kód maximum 6 karakter, csak betű és szám lehet!":
+      "Neptun code must be at most 6 letters or digits.",
+    "Kérjük, adja meg a teljes nevét (vezetéknév és keresztnév)!":
+      "Please enter your full name (first and last name).",
+    "A születési dátum nem lehet a jövőben!":
+      "Date of birth cannot be in the future.",
+    "A szám formátuma: 6 számjegy, majd 2 nagybetű (pl. 123456AB)":
+      "Use 6 digits followed by 2 uppercase letters (e.g. 123456AB).",
+    "Kérjük, adja meg az anyja teljes nevét (vezetéknév és keresztnév)!":
+      "Please enter your mother's full name (first and last name).",
+    "E-mail küldés nincs konfigurálva. Állítsd be a MAILJET_API_KEY és MAILJET_API_SECRET értékeket a .env-ben.":
+      "Email sending is not configured (set MAILJET_API_KEY and MAILJET_API_SECRET in .env)."
+  },
+  emailSendErrorPrefixHu: "E-mail küldési hiba:",
+  emailSendErrorPrefixEn: "Could not send email:",
+  apiFallbackEn:
+    "Registration could not be completed. Please check your details and try again.",
+  apiFallbackHu:
+    "A regisztráció nem sikerült. Ellenőrizd az adataidat, és próbáld újra."
+};
+
 export const PROGRESS_TRACKER_LABELS = {
   hu: {
     loginRequired: "Jelentkezz be az előrehaladás megtekintéséhez!",

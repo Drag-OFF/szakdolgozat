@@ -1,5 +1,6 @@
 import { redirectToLogin } from "./authStorage";
 import { syntheticUnauthorizedResponse } from "./apiUnauthorizedResponse";
+import { REGISTER_I18N } from "./translations";
 
 /** Dátum megjelenítése: ma esetén csak idő, egyébként teljes timestamp. */
 export function formatDate(date) {
@@ -46,47 +47,85 @@ export function isValidNeptun(neptun) {
   return typeof neptun === "string" && /^[a-zA-Z0-9]{6}$/.test(neptun) && !neptun.includes("@");
 }
 
-/** Regisztrációs űrlap validálása; mezőnkénti hibaüzenet-objektumot ad vissza. */
-export function validateRegisterForm(form) {
+/** Regisztrációs űrlap validálása; mezőnkénti hibaüzenet-objektumot ad vissza (`lang`: hu | en). */
+export function validateRegisterForm(form, lang = "hu") {
+  const L = lang === "en" ? "en" : "hu";
+  const t = REGISTER_I18N.formErrors[L];
   const errors = {};
 
   if (!isValidNeptun(form.uid)) {
-    errors.uid = "A Neptun kód 6 karakteres, csak betű és szám lehet.";
+    errors.uid = t.uid;
   }
 
   if (!isValidEmail(form.email)) {
-    errors.email = "Érvényes e-mail címet adj meg!";
+    errors.email = t.email;
   }
 
   if (!form.password || form.password.length < 8) {
-    errors.password = "A jelszónak legalább 8 karakter hosszúnak kell lennie.";
+    errors.password = t.password;
   }
 
   if (!form.name || form.name.length < 3) {
-    errors.name = "Add meg a teljes neved!";
+    errors.name = t.name;
   }
 
   if (!form.birth_date) {
-    errors.birth_date = "Add meg a születési dátumodat!";
+    errors.birth_date = t.birth_date;
   }
 
   if (!form.id_card_number) {
-    errors.id_card_number = "Add meg a személyi igazolvány számodat!";
+    errors.id_card_number = t.id_card_number;
   }
 
   if (!form.address_card_number) {
-    errors.address_card_number = "Add meg a lakcímkártya számodat!";
+    errors.address_card_number = t.address_card_number;
   }
 
   if (!form.mothers_name) {
-    errors.mothers_name = "Add meg az anyád nevét!";
+    errors.mothers_name = t.mothers_name;
   }
 
   if (!form.major) {
-    errors.major = "Válassz szakot!";
+    errors.major = t.major;
   }
 
   return errors;
+}
+
+/**
+ * Regisztrációs API hiba (`detail`) megjelenítése a választott nyelven.
+ * A szerver magyar szöveget ad; angol nézetben leképezzük.
+ */
+export function formatRegisterApiErrorDetail(detail, lang = "hu") {
+  const L = lang === "en" ? "en" : "hu";
+  const mapHuToEn = REGISTER_I18N.apiHuToEn;
+  const fallback = L === "en" ? REGISTER_I18N.apiFallbackEn : REGISTER_I18N.apiFallbackHu;
+
+  const translateOne = (raw) => {
+    const msg = typeof raw === "string" ? raw.trim() : String(raw ?? "").trim();
+    if (!msg) return fallback;
+    if (L === "hu") return msg;
+    if (mapHuToEn[msg]) return mapHuToEn[msg];
+    const prefixHu = REGISTER_I18N.emailSendErrorPrefixHu;
+    if (msg.startsWith(prefixHu)) {
+      return `${REGISTER_I18N.emailSendErrorPrefixEn} ${msg.slice(prefixHu.length).trim()}`.trim();
+    }
+    return msg;
+  };
+
+  if (detail == null || detail === "") return fallback;
+  if (typeof detail === "string") return translateOne(detail);
+  if (Array.isArray(detail)) {
+    const parts = detail.map((item) => {
+      const m =
+        item && typeof item === "object"
+          ? (item.msg ?? item.message ?? item.detail)
+          : item;
+      return translateOne(m != null ? m : "");
+    });
+    return parts.filter(Boolean).join("\n") || fallback;
+  }
+  return translateOne(String(detail));
 }
 
 export function isValidPassword(pw) {

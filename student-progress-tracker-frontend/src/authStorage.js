@@ -37,12 +37,16 @@ export function setUserJson(obj) {
 }
 
 export function clearAuth() {
-  const s = getStore();
-  s?.removeItem(TOKEN_KEY);
-  s?.removeItem(USER_KEY);
   try {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
+  } catch (_) {}
+  try {
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("auth-changed"));
+    }
   } catch (_) {}
 }
 

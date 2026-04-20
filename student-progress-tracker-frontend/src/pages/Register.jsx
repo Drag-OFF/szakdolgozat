@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Auth.css";
 import "../styles/GlobalBackground.css";
-import { authFetch, validateRegisterForm } from "../utils";
+import { validateRegisterForm, formatRegisterApiErrorDetail } from "../utils";
 import AuthInput from "../components/AuthInput";
 import AuthSelect from "../components/AuthSelect";
 import { useLang } from "../context/LangContext";
@@ -38,8 +38,8 @@ export default function Register() {
       login: "Jelentkezz be!",
       resend: "Már regisztráltál, de nem kaptál megerősítő e-mailt?",
       resendBtn: "Újra küldés",
-      unknown: "Ismeretlen hiba",
-      network: "Hálózati hiba: "
+      unknown: "Ismeretlen hiba.",
+      network: "Hálózati hiba. Próbáld újra később."
     },
     en: {
       title: "Register",
@@ -59,8 +59,8 @@ export default function Register() {
       login: "Login!",
       resend: "Already registered but didn't get a confirmation email?",
       resendBtn: "Resend",
-      unknown: "Unknown error",
-      network: "Network error: "
+      unknown: "Unknown error.",
+      network: "Network error. Please try again later."
     }
   };
 
@@ -104,7 +104,7 @@ export default function Register() {
   async function handleSubmit(e) {
     e.preventDefault();
     setMsg("");
-    const validation = validateRegisterForm(form);
+    const validation = validateRegisterForm(form, lang);
     setErrors(validation);
     if (Object.keys(validation).length > 0) {
       setMsg(texts[lang].msg);
@@ -120,12 +120,11 @@ export default function Register() {
       const result = await resp.json();
       if (resp.ok) {
         setMsg(texts[lang].success);
-      } else if (result.detail) {
-        if (Array.isArray(result.detail)) setMsg(result.detail.map(e => e.msg).join("\n"));
-        else setMsg(result.detail);
+      } else if (result.detail != null && result.detail !== "") {
+        setMsg(formatRegisterApiErrorDetail(result.detail, lang));
       } else setMsg(texts[lang].unknown);
-    } catch (err) {
-      setMsg(texts[lang].network + err);
+    } catch {
+      setMsg(texts[lang].network);
     }
   }
 
