@@ -1,7 +1,7 @@
 .course-rec-container {
-  max-width: 1500px;
+  max-width: min(1920px, 100%);
   margin: 0 auto;
-  padding: 1.15rem 12px 180px;
+  padding: 1.15rem 16px 180px;
   box-sizing: border-box;
 }
 
@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 1200px;
+  max-width: min(1760px, 100%);
   margin: 0 auto;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -103,7 +103,8 @@
 }
 
 .course-rec-result-card {
-  width: min(1400px, 100%);
+  width: min(1760px, 100%);
+  max-width: 100%;
   margin: 18px auto 0;
   background: var(--panel-bg);
   border-radius: 10px;
@@ -127,13 +128,40 @@
   font-weight: 700;
 }
 
+.course-rec-estimate-detail {
+  margin: 0 0 14px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--admin-input-bg, rgba(0, 0, 0, 0.03));
+  border: 1px solid var(--panel-border);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.course-rec-estimate-detail-intro {
+  margin: 0 0 8px 0;
+  color: var(--accent-dark);
+  font-weight: 600;
+}
+
+.course-rec-estimate-detail-list {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.course-rec-estimate-detail-list li {
+  margin: 4px 0;
+}
+
 .course-rec-table-wrap {
   width: 100%;
   overflow-x: auto;
 }
 
 .course-rec-table {
-  min-width: 100%;
+  width: 100%;
+  min-width: min(1100px, 100%);
   table-layout: fixed;
 }
 
@@ -144,68 +172,54 @@
 /* Kurzusajánló táblázat oszlopai (eltérnek az Előrehaladás táblázattól) */
 .course-rec-container .progress-table.course-rec-table th:nth-child(1),
 .course-rec-container .progress-table.course-rec-table td:nth-child(1) {
-  width: 7%;
-  max-width: 7.5rem;
+  width: 14%;
+  min-width: 12rem;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
 .course-rec-container .progress-table.course-rec-table th:nth-child(2),
 .course-rec-container .progress-table.course-rec-table td:nth-child(2) {
-  width: 21%;
-  min-width: 8rem;
+  width: 22%;
+  min-width: 10rem;
   white-space: normal;
   word-break: break-word;
 }
 
 .course-rec-container .progress-table.course-rec-table th:nth-child(3),
 .course-rec-container .progress-table.course-rec-table td:nth-child(3) {
-  width: 5%;
+  width: 6%;
+  min-width: 3.25rem;
   text-align: center;
   white-space: nowrap;
 }
 
 .course-rec-container .progress-table.course-rec-table th:nth-child(4),
 .course-rec-container .progress-table.course-rec-table td:nth-child(4) {
-  width: 5%;
+  width: 6%;
+  min-width: 3.25rem;
   text-align: right;
   white-space: nowrap;
 }
 
 .course-rec-container .progress-table.course-rec-table th:nth-child(5),
 .course-rec-container .progress-table.course-rec-table td:nth-child(5) {
-  width: 10%;
+  width: 12%;
+  min-width: 7rem;
   white-space: normal;
   word-break: break-word;
 }
 
 .course-rec-container .progress-table.course-rec-table th:nth-child(6),
 .course-rec-container .progress-table.course-rec-table td:nth-child(6) {
-  width: 6%;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.course-rec-container .progress-table.course-rec-table th:nth-child(7),
-.course-rec-container .progress-table.course-rec-table td:nth-child(7) {
-  width: 7%;
-  text-align: right;
-  white-space: nowrap;
-}
-
-.course-rec-container .progress-table.course-rec-table th:nth-child(8),
-.course-rec-container .progress-table.course-rec-table td:nth-child(8) {
-  width: 39%;
-  min-width: 14rem;
+  width: 40%;
+  min-width: 16rem;
   white-space: normal;
   word-break: break-word;
 }
 
 .course-rec-cell-center {
   text-align: center;
-}
-
-.progress-table td.course-rec-cell-right {
-  text-align: right;
 }
 
 .course-rec-overdue-badge {
@@ -237,4 +251,55 @@ html[data-theme="dark"] .course-rec-overdue-badge {
 
 html[data-theme="dark"] .course-rec-error {
   color: #fca5a5;
+}
+
+@media (max-width: 720px) {
+  .course-rec-container {
+    padding: 0.85rem 10px 100px;
+  }
+
+  .course-rec-form {
+    padding: 12px;
+  }
+
+  .course-rec-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .course-rec-choice {
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: flex-start;
+  }
+
+  .course-rec-actions {
+    flex-wrap: wrap;
+  }
+
+  .course-rec-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .course-rec-estimate {
+    width: 100%;
+  }
+
+  .course-rec-table {
+    min-width: 640px;
+  }
+
+  .course-rec-container .progress-table.course-rec-table th:nth-child(1),
+  .course-rec-container .progress-table.course-rec-table td:nth-child(1) {
+    min-width: 9rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .course-rec-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }

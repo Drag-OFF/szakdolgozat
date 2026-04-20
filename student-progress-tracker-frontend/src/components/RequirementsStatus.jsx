@@ -534,8 +534,16 @@ function DynamicSummaryTable({ rows, lang }) {
 }
 
 /** Hallgatói követelményteljesítés és hiánylista fő komponense. */
-export default function RequirementsStatus({ embedded = false }) {
+export default function RequirementsStatus({ embedded = false, targetUserId = null }) {
   const user = getUserObject();
+  const previewUserId =
+    targetUserId !== undefined && targetUserId !== null && String(targetUserId).trim() !== ""
+      ? String(targetUserId).trim()
+      : null;
+  const effectiveUserId =
+    previewUserId != null ? previewUserId : user?.id != null ? String(user.id) : "";
+  const readOnlySpec = previewUserId != null;
+
   const statusRootClass = embedded
     ? "requirements-status requirements-status--embedded"
     : "requirements-status";
@@ -603,12 +611,15 @@ export default function RequirementsStatus({ embedded = false }) {
 
   const loadRequirements = useCallback(
     (opts) => {
-      if (!user.id) return Promise.resolve();
+      if (!effectiveUserId || !user?.id) return Promise.resolve();
       const silent = !!(opts && opts.silent);
       if (!silent) setLoading(true);
-      return authFetch(apiUrl(`/api/progress/${user.id}/requirements?lang=${lang || "hu"}`), {
-        headers: { Authorization: `Bearer ${getAccessToken()}` }
-      })
+      return authFetch(
+        apiUrl(`/api/progress/${encodeURIComponent(effectiveUserId)}/requirements?lang=${lang || "hu"}`),
+        {
+          headers: { Authorization: `Bearer ${getAccessToken()}` }
+        }
+      )
         .then(res => res.json().catch(() => null))
         .then(data => {
           setReq(data || null);
@@ -619,16 +630,23 @@ export default function RequirementsStatus({ embedded = false }) {
           if (!silent) setLoading(false);
         });
     },
-    [user.id, lang]
+    [effectiveUserId, user?.id, lang]
   );
 
   useEffect(() => {
-    if (!user.id) return;
+    if (!effectiveUserId || !user?.id) return;
     loadRequirements();
-  }, [user.id, lang, loadRequirements]);
+  }, [effectiveUserId, user?.id, lang, loadRequirements]);
+
+  useEffect(() => {
+    if (!effectiveUserId || !user?.id) return;
+    const handler = () => loadRequirements({ silent: true });
+    window.addEventListener("refresh-progress", handler);
+    return () => window.removeEventListener("refresh-progress", handler);
+  }, [effectiveUserId, user?.id, loadRequirements]);
 
   async function saveSpecializationChoice(code) {
-    if (!user.id) return;
+    if (readOnlySpec || !user.id) return;
     setSpecErr("");
     setSpecSaving(true);
     try {
@@ -683,26 +701,44 @@ export default function RequirementsStatus({ embedded = false }) {
       <div className={statusRootClass}>
         {!embedded && <h2>{t.title}</h2>}
         {showSpecPicker ? (
-          <fieldset className="req-spec-fieldset" disabled={specSaving}>
-            <legend>{t.specLegend}</legend>
-            <p className="req-spec-hint">{t.specHint}</p>
-            {specOptions.map((opt) => (
-              <label key={String(opt.code)} className="req-spec-option">
-                <input
-                  type="radio"
-                  name="chosen-mk-spec"
-                  checked={
-                    (specValue == null && opt.code == null) ||
-                    (specValue != null && opt.code != null && String(specValue) === String(opt.code))
-                  }
-                  onChange={() => saveSpecializationChoice(opt.code)}
-                />
-                <span>{opt.label}</span>
-              </label>
-            ))}
-            {specSaving ? <div className="req-spec-saving">{t.specSaving}</div> : null}
-            {specErr ? <div className="req-spec-err">{specErr}</div> : null}
-          </fieldset>
+          readOnlySpec ? (
+            <div className="req-spec-fieldset req-spec-readonly">
+              <div className="req-spec-legend">{t.specLegend}</div>
+              <p className="req-spec-current-value">
+                {(() => {
+                  const found = specOptions.find(
+                    (o) =>
+                      (specValue == null && o.code == null) ||
+                      (specValue != null &&
+                        o.code != null &&
+                        String(specValue) === String(o.code))
+                  );
+                  return found?.label ?? (specValue != null ? String(specValue) : "—");
+                })()}
+              </p>
+            </div>
+          ) : (
+            <fieldset className="req-spec-fieldset" disabled={specSaving}>
+              <legend>{t.specLegend}</legend>
+              <p className="req-spec-hint">{t.specHint}</p>
+              {specOptions.map((opt) => (
+                <label key={String(opt.code)} className="req-spec-option">
+                  <input
+                    type="radio"
+                    name="chosen-mk-spec"
+                    checked={
+                      (specValue == null && opt.code == null) ||
+                      (specValue != null && opt.code != null && String(specValue) === String(opt.code))
+                    }
+                    onChange={() => saveSpecializationChoice(opt.code)}
+                  />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+              {specSaving ? <div className="req-spec-saving">{t.specSaving}</div> : null}
+              {specErr ? <div className="req-spec-err">{specErr}</div> : null}
+            </fieldset>
+          )
         ) : null}
         <DynamicGroupSummaryTotals rows={dynRows} lang={lang} />
         <DynamicSummaryTable rows={dynRows} lang={lang} />

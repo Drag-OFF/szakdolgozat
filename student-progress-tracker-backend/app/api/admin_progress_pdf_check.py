@@ -6,7 +6,7 @@ Több PDF feltöltés, csak memóriafeldolgozás, DB írás nélkül.
 import re
 import unicodedata
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import func, text
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -150,6 +150,39 @@ def _find_course_for_admin_upsert(db: Session, raw_code: str) -> models.Course |
         if _compact_code(str(row.course_code or "")) == comp:
             return row
     return None
+
+
+@router.get("/progress/check-course-code")
+def check_course_code(
+    code: str = Query(..., min_length=1),
+    _admin: dict = Depends(admin_required),
+    db: Session = Depends(get_db),
+):
+    """
+    Admin: kurzuskód létezik-e az adatbázisban (ugyanaz a keresés, mint upsert / PDF párosítás).
+    Nem ír adatbázisba.
+    """
+    try:
+        raw = str(code or "").strip()
+        if not raw:
+            raise HTTPException(status_code=400, detail="code kötelező.")
+        course = _find_course_for_admin_upsert(db, raw)
+        if not course:
+            return {"found": False}
+        can_in = _canonicalize_course_code(raw)
+        can_db = _canonicalize_course_code(str(course.course_code or ""))
+        match_kind = "exact" if can_in == can_db else "compact"
+        return {
+            "found": True,
+            "course_id": int(course.id),
+            "course_code": str(course.course_code),
+            "course_name": str(course.name or ""),
+            "match_kind": match_kind,
+        }
+    except HTTPException:
+        raise
+    except Exception as ex:
+        raise HTTPException(status_code=500, detail=f"Ellenőrzés sikertelen: {ex}")
 
 
 class UpsertCourseMajorRequest(BaseModel):

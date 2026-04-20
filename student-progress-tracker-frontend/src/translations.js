@@ -75,7 +75,16 @@ export const PROGRESS_LABELS = {
     assignButtonTitle: "Hozzárendelés a kijelölt felhasználóhoz",
     searchLabel: "Keresés a felhasználói táblázatban",
     searchHint: "Szűrés ugyanazokon az adatokon, mint az oszlopok: #, név, Neptun, szak, email",
-    colSpec: "MK spec"
+    colSpec: "MK spec",
+    clearAllProgress: "Összes progress törlése",
+    clearingAllProgress: "Törlés…",
+    clearAllConfirm:
+      "Biztosan törlöd a kiválasztott felhasználó ÖSSZES haladásrekordját? Ez nem vonható vissza.",
+    clearAllSuccess: "A felhasználó összes progress sorát töröltük.",
+    clearAllFailed: "Teljes progress törlése sikertelen",
+    requirementsPreviewTitle: "Teljesítési összegzés (kiválasztott hallgató)",
+    requirementsPreviewSpecReadOnly:
+      "A specializáció (MK ág) csak megjelenítés; a hallgató a saját fiókjában módosíthatja."
   },
   en: {
     title: "Upload progress template",
@@ -104,7 +113,16 @@ export const PROGRESS_LABELS = {
     searchLabel: "Search in user table",
     searchHint: "Filters the same fields as columns: #, name, Neptun, major, email",
     assignButtonTitle: "Assign to selected user",
-    colSpec: "MK spec"
+    colSpec: "MK spec",
+    clearAllProgress: "Delete all progress",
+    clearingAllProgress: "Deleting…",
+    clearAllConfirm:
+      "Delete ALL progress records for the selected user? This cannot be undone.",
+    clearAllSuccess: "All progress rows for this user were deleted.",
+    clearAllFailed: "Failed to delete all progress",
+    requirementsPreviewTitle: "Completion summary (selected student)",
+    requirementsPreviewSpecReadOnly:
+      "Specialization is read-only here; the student can change it in their own account."
   }
 };
 
@@ -251,11 +269,8 @@ export const COURSE_RECOMMENDER_LABELS = {
     semester: "Félév",
     credit: "Kredit",
     category: "Kategória",
-    score: "Pontszám",
-    urgency: "Prioritás",
-    similarity: "Hasonlóság",
     why: "Miért ajánlott",
-    overdueOnly: "Csak esedékes/elmaradt tárgyak",
+    overdueOnly: "Csak esedékes (kötelező / kötvál, nem szabad választás)",
     typeFilterLabel: "Tárgytípus:",
     typeAll: "Összes",
     typeRequired: "Csak kötelező",
@@ -265,6 +280,14 @@ export const COURSE_RECOMMENDER_LABELS = {
     electiveLabel: "Kötelezően választható",
     optionalLabel: "Szabadon választható",
     estimatedSemester: "Becsült aktuális féléved",
+    estimateDetailIntro:
+      "A becslés két jelzést egyesít, ha mindkettő elérhető: (1) a mintatanterv félévenkénti kreditjeihez viszonyított teljesítésed, (2) a teljesített tárgyak „melyik félévben” mezőinek mediánja (nem a legnagyobb szám egyedül).",
+    estimateByCredits: "Kreditgörbe (mintatanterv)",
+    estimateByTerms: "Teljesítési félévek mediánja",
+    estimateMethodBlend: "összevont (átlag)",
+    estimateMethodCredits: "csak kreditgörbe",
+    estimateMethodTerms: "csak teljesítési félévek",
+    estimateMethodDefault: "nincs elég adat (1. félév feltételezve)",
     overdueBadge: "Esedékes",
     requiresLogin: "Jelentkezz be a kurzusajánló használatához!"
   },
@@ -288,11 +311,8 @@ export const COURSE_RECOMMENDER_LABELS = {
     semester: "Semester",
     credit: "Credit",
     category: "Category",
-    score: "Score",
-    urgency: "Priority",
-    similarity: "Similarity",
     why: "Why recommended",
-    overdueOnly: "Only overdue/due subjects",
+    overdueOnly: "Only due on degree track (required/elective)",
     typeFilterLabel: "Course type:",
     typeAll: "All",
     typeRequired: "Required only",
@@ -302,6 +322,14 @@ export const COURSE_RECOMMENDER_LABELS = {
     electiveLabel: "Elective",
     optionalLabel: "Optional",
     estimatedSemester: "Estimated current semester",
+    estimateDetailIntro:
+      "When both signals exist, we combine them: (1) your completed credits vs the major’s per-semester credit buckets, and (2) the median of “which semester each course was completed in” (not the single highest value alone).",
+    estimateByCredits: "Credit curve (curriculum)",
+    estimateByTerms: "Median of completion semesters",
+    estimateMethodBlend: "blended (average)",
+    estimateMethodCredits: "credit curve only",
+    estimateMethodTerms: "completion semesters only",
+    estimateMethodDefault: "not enough data (assumes semester 1)",
     overdueBadge: "Due now",
     requiresLogin: "Sign in to use course recommendations!"
   }

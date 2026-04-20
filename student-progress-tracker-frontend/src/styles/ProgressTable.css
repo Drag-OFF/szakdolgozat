@@ -689,3 +689,76 @@ html[data-theme="dark"] .progress-file-status--bad {
 .progress-drop-title {
   margin-bottom: 6px;
 }
+
+/* --- Mobil / keskeny viewport: közös oldalelemek --- */
+@media (max-width: 640px) {
+  .progress-tracker-layout {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .progress-tracker-container {
+    padding-bottom: 140px;
+  }
+
+  .panel-header-inline {
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  h1.panel-header-inline,
+  h2.panel-header-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .admin-title {
+    font-size: clamp(1.05rem, 4.2vw, 1.45rem);
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  .progress-input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .progress-select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .progress-panel-toolbar-row {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+
+  .progress-panel-search-field {
+    min-width: 0;
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .progress-panel-actions {
+    flex-wrap: wrap;
+  }
+
+  .progress-drop-zone {
+    padding: 14px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .progress-table th,
+  .progress-table td {
+    padding: 6px 8px;
+    font-size: 0.95rem;
+  }
+}

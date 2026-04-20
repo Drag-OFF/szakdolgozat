@@ -5,15 +5,18 @@
   --home-border: rgba(15, 98, 254, 0.12);
   flex: 1;
   width: 100%;
-  padding: 1.25rem 1rem 2rem;
+  max-width: 100%;
+  padding: 1.25rem max(0.75rem, env(safe-area-inset-left)) 2rem max(0.75rem, env(safe-area-inset-right));
   box-sizing: border-box;
+  overflow-x: clip;
   background: linear-gradient(165deg, #e8eef6 0%, #dce6f3 45%, #cfd9e8 100%);
 }
 
 .home-inner {
-  max-width: 44rem;
+  max-width: min(44rem, 100%);
   margin: 0 auto;
   padding: 1.35rem 1.25rem 1.5rem;
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.96);
   border-radius: 14px;
   box-shadow:

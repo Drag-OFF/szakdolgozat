@@ -111,7 +111,7 @@ export default function AdminTantervEditor() {
   };
 
   return (
-    <div style={{ padding: 12, marginBottom: 140, maxWidth: 1200 }}>
+    <div style={{ padding: 12, marginBottom: 140, maxWidth: 1200, width: "100%", boxSizing: "border-box" }}>
       <div style={{ marginBottom: 16 }}>
         <Link to="/admin/pdf-import" style={{ fontWeight: 700, color: "#155a9a" }}>
           ← Vissza az import oldalra

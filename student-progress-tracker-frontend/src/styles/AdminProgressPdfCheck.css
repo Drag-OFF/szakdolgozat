@@ -1,7 +1,9 @@
 .admin-pdf-check-page {
-  max-width: 1500px;
+  width: 100%;
+  max-width: min(1920px, calc(100vw - 24px));
   margin: 0 auto;
-  padding: 0 12px 160px;
+  padding: 0 16px 160px;
+  box-sizing: border-box;
 }
 
 .admin-pdf-check-backlink-wrap {
@@ -218,11 +220,95 @@
 
 .admin-pdf-check-table-wrap {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .admin-pdf-check-table {
-  min-width: 1050px;
+  width: 100%;
+  min-width: 1520px;
+  table-layout: auto;
+}
+
+/* Többsoros tartalom (gombok, alcsoport): felül igazítás */
+.admin-pdf-check-table tbody > tr:not(.admin-pdf-check-verify-banner-tr) td {
+  vertical-align: top;
+}
+
+.admin-pdf-check-table th:nth-child(1),
+.admin-pdf-check-table td:nth-child(1) {
+  min-width: 8.5rem;
+}
+
+.admin-pdf-check-table th:nth-child(2),
+.admin-pdf-check-table td:nth-child(2) {
+  min-width: 16rem;
+  max-width: 36rem;
+}
+
+.admin-pdf-check-table th:nth-child(8),
+.admin-pdf-check-table td:nth-child(8) {
+  min-width: 18rem;
+}
+
+/* Ellenőrzés üzenet: külön sor, teljes szélesség – nem nyújtja a fő sort */
+.admin-pdf-check-verify-banner-tr td.admin-pdf-check-verify-banner-td {
+  vertical-align: top;
+  padding: 0 10px 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(249, 250, 251, 0.85);
+}
+
+.admin-pdf-check-verify-banner-td .admin-pdf-check-verify-banner {
+  margin: 0;
+}
+
+.admin-pdf-check-verify-banner-td .admin-pdf-check-row-status {
+  margin-top: 0;
+}
+
+/* Szak: olvasható szélesség */
+.admin-pdf-check-table th:nth-child(4),
+.admin-pdf-check-table td:nth-child(4) {
+  min-width: 12.5rem;
+  max-width: 18rem;
+  vertical-align: top;
+}
+
+.admin-pdf-check-table td:nth-child(4) .admin-pdf-check-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.admin-pdf-check-table td:nth-child(4) > span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Típus (required / elective / …) */
+.admin-pdf-check-table th:nth-child(7),
+.admin-pdf-check-table td:nth-child(7) {
+  min-width: 12rem;
+  vertical-align: top;
+}
+
+.admin-pdf-check-table td:nth-child(7) .admin-pdf-check-input {
+  min-width: 11rem;
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-pdf-check-table th:last-child,
+.admin-pdf-check-table td:last-child {
+  min-width: 18rem;
+  max-width: 42rem;
+  vertical-align: top;
 }
 
 .admin-pdf-check-row-indb {
@@ -264,18 +350,111 @@
   font-size: 13px;
 }
 
+.admin-pdf-check-cell-empty {
+  display: inline-block;
+  min-width: 0.5em;
+  min-height: 1em;
+  vertical-align: middle;
+}
+
+.admin-pdf-check-subgroup-cell {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 12rem;
+  max-width: 36rem;
+}
+
+.admin-pdf-check-subgroup-select {
+  flex: 1 1 12rem;
+  min-width: 10rem;
+  width: auto;
+  max-width: 20rem;
+}
+
+.admin-pdf-check-subgroup-text {
+  flex: 1 1 14rem;
+  min-width: 10rem;
+  width: auto;
+  max-width: none;
+}
+
+.admin-pdf-check-subgroup-cell .admin-pdf-check-input {
+  width: auto;
+}
+
 .admin-pdf-check-row-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: stretch;
   gap: 6px;
+  min-width: 0;
+}
+
+.admin-pdf-check-row-actions-edit-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-pdf-check-verify-banner {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 8px 10px;
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-pdf-check-verify-banner--conflict {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.admin-pdf-check-verify-banner--new {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.admin-pdf-check-row-actions-edit {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-pdf-check-table td:last-child .admin-pdf-check-row-actions-edit .admin-pdf-check-btn {
+  flex-shrink: 0;
+}
+
+.admin-pdf-check-hint--inline {
+  margin-top: 0;
+  font-size: 11px;
 }
 
 .admin-pdf-check-row-status {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   margin-top: 2px;
+  padding-right: 4px;
   font-size: 12px;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .admin-pdf-check-row-status.success {
@@ -323,6 +502,17 @@
 }
 
 .admin-pdf-check-btn-success:hover:enabled {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.admin-pdf-check-btn-warning {
+  background: linear-gradient(180deg, #fbbf24, #f59e0b);
+  color: #1f2937;
+  border-color: #d97706;
+}
+
+.admin-pdf-check-btn-warning:hover:enabled {
   transform: translateY(-1px);
   filter: brightness(1.03);
 }
@@ -427,7 +617,7 @@
   right: 16px;
   bottom: 16px;
   z-index: 30;
-  max-width: min(700px, calc(100vw - 28px));
+  max-width: min(1200px, calc(100vw - 28px));
   background: #0b4f85;
   color: #fff;
   border-radius: 12px;
@@ -478,9 +668,15 @@ html[data-theme="dark"] .admin-pdf-check-manual-match {
   border-color: var(--panel-border);
 }
 
-html[data-theme="dark"] .admin-pdf-check-input {
+html[data-theme="dark"] .admin-pdf-check-input,
+html[data-theme="dark"] .admin-pdf-check-subgroup-select {
   background: var(--admin-input-bg);
   border-color: var(--admin-input-border);
+  color: var(--admin-table-fg);
+}
+
+html[data-theme="dark"] .admin-pdf-check-subgroup-select option {
+  background: var(--admin-input-bg);
   color: var(--admin-table-fg);
 }
 
@@ -508,4 +704,130 @@ html[data-theme="dark"] .admin-pdf-check-debug-textarea {
 html[data-theme="dark"] .admin-pdf-check-sticky-edit {
   background: #0c4a6e;
   border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+/* --- PDF check: sötét téma — szövegek, státuszok, táblázat sorok --- */
+html[data-theme="dark"] .admin-pdf-check-error {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .admin-pdf-check-file-list {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .admin-pdf-check-muted {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .admin-pdf-check-person.with-top-border {
+  border-top-color: var(--panel-border);
+}
+
+html[data-theme="dark"] .admin-pdf-check-person-name {
+  color: var(--admin-table-fg);
+}
+
+html[data-theme="dark"] .admin-pdf-check-status-pill.ok {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .admin-pdf-check-status-pill.warn {
+  background: rgba(248, 113, 113, 0.16);
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .admin-pdf-check-userline,
+html[data-theme="dark"] .admin-pdf-check-doc-kind-line {
+  color: var(--admin-table-fg);
+}
+
+html[data-theme="dark"] .admin-pdf-check-warning-line {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .admin-pdf-check-warning-line-amber {
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .admin-pdf-check-row-indb {
+  background: rgba(16, 185, 129, 0.1);
+}
+
+html[data-theme="dark"] .admin-pdf-check-row-missing {
+  background: rgba(251, 146, 60, 0.1);
+}
+
+html[data-theme="dark"] .admin-pdf-check-hint,
+html[data-theme="dark"] .admin-pdf-check-dash {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .admin-pdf-check-row-status.success {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .admin-pdf-check-row-status.error {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .admin-pdf-check-verify-banner--conflict {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fecaca;
+}
+
+html[data-theme="dark"] .admin-pdf-check-verify-banner--new {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(252, 211, 77, 0.4);
+  color: #fcd34d;
+}
+
+html[data-theme="dark"] .admin-pdf-check-verify-banner-tr td.admin-pdf-check-verify-banner-td {
+  border-top-color: rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+/* Kiértékelés (összegző kártyák): ne maradjanak világos háttér + halvány felirat */
+html[data-theme="dark"] .admin-pdf-check-summary-item {
+  background: var(--panel-bg);
+  border-color: var(--panel-border);
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item span {
+  color: #cbd5e1;
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item strong {
+  color: var(--accent);
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.ready {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(52, 211, 153, 0.42);
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.ready span {
+  color: #a7f3d0;
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.ready strong {
+  color: #6ee7b7;
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.not-ready {
+  background: rgba(244, 63, 94, 0.12);
+  border-color: rgba(251, 113, 133, 0.38);
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.not-ready span {
+  color: #fecdd3;
+}
+
+html[data-theme="dark"] .admin-pdf-check-summary-item.not-ready strong {
+  color: #fda4af;
+}
+
+html[data-theme="dark"] .admin-pdf-check-missing-list li {
+  color: var(--admin-table-fg);
 }

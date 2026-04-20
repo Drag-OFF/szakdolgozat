@@ -72,17 +72,37 @@ class ProgressService:
         self.db.refresh(progress)
         return progress
 
-    def delete_progress(self, progress_id: int) -> None:
+    def delete_progress(self, progress_id: int) -> bool:
         """
         Haladás törlése.
 
         Paraméterek:
             progress_id (int): A törlendő haladás azonosítója.
+
+        Visszatérés:
+            bool: True, ha volt ilyen rekord és törölve lett.
         """
         progress = self.db.query(models.Progress).filter(models.Progress.id == progress_id).first()
         if progress:
             self.db.delete(progress)
             self.db.commit()
+            return True
+        return False
+
+    def delete_all_progress_for_user(self, user_id: int) -> int:
+        """
+        Egy felhasználó összes progress sorának törlése (admin).
+
+        Visszatérés:
+            int: Törölt sorok száma.
+        """
+        n = (
+            self.db.query(models.Progress)
+            .filter(models.Progress.user_id == user_id)
+            .delete(synchronize_session=False)
+        )
+        self.db.commit()
+        return int(n or 0)
 
     def get_user_completed_courses(self, user_id: int) -> list[models.Progress]:
         """

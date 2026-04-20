@@ -8,6 +8,7 @@ import { PROGRESS_LABELS } from "../../translations";
 import { API_BASE } from "../../config";
 import { formatChosenSpecDisplay } from "../../utils";
 import Button from "../Button";
+import RequirementsStatus from "../RequirementsStatus";
 
 export default function ProgressPanel() {
   const { fetchJson, authFetch } = useAuthFetch();
@@ -24,6 +25,7 @@ export default function ProgressPanel() {
   const [fileOwner, setFileOwner] = useState(null);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [clearingAll, setClearingAll] = useState(false);
 
   const dropRef = useRef(null);
 
@@ -133,6 +135,30 @@ export default function ProgressPanel() {
   const handleDragOver = (e) => { e.preventDefault(); e.stopPropagation(); dropRef.current?.classList.add("drag-over"); };
   const handleDragLeave = (e) => { e.preventDefault(); e.stopPropagation(); dropRef.current?.classList.remove("drag-over"); };
 
+  const clearAllProgressForSelected = async () => {
+    if (!selectedId) return alert(t.chooseUser);
+    if (!window.confirm(t.clearAllConfirm)) return;
+    setClearingAll(true);
+    try {
+      const res = await authFetch(`${API_BASE}/api/progress/by-user/${encodeURIComponent(selectedId)}/all`, {
+        method: "DELETE"
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = typeof body?.detail === "string" ? body.detail : res.statusText;
+        alert(`${t.clearAllFailed}: ${detail}`);
+        return;
+      }
+      alert(t.clearAllSuccess);
+      window.dispatchEvent(new Event("refresh-progress"));
+    } catch (e) {
+      console.error("[ProgressPanel] clear all progress", e);
+      alert(t.clearAllFailed);
+    } finally {
+      setClearingAll(false);
+    }
+  };
+
   const handleUpload = async () => {
     if (!selectedId) return alert(t.chooseUser);
     if (!file) return alert(t.chooseFile);
@@ -188,6 +214,15 @@ export default function ProgressPanel() {
         <div className="progress-panel-actions">
           <Button onClick={() => { if (!selectedId) return alert(t.chooseUser); downloadTemplateFor(selectedId); }} disabled={!selectedId || loadingTemplate} variant="primary" size="sm">
             {loadingTemplate ? t.downloading : t.downloadTemplate}
+          </Button>
+          <Button
+            onClick={clearAllProgressForSelected}
+            disabled={!selectedId || clearingAll}
+            variant="danger"
+            size="sm"
+            title={lang === "en" ? "Remove every progress row for this user" : "A felhasználó összes haladásrekordjának törlése"}
+          >
+            {clearingAll ? t.clearingAllProgress : t.clearAllProgress}
           </Button>
           <Button onClick={() => { setSelectedId(""); }} variant="ghost" size="sm">{t.clearSelection}</Button>
         </div>
@@ -282,6 +317,16 @@ export default function ProgressPanel() {
         </Button>
         <Button onClick={() => { setFile(null); setFileOwner(null); }} disabled={!file} variant="ghost" size="md">{t.cancel}</Button>
       </div>
+
+      {selectedId ? (
+        <section className="progress-panel-requirements-preview" style={{ marginTop: 24 }}>
+          <h4 className="progress-panel-requirements-preview-title">{t.requirementsPreviewTitle}</h4>
+          <p className="progress-muted-hint" style={{ marginBottom: 12 }}>
+            {t.requirementsPreviewSpecReadOnly}
+          </p>
+          <RequirementsStatus embedded targetUserId={selectedId} key={String(selectedId)} />
+        </section>
+      ) : null}
     </div>
   );
 }

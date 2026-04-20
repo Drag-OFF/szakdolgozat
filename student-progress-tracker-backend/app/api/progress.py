@@ -10,7 +10,7 @@ from sqlalchemy import text
 from app.db import schemas, models
 from app.db.database import get_db
 from app.services.progress_service import ProgressService
-from app.utils.utils import get_current_user
+from app.utils.utils import get_current_user, admin_required
 from app.utils.translations import EXPORT_HEADER, STATUS_MAP, CATEGORY_MAP, TEMPLATE_HEADER
 from app.services.progress_export import export_progress_xlsx, generate_progress_template_xlsx
 from app.services.requirements_service import get_user_requirements
@@ -21,7 +21,37 @@ import csv
 import io
 import openpyxl
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
+
+
+def _can_access_progress_for_user_id(current_user, user_id: int) -> bool:
+    """Admin bármely user_id-hez; hallgató csak saját azonosítójához."""
+    current_role = None
+    current_id = -1
+    try:
+        if isinstance(current_user, dict):
+            current_role = current_user.get("role") or current_user.get("roles")
+            current_id = int(current_user.get("id") or current_user.get("user_id") or -1)
+        else:
+            current_role = getattr(current_user, "role", None) or getattr(current_user, "roles", None)
+            current_id = int(getattr(current_user, "id", getattr(current_user, "user_id", -1)))
+    except Exception:
+        current_id = -1
+
+    def is_admin(role_val) -> bool:
+        if role_val is None:
+            return False
+        if isinstance(role_val, (list, tuple, set)):
+            return any(str(r).lower() == "admin" or "admin" in str(r).lower() for r in role_val)
+        s = str(role_val).lower()
+        return s == "admin" or "admin" in s
+
+    try:
+        return is_admin(current_role) or int(user_id) == int(current_id)
+    except (TypeError, ValueError):
+        return False
 
 @router.post("/", response_model=schemas.Progress, dependencies=[Depends(get_current_user)])
 def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_db)):
@@ -124,6 +154,26 @@ def delete_progress(progress_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Progress not found")
     return {"detail": "Progress deleted successfully"}
 
+
+@router.delete(
+    "/by-user/{user_id}/all",
+    response_model=dict,
+    summary="Felhasználó teljes progress törlése (admin)",
+    description="Az adott felhasználó összes ``progress`` sorát törli. Csak admin.",
+)
+def delete_all_progress_for_user_admin(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _admin=Depends(admin_required),
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Felhasználó nem található.")
+    progress_service = ProgressService(db)
+    deleted = progress_service.delete_all_progress_for_user(user_id)
+    return {"detail": "OK", "deleted_count": deleted}
+
+
 @router.get("/{user_id}/completed", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
 def get_user_completed_courses(user_id: int, db: Session = Depends(get_db)):
     """
@@ -197,7 +247,8 @@ def get_user_progress_full(user_id: int, lang: str = "hu", db: Session = Depends
 def requirements_endpoint(
     user_id: int,
     lang: str = "hu",
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Egy felhasználó szakos követelményeinek, teljesített és hiányzó kreditjeinek, elérhető kurzusainak lekérdezése.
@@ -210,9 +261,9 @@ def requirements_endpoint(
     Visszatérés:
         dict: A követelmények, teljesített kreditek, elérhető kurzusok, stb.
     """
+    if not _can_access_progress_for_user_id(current_user, user_id):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod ehhez a követelmény nézethez.")
     return get_user_requirements(user_id, lang, db)
-
-logger = logging.getLogger(__name__)
 
 @router.get("/{user_id}/template-xlsx")
 def template_xlsx(
@@ -231,29 +282,8 @@ def template_xlsx(
     logger.debug("template_xlsx called; request.headers: %s", {k:v for k,v in request.headers.items()})
     logger.debug("template_xlsx called; current_user: %r", current_user)
 
-    current_role = None
-    current_id = -1
-    try:
-        if isinstance(current_user, dict):
-            current_role = current_user.get("role") or current_user.get("roles")
-            current_id = int(current_user.get("id") or current_user.get("user_id") or -1)
-        else:
-            current_role = getattr(current_user, "role", None) or getattr(current_user, "roles", None)
-            current_id = int(getattr(current_user, "id", getattr(current_user, "user_id", -1)))
-    except Exception as e:
-        logger.exception("Error parsing current_user: %s", e)
-        current_id = -1
-
-    def is_admin(role_val) -> bool:
-        if role_val is None:
-            return False
-        if isinstance(role_val, (list, tuple, set)):
-            return any(str(r).lower() == "admin" or "admin" in str(r).lower() for r in role_val)
-        s = str(role_val).lower()
-        return s == "admin" or "admin" in s
-
-    allowed = is_admin(current_role) or int(user_id) == int(current_id)
-    logger.debug("template_xlsx auth check: current_id=%s current_role=%s allowed=%s", current_id, repr(current_role), allowed)
+    allowed = _can_access_progress_for_user_id(current_user, user_id)
+    logger.debug("template_xlsx auth check: user_id=%s allowed=%s", user_id, allowed)
 
     if not allowed:
         raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó sablonjához.")

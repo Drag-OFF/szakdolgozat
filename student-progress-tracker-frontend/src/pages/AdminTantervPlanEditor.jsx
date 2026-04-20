@@ -511,7 +511,14 @@ export default function AdminTantervPlanEditor() {
   return (
     <div
       className="admin-panel admin-tanterv-plan-editor"
-      style={{ padding: 12, marginBottom: loading || !plan ? 120 : 100, maxWidth: 1250, paddingBottom: loading || !plan ? 12 : 88 }}
+      style={{
+        padding: 12,
+        marginBottom: loading || !plan ? 120 : 100,
+        maxWidth: 1250,
+        width: "100%",
+        boxSizing: "border-box",
+        paddingBottom: loading || !plan ? 12 : 88,
+      }}
     >
       <div style={{ marginBottom: 12 }}>
         <Link to="/admin/pdf-import" style={{ fontWeight: 700, color: "var(--admin-link-blue, #155a9a)" }}>

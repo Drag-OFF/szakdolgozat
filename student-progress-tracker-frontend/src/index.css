@@ -39,6 +39,8 @@ html::-webkit-scrollbar-thumb {
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
+  min-width: 0;
+  max-width: 100%;
 }
 
 main {
@@ -47,4 +49,19 @@ main {
   flex-direction: column;
   width: 100%;
   min-height: 0;
+  /* keskeny képernyőn a flex gyerek ne okozzon vízszintes scrollt */
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Chat útvonal: belső .chat-root kezeli a magasságot; ne nyomjon paddingot a Navbarhoz képest */
+main.chat-main-padding {
+  padding: 0;
+  min-height: 0;
+}
+
+@supports (padding: max(0px)) {
+  .footer {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
 }

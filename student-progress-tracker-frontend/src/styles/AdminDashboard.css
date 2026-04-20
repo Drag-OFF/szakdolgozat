@@ -60,6 +60,16 @@ html[data-theme="dark"] .admin-quick-link--blue {
   height: 64px;
 }
 
+@media (max-width: 720px) {
+  .admin-dashboard {
+    padding: 8px;
+  }
+
+  .admin-footer-spacer {
+    height: 40px;
+  }
+}
+
 /* Lenyíló szekciók fejléce: egy teljes sáv, belső „pill” / keskeny ovális keret nélkül (dark + light) */
 .admin-dashboard .admin-card-body header.panel-header-inline {
   display: flex;

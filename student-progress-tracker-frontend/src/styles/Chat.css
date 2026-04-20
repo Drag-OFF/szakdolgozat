@@ -1,16 +1,17 @@
-.app-wrapper {
+/* Csak chat oldalon: ne írjuk felül az egész app layoutját (SPA-ban a CSS megmarad más route-okon is) */
+.app-wrapper:has(.chat-root) {
   height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-
 }
 
-main {
+main:has(.chat-root) {
   flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0; /* ha kell */
+  padding: 0;
 }
 
 /* WebKit alapú böngészők (Chrome, Edge, Safari) */

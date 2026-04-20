@@ -81,7 +81,14 @@ export default function CourseRecommender() {
   /** Backend reason kulcsok — ismeretlen / belső kulcsot nem mutatunk nyersen */
   const reasonLabel = (reasonKey) => {
     const map = {
-      overdue_by_recommended_semester: lang === "en" ? "Recommended semester is due" : "Ajánlott félév alapján esedékes",
+      overdue_by_recommended_semester:
+        lang === "en"
+          ? "Due on degree track (required/elective)"
+          : "Követelmény útvonalon esedékes (kötelező / kötvál)",
+      past_suggested_semester_optional:
+        lang === "en"
+          ? "Suggested semester passed (optional — lower priority)"
+          : "Ajánlott félév elmúlt (szabad választás — alacsonyabb prioritás)",
       name_similarity: lang === "en" ? "Similar topic by name" : "Név alapján hasonló témakör",
       category_similarity: lang === "en" ? "Similar category/subgroup" : "Hasonló kategória/alcsoport",
       major_curriculum_candidate: lang === "en" ? "Fits your curriculum" : "Illeszkedik a szakod mintatantervéhez"
@@ -178,6 +185,33 @@ export default function CourseRecommender() {
             </div>
           </div>
 
+          {result?.semester_estimate_detail && (
+            <div className="course-rec-estimate-detail">
+              <p className="course-rec-estimate-detail-intro">{t.estimateDetailIntro}</p>
+              <ul className="course-rec-estimate-detail-list">
+                <li>
+                  {t.estimateByCredits}:{" "}
+                  {result.semester_estimate_detail.by_major_credit_curve ?? "—"}
+                </li>
+                <li>
+                  {t.estimateByTerms}:{" "}
+                  {result.semester_estimate_detail.by_completed_term_median ?? "—"}
+                </li>
+                <li>
+                  {lang === "en" ? "Method" : "Módszer"}:{" "}
+                  {(
+                    {
+                      blend_avg: t.estimateMethodBlend,
+                      credit_curve: t.estimateMethodCredits,
+                      completed_term_median: t.estimateMethodTerms,
+                      default: t.estimateMethodDefault
+                    }[result.semester_estimate_detail.method] ?? result.semester_estimate_detail.method
+                  )}
+                </li>
+              </ul>
+            </div>
+          )}
+
           {visibleRows.length === 0 ? (
             <div>{t.noRecommendations}</div>
           ) : (
@@ -190,8 +224,6 @@ export default function CourseRecommender() {
                   <th>{t.semester}</th>
                   <th>{t.credit}</th>
                   <th>{t.category}</th>
-                  <th>{t.urgency}</th>
-                  <th>{t.similarity}</th>
                   <th>{t.why}</th>
                 </tr>
               </thead>
@@ -210,8 +242,6 @@ export default function CourseRecommender() {
                     <td>{r.semester ?? "-"}</td>
                     <td>{r.credit ?? "-"}</td>
                     <td>{typeLabel(r.normalized_type || r.category)}</td>
-                    <td>{r.urgency_score ?? 0}</td>
-                    <td className="course-rec-cell-right">{r.similarity_score ?? 0}</td>
                     <td>
                       {Array.isArray(r.reasons)
                         ? r.reasons.map(reasonLabel).filter(Boolean).join(", ") || "-"

@@ -621,6 +621,19 @@
   padding: 0 6px;
 }
 
+.req-spec-readonly .req-spec-legend {
+  font-weight: 700;
+  color: var(--req-spec-legend-fg);
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.req-spec-current-value {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
 .req-spec-hint {
   margin: 0 0 10px 0;
   font-size: 0.9rem;

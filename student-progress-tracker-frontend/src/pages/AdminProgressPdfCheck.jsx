@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAccessToken } from "../authStorage";
 import { useLang } from "../context/LangContext";
@@ -23,6 +23,11 @@ function compactCourseKey(s) {
   return String(s || "")
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "");
+}
+
+/** PDF táblázatsor stabil kulcsa (személy + sorindex); mentés / ellenőrzés állapot. */
+function pdfCheckRowKey(personKey, idx) {
+  return `${personKey}:${idx}`;
 }
 
 /** PDF alapú "mi-lenne-ha" ellenőrzés és progress mentés admin felülete. */
@@ -90,6 +95,8 @@ export default function AdminProgressPdfCheck() {
             editingNow: "Editing now",
             closeEdit: "Close",
             subgroupHint: "Type new subgroup or pick existing",
+            subgroupPlaceholder: "Or type a new subgroup name",
+            subgroupPick: "Pick subgroup…",
             unknownOnly: "Only missing from database",
             allRows: "All extracted rows",
             summaryBefore: "Missing before",
@@ -123,6 +130,19 @@ export default function AdminProgressPdfCheck() {
             rowsShown: "Rows shown",
             rowsShownMissingSuffix: "missing only",
             nameMismatchWarning: "Name mismatch on {count} matched course(s): database names are used when saving.",
+            checkRow: "Verify code",
+            checkingRow: "Checking...",
+            checkAgain: "Verify again",
+            checkCodeEmpty: "Enter a course code first.",
+            checkFoundConflictHint:
+              "Conflict: this code already exists in the database ({code}: {name}). ({match}) Do not create a duplicate; use “Align row” to update this row to the DB record (no new course write).",
+            checkNotFoundHint:
+              "No such course in the database yet; the first save will create it and the major mapping.",
+            saveAfterCheckHint: "Save course + mapping",
+            syncRowFromDb: "Align row to database",
+            rowSyncedFromDb: "Row aligned (no new course saved).",
+            matchExact: "exact code match",
+            matchCompact: "relaxed match (format differs)",
           }
         : {
             title: "PDF Progress Mi-lenne-ha ellenőrzés",
@@ -181,6 +201,8 @@ export default function AdminProgressPdfCheck() {
             editingNow: "Épp szerkeszted",
             closeEdit: "Bezárás",
             subgroupHint: "Új alcsoport írható, vagy választhatsz meglévőt",
+            subgroupPlaceholder: "Vagy írj be új alcsoportnevet",
+            subgroupPick: "Válassz alcsoportot…",
             unknownOnly: "Csak az adatbázisból hiányzó sorok",
             allRows: "Összes kinyert sor",
             summaryBefore: "Hiányzó előtte",
@@ -214,6 +236,19 @@ export default function AdminProgressPdfCheck() {
             rowsShown: "Megjelenített sorok",
             rowsShownMissingSuffix: "csak hiányzó",
             nameMismatchWarning: "{count} egyező kurzusnál eltér a név: mentésnél az adatbázis neve lesz használva.",
+            checkRow: "Kód ellenőrzése",
+            checkingRow: "Ellenőrzés...",
+            checkAgain: "Újraellenőrzés",
+            checkCodeEmpty: "Előbb írj be kurzuskódot.",
+            checkFoundConflictHint:
+              "Ütközés: ez a kód már az adatbázisban van ({code}: {name}). ({match}) Ne hozz létre duplikátumot; az „Sor igazítása” gombbal ehhez a DB sorhoz igazíthatod a táblázatot (új kurzus mentése nélkül).",
+            checkNotFoundHint:
+              "Nincs ilyen kurzus az adatbázisban; az első mentés létrehozza a kurzust és a szak-kapcsolatot.",
+            saveAfterCheckHint: "Kurzus + kapcsolat mentése",
+            syncRowFromDb: "Sor igazítása az adatbázishoz",
+            rowSyncedFromDb: "Sor igazítva (új kurzus nem lett mentve).",
+            matchExact: "pontos kódegyezés",
+            matchCompact: "laza egyezés (más formátum)",
           }),
     [lang]
   );
@@ -227,10 +262,14 @@ export default function AdminProgressPdfCheck() {
   const [rowEdits, setRowEdits] = useState({});
   const [rowSaving, setRowSaving] = useState({});
   const [rowStatus, setRowStatus] = useState({});
+  /** Hiányzó sor szerkesztés: kód ellenőrzés eredménye mentés előtt */
+  const [rowCourseCheck, setRowCourseCheck] = useState({});
   const [rowEditing, setRowEditing] = useState({});
   const [showOnlyMissing, setShowOnlyMissing] = useState(true);
   const [subgroupOptions, setSubgroupOptions] = useState({});
   const [subgroupLoading, setSubgroupLoading] = useState({});
+  /** major_id → már lekérdeztük-e az alcsoportokat (üres lista is „kész”) */
+  const subgroupMajorsFetchedRef = useRef(new Set());
   const [manualNames, setManualNames] = useState({});
   const [manualLoading, setManualLoading] = useState({});
   const [manualStatus, setManualStatus] = useState({});
@@ -285,6 +324,7 @@ export default function AdminProgressPdfCheck() {
         if (pr) {
           merged.push({
             inDb: true,
+            slotCode: code,
             code: pr.code || code,
             name: pr.db_name || pr.name || tr.name || "",
             db_name: pr.db_name || pr.name || "",
@@ -300,6 +340,7 @@ export default function AdminProgressPdfCheck() {
         } else if (mr) {
           merged.push({
             inDb: false,
+            slotCode: code,
             code: mr.code || code,
             name: mr.name || tr.name || "",
             credit: Number.isFinite(tr.credit) ? tr.credit : 0,
@@ -311,6 +352,7 @@ export default function AdminProgressPdfCheck() {
         } else {
           merged.push({
             inDb: false,
+            slotCode: code,
             code,
             name: tr.name || "",
             credit: Number.isFinite(tr.credit) ? tr.credit : 0,
@@ -328,6 +370,7 @@ export default function AdminProgressPdfCheck() {
     }
     setRowEdits(initial);
     setRowSaving({});
+    setRowCourseCheck({});
     setRowEditing({});
     const initialManual = {};
     for (const p of result?.people || []) {
@@ -351,9 +394,16 @@ export default function AdminProgressPdfCheck() {
       ...prev,
       [personKey]: (prev[personKey] || []).map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
     }));
+    if (field === "code" || field === "major_id") {
+      const rk = pdfCheckRowKey(personKey, idx);
+      setRowCourseCheck((prev) => {
+        if (!prev[rk]) return prev;
+        const next = { ...prev };
+        delete next[rk];
+        return next;
+      });
+    }
   };
-
-  const rowKey = (personKey, idx) => `${personKey}:${idx}`;
 
   const upsertKnownSubgroup = (majorId, subgroupValue) => {
     const mid = Number(majorId || 0);
@@ -369,13 +419,14 @@ export default function AdminProgressPdfCheck() {
   const ensureSubgroups = async (majorId) => {
     const mid = Number(majorId || 0);
     if (mid < 1) return;
-    if (Array.isArray(subgroupOptions[mid])) return;
+    if (subgroupMajorsFetchedRef.current.has(mid)) return;
     if (subgroupLoading[mid]) return;
     setSubgroupLoading((s) => ({ ...s, [mid]: true }));
     try {
       const res = await authFetch(apiUrl(`/api/admin/progress/major-subgroups/${mid}`));
       const body = await res.json().catch(() => ({}));
       if (res.ok) {
+        subgroupMajorsFetchedRef.current.add(mid);
         setSubgroupOptions((s) => ({ ...s, [mid]: Array.isArray(body?.subgroups) ? body.subgroups : [] }));
       }
     } catch {} finally {
@@ -384,18 +435,261 @@ export default function AdminProgressPdfCheck() {
   };
 
   const toggleEditRow = async (personKey, idx, on) => {
-    const key = rowKey(personKey, idx);
+    const key = pdfCheckRowKey(personKey, idx);
     setRowEditing((s) => ({ ...s, [key]: !!on }));
+    if (!on) {
+      setRowCourseCheck((prev) => {
+        if (!prev[key]) return prev;
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
     if (on) {
       const row = (rowEdits[personKey] || [])[idx];
       if (row?.major_id) await ensureSubgroups(row.major_id);
     }
   };
 
+  const clearCourseRowVerify = (personKey, idx) => {
+    const rk = pdfCheckRowKey(personKey, idx);
+    setRowCourseCheck((prev) => {
+      if (!prev[rk]) return prev;
+      const next = { ...prev };
+      delete next[rk];
+      return next;
+    });
+  };
+
+  const checkCourseCodeRow = async (personKey, idx) => {
+    const row = (rowEdits[personKey] || [])[idx];
+    if (!row || row.inDb) return;
+    const key = pdfCheckRowKey(personKey, idx);
+    const code = String(row.code || "").trim();
+    if (!code) {
+      setRowCourseCheck((prev) => ({
+        ...prev,
+        [key]: { status: "error", message: t.checkCodeEmpty },
+      }));
+      return;
+    }
+    setRowCourseCheck((prev) => ({ ...prev, [key]: { status: "loading" } }));
+    try {
+      const res = await authFetch(
+        apiUrl(`/api/admin/progress/check-course-code?${new URLSearchParams({ code })}`)
+      );
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const detail = typeof body?.detail === "string" ? body.detail : res.statusText;
+        setRowCourseCheck((prev) => ({
+          ...prev,
+          [key]: { status: "error", message: detail },
+        }));
+        return;
+      }
+      if (body.found) {
+        setRowCourseCheck((prev) => ({
+          ...prev,
+          [key]: {
+            status: "found",
+            course_id: body.course_id,
+            course_code: body.course_code,
+            course_name: body.course_name,
+            match_kind: body.match_kind || "exact",
+          },
+        }));
+      } else {
+        setRowCourseCheck((prev) => ({ ...prev, [key]: { status: "not_found" } }));
+      }
+    } catch (e) {
+      setRowCourseCheck((prev) => ({
+        ...prev,
+        [key]: { status: "error", message: String(e) },
+      }));
+    }
+  };
+
+  /**
+   * PDF debug állapot frissítése, ha egy kurzus már létezik a DB-ben (POST nélkül is).
+   * @returns {boolean} sikerült-e a merge
+   */
+  const mergeResolvedCourseIntoResult = (
+    personKey,
+    {
+      savedCodeDisplay,
+      courseId,
+      courseName,
+      courseCodeDb,
+      pdfNameForMismatch,
+      removeMissingForSlotCodes,
+    }
+  ) => {
+    const person = (result?.people || []).find((p) => (p.person_key || "unknown") === personKey);
+    if (!person?.debug) return false;
+    const slotNorm = (c) => String(c ?? "").trim();
+    const display = slotNorm(savedCodeDisplay);
+    const ck = compactCourseKey(display);
+    const cid = Number(courseId || 0);
+    const cname = String(courseName || "").trim();
+    const ccodeDb = String(courseCodeDb || "").trim();
+    const pdfN = String(pdfNameForMismatch ?? "").trim();
+    const nameMismatch =
+      pdfN.length > 0 && pdfN.toLowerCase() !== cname.toLowerCase();
+
+    const slotCompactsRem = new Set(
+      (removeMissingForSlotCodes || [])
+        .map((c) => compactCourseKey(slotNorm(c)))
+        .filter((x) => x.length > 0)
+    );
+
+    const dbg = { ...person.debug };
+    const prevMissing = dbg.missing_in_db_rows || [];
+    const missingRemovesRow = (r) => {
+      const rc = slotNorm(r.code);
+      if (!rc) return false;
+      const rck = compactCourseKey(rc);
+      if (rck === ck || rc === display) return true;
+      if (slotCompactsRem.has(rck)) return true;
+      return false;
+    };
+    const missRows = prevMissing.filter((r) => !missingRemovesRow(r));
+    const removedMissingN = prevMissing.length - missRows.length;
+
+    const alreadyPresent = (dbg.present_in_db_rows || []).some(
+      (r) => (cid > 0 && Number(r.course_id) === cid) || compactCourseKey(r.code) === ck
+    );
+    const newPresent = {
+      code: display,
+      name: cname,
+      db_name: cname,
+      pdf_name: pdfN,
+      name_mismatch: nameMismatch,
+      course_id: cid,
+      in_db: true,
+    };
+    const presentRows = alreadyPresent
+      ? [...(dbg.present_in_db_rows || [])]
+      : [...(dbg.present_in_db_rows || []), newPresent];
+
+    dbg.missing_in_db_rows = missRows;
+    dbg.present_in_db_rows = presentRows;
+    dbg.missing_in_db_count = Math.max(0, (dbg.missing_in_db_count || 0) - removedMissingN);
+    if (!alreadyPresent) {
+      dbg.present_in_db_count = Math.max(0, (dbg.present_in_db_count || 0) + 1);
+    }
+
+    dbg.extracted_codes = (dbg.extracted_codes || []).filter((c) => {
+      const cc = compactCourseKey(slotNorm(c));
+      if (!cc) return true;
+      if (slotCompactsRem.has(cc)) return false;
+      return true;
+    });
+
+    const pcodes = [...(dbg.present_in_db_codes || [])];
+    if (ccodeDb && !pcodes.some((x) => compactCourseKey(x) === compactCourseKey(ccodeDb))) {
+      pcodes.push(ccodeDb);
+    }
+    dbg.present_in_db_codes = pcodes;
+    dbg.missing_in_db_codes = (dbg.missing_in_db_codes || []).filter((x) => {
+      const xc = compactCourseKey(String(x || ""));
+      if (!xc) return true;
+      if (xc === ck || xc === compactCourseKey(ccodeDb)) return false;
+      if (slotCompactsRem.has(xc)) return false;
+      return true;
+    });
+
+    const nm = { ...(dbg.near_matches_for_missing || {}) };
+    for (const k of Object.keys(nm)) {
+      const kk = compactCourseKey(String(k || ""));
+      if (kk === ck || slotCompactsRem.has(kk)) delete nm[k];
+    }
+    dbg.near_matches_for_missing = nm;
+
+    const nextPerson = {
+      ...person,
+      debug: dbg,
+      known_course_codes_count: Math.max(
+        0,
+        (person.known_course_codes_count || 0) + (alreadyPresent ? 0 : 1)
+      ),
+      missing_course_codes: (person.missing_course_codes || []).filter((c) => {
+        const cc = compactCourseKey(String(c || ""));
+        if (cc === ck) return false;
+        if (slotCompactsRem.has(cc)) return false;
+        return true;
+      }),
+    };
+
+    setResult((prev) => ({
+      ...prev,
+      people: (prev.people || []).map((p) =>
+        (p.person_key || "unknown") === personKey ? nextPerson : p
+      ),
+    }));
+
+    if (person.status === "ok" && person.matched_user?.id && cid > 0) {
+      const ids = new Set(presentRows.map((r) => Number(r.course_id || 0)).filter((x) => x > 0));
+      (async () => {
+        try {
+          const hr = await authFetch(apiUrl("/api/admin/progress/refresh-hypothetical"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: Number(person.matched_user.id),
+              pdf_resolved_course_ids: [...ids],
+              lang: lang === "en" ? "en" : "hu",
+            }),
+          });
+          const hBody = await hr.json().catch(() => ({}));
+          if (hr.ok) {
+            setResult((prev) => ({
+              ...prev,
+              people: (prev.people || []).map((p) =>
+                (p.person_key || "unknown") === personKey
+                  ? {
+                      ...p,
+                      hypothetical_summary: hBody.hypothetical_summary ?? p.hypothetical_summary,
+                      diploma_ready_hypothetical:
+                        hBody.diploma_ready_hypothetical ?? p.diploma_ready_hypothetical,
+                      missing_rules_hypothetical:
+                        hBody.missing_rules_hypothetical ?? p.missing_rules_hypothetical,
+                    }
+                  : p
+              ),
+            }));
+          }
+        } catch {}
+      })();
+    }
+    return true;
+  };
+
+  const applyDbMatchToRow = (personKey, idx) => {
+    const key = pdfCheckRowKey(personKey, idx);
+    const chk = rowCourseCheck[key];
+    if (!chk || chk.status !== "found") return;
+    const row = (rowEdits[personKey] || [])[idx];
+    if (!row || row.inDb) return;
+    const display = String(chk.course_code || "").trim();
+    const ok = mergeResolvedCourseIntoResult(personKey, {
+      savedCodeDisplay: display,
+      courseId: Number(chk.course_id || 0),
+      courseName: String(chk.course_name || "").trim(),
+      courseCodeDb: String(chk.course_code || ""),
+      pdfNameForMismatch: row.name,
+      removeMissingForSlotCodes: [row.slotCode, row.code].filter((c) => String(c || "").trim()),
+    });
+    if (!ok) return;
+    clearCourseRowVerify(personKey, idx);
+    setRowEditing((s) => ({ ...s, [key]: false }));
+    setRowStatus((s) => ({ ...s, [key]: t.rowSyncedFromDb }));
+  };
+
   const saveMissingRow = async (personKey, idx) => {
     const row = (rowEdits[personKey] || [])[idx];
     if (!row || row.inDb) return;
-    const key = `${personKey}:${idx}`;
+    const key = pdfCheckRowKey(personKey, idx);
+    if (rowCourseCheck[key]?.status !== "not_found") return;
     setRowSaving((s) => ({ ...s, [key]: true }));
     setRowStatus((s) => ({ ...s, [key]: "" }));
     try {
@@ -420,108 +714,19 @@ export default function AdminProgressPdfCheck() {
       }
       if (payload.subgroup) upsertKnownSubgroup(payload.major_id, payload.subgroup);
 
-      const person = (result?.people || []).find((p) => (p.person_key || "unknown") === personKey);
-      const savedCodeDisplay = String(row.code || "").trim();
-      const ck = compactCourseKey(savedCodeDisplay);
+      const savedCodeDisplay = String(body.course_code || row.code || "").trim();
       const courseId = Number(body.course_id || 0);
       const courseName = String(body.course_name || row.name || "").trim();
       const courseCodeDb = String(body.course_code || "");
 
-      if (person?.debug) {
-        const dbg = { ...person.debug };
-        const missRows = (dbg.missing_in_db_rows || []).filter(
-          (r) => compactCourseKey(r.code) !== ck && String(r.code || "").trim() !== savedCodeDisplay
-        );
-        const alreadyPresent = (dbg.present_in_db_rows || []).some(
-          (r) =>
-            (courseId > 0 && Number(r.course_id) === courseId) || compactCourseKey(r.code) === ck
-        );
-        const newPresent = {
-          code: savedCodeDisplay,
-          name: courseName,
-          course_id: courseId,
-          in_db: true,
-        };
-        const presentRows = alreadyPresent
-          ? [...(dbg.present_in_db_rows || [])]
-          : [...(dbg.present_in_db_rows || []), newPresent];
-
-        dbg.missing_in_db_rows = missRows;
-        dbg.present_in_db_rows = presentRows;
-        if (!alreadyPresent) {
-          dbg.present_in_db_count = Math.max(0, (dbg.present_in_db_count || 0) + 1);
-          dbg.missing_in_db_count = Math.max(0, (dbg.missing_in_db_count || 0) - 1);
-        }
-
-        const pcodes = [...(dbg.present_in_db_codes || [])];
-        if (courseCodeDb && !pcodes.some((x) => compactCourseKey(x) === compactCourseKey(courseCodeDb))) {
-          pcodes.push(courseCodeDb);
-        }
-        dbg.present_in_db_codes = pcodes;
-        dbg.missing_in_db_codes = (dbg.missing_in_db_codes || []).filter(
-          (x) => compactCourseKey(x) !== ck && compactCourseKey(x) !== compactCourseKey(courseCodeDb)
-        );
-
-        const nm = { ...(dbg.near_matches_for_missing || {}) };
-        for (const k of Object.keys(nm)) {
-          if (compactCourseKey(k) === ck) delete nm[k];
-        }
-        dbg.near_matches_for_missing = nm;
-
-        const nextPerson = {
-          ...person,
-          debug: dbg,
-          known_course_codes_count: Math.max(
-            0,
-            (person.known_course_codes_count || 0) + (alreadyPresent ? 0 : 1)
-          ),
-          missing_course_codes: (person.missing_course_codes || []).filter(
-            (c) => compactCourseKey(c) !== ck
-          ),
-        };
-
-        setResult((prev) => ({
-          ...prev,
-          people: (prev.people || []).map((p) =>
-            (p.person_key || "unknown") === personKey ? nextPerson : p
-          ),
-        }));
-
-        if (person.status === "ok" && person.matched_user?.id && courseId > 0) {
-          const ids = new Set(
-            presentRows.map((r) => Number(r.course_id || 0)).filter((x) => x > 0)
-          );
-          try {
-            const hr = await authFetch(apiUrl("/api/admin/progress/refresh-hypothetical"), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                user_id: Number(person.matched_user.id),
-                pdf_resolved_course_ids: [...ids],
-                lang: lang === "en" ? "en" : "hu",
-              }),
-            });
-            const hBody = await hr.json().catch(() => ({}));
-            if (hr.ok) {
-              setResult((prev) => ({
-                ...prev,
-                people: (prev.people || []).map((p) =>
-                  (p.person_key || "unknown") === personKey
-                    ? {
-                        ...p,
-                        hypothetical_summary: hBody.hypothetical_summary ?? p.hypothetical_summary,
-                        diploma_ready_hypothetical:
-                          hBody.diploma_ready_hypothetical ?? p.diploma_ready_hypothetical,
-                        missing_rules_hypothetical:
-                          hBody.missing_rules_hypothetical ?? p.missing_rules_hypothetical,
-                      }
-                    : p
-                ),
-              }));
-            }
-          } catch {}
-        }
-      }
+      mergeResolvedCourseIntoResult(personKey, {
+        savedCodeDisplay,
+        courseId,
+        courseName,
+        courseCodeDb,
+        pdfNameForMismatch: row.name,
+        removeMissingForSlotCodes: [row.slotCode, row.code].filter((c) => String(c || "").trim()),
+      });
 
       setRowStatus((s) => ({ ...s, [key]: t.saved }));
       setRowEditing((s) => ({ ...s, [key]: false }));
@@ -575,8 +780,8 @@ export default function AdminProgressPdfCheck() {
   };
 
   const mismatchTooltip = (row) => {
-    const dbName = String(row?.db_name || row?.name || "-").trim() || "-";
-    const pdfName = String(row?.pdf_name || "-").trim() || "-";
+    const dbName = String(row?.db_name || row?.name || "").trim();
+    const pdfName = String(row?.pdf_name || "").trim();
     return `${t.inDbNameMismatchStatus}\n${t.dbNameLabel}: ${dbName}\n${t.pdfNameLabel}: ${pdfName}`;
   };
 
@@ -893,7 +1098,7 @@ export default function AdminProgressPdfCheck() {
                         <option value="">{t.manualSelectLabel}</option>
                         {(manualCandidates[p.person_key || "unknown"] || []).map((u) => (
                           <option key={u.id} value={u.id}>
-                            {u.name} - {t.manualMotherLabel}: {u.mothers_name || "-"} (#{u.id})
+                            {u.name} - {t.manualMotherLabel}: {u.mothers_name || ""} (#{u.id})
                           </option>
                         ))}
                       </select>
@@ -964,14 +1169,28 @@ export default function AdminProgressPdfCheck() {
                           .map((row, i3) => ({ row, i3 }))
                           .filter(({ row }) => (showOnlyMissing ? !row.inDb : true))
                           .map(({ row, i3 }) => {
-                          const key = `${p.person_key || "unknown"}:${i3}`;
+                          const key = pdfCheckRowKey(p.person_key || "unknown", i3);
                           const isDb = !!row.inDb;
                           const isEditing = !isDb && !!rowEditing[key];
                           const majorId = Number(row.major_id || 0);
                           const subgroups = Array.isArray(subgroupOptions[majorId]) ? subgroupOptions[majorId] : [];
+                          const chk = rowCourseCheck[key];
+                          const chkFound = chk?.status === "found";
+                          const chkNotFound = chk?.status === "not_found";
+                          const chkErr = chk?.status === "error";
+                          const showCheckBannerRow =
+                            isEditing && !isDb && (chkFound || chkNotFound || chkErr);
+                          const mkConflictBannerText = () => {
+                            if (!chkFound) return "";
+                            const mkLabel = chk.match_kind === "compact" ? t.matchCompact : t.matchExact;
+                            return String(t.checkFoundConflictHint)
+                              .replace("{code}", String(chk.course_code || ""))
+                              .replace("{name}", String(chk.course_name || ""))
+                              .replace("{match}", mkLabel);
+                          };
                           return (
+                          <Fragment key={`course-${row.slotCode || row.code}-${i3}`}>
                           <tr
-                            key={`course-${row.code}-${i3}`}
                             className={isDb ? "admin-pdf-check-row-indb" : "admin-pdf-check-row-missing"}
                           >
                             <td>
@@ -994,7 +1213,7 @@ export default function AdminProgressPdfCheck() {
                                 />
                               ) : (
                                 <span>
-                                  {row.name || "-"}
+                                  {row.name || ""}
                                   {isDb && row.name_mismatch ? (
                                     <span className="admin-pdf-check-name-mismatch-badge" title={mismatchTooltip(row)}>!</span>
                                   ) : null}
@@ -1017,13 +1236,13 @@ export default function AdminProgressPdfCheck() {
                                     await ensureSubgroups(v);
                                   }}
                                 >
-                                  <option value="">-</option>
+                                  <option value=""></option>
                                   {majors.map((m) => (
                                     <option key={m.id} value={m.id}>{m.name}</option>
                                   ))}
                                 </select>
                               ) : (
-                                <span>{majors.find((m) => String(m.id) === String(row.major_id))?.name || "-"}</span>
+                                <span>{majors.find((m) => String(m.id) === String(row.major_id))?.name || ""}</span>
                               )}
                             </td>
                             <td>
@@ -1035,7 +1254,7 @@ export default function AdminProgressPdfCheck() {
                                   onChange={(e) => updateRowField(p.person_key || "unknown", i3, "credit", e.target.value)}
                                 />
                               ) : (
-                                <span>{Number.isFinite(Number(row.credit)) ? Number(row.credit) : "-"}</span>
+                                <span>{Number.isFinite(Number(row.credit)) ? Number(row.credit) : ""}</span>
                               )}
                             </td>
                             <td>
@@ -1047,7 +1266,7 @@ export default function AdminProgressPdfCheck() {
                                   onChange={(e) => updateRowField(p.person_key || "unknown", i3, "semester", e.target.value)}
                                 />
                               ) : (
-                                <span>{Number.isFinite(Number(row.semester)) ? Number(row.semester) : "-"}</span>
+                                <span>{Number.isFinite(Number(row.semester)) ? Number(row.semester) : ""}</span>
                               )}
                             </td>
                             <td>
@@ -1064,72 +1283,155 @@ export default function AdminProgressPdfCheck() {
                                   <option value="pe">pe</option>
                                 </select>
                               ) : (
-                                <span>{row.type || "-"}</span>
+                                <span>{row.type || ""}</span>
                               )}
                             </td>
                             <td>
                               {!isDb && isEditing ? (
-                                <>
-                                <input
-                                  className="admin-pdf-check-input"
-                                  list={`subgroups-${majorId || 0}`}
-                                  value={row.subgroup || ""}
-                                  onChange={(e) => {
-                                    updateRowField(p.person_key || "unknown", i3, "subgroup", e.target.value);
-                                    upsertKnownSubgroup(majorId, e.target.value);
-                                  }}
-                                  placeholder="subgroup"
-                                />
-                                <datalist id={`subgroups-${majorId || 0}`}>
-                                  {subgroups.map((sg) => (
-                                    <option key={sg} value={sg}>{sg}</option>
-                                  ))}
-                                </datalist>
-                                <div className="admin-pdf-check-hint">{t.subgroupHint}</div>
-                                </>
+                                <div className="admin-pdf-check-subgroup-cell">
+                                  {subgroups.length > 0 && (
+                                    <select
+                                      className="admin-pdf-check-input admin-pdf-check-subgroup-select"
+                                      aria-label={t.subgroupCol}
+                                      title={t.subgroupHint}
+                                      value={
+                                        subgroups.some((sg) => String(sg) === String(row.subgroup ?? ""))
+                                          ? String(row.subgroup ?? "")
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        const v = e.target.value;
+                                        updateRowField(p.person_key || "unknown", i3, "subgroup", v);
+                                        if (v) upsertKnownSubgroup(majorId, v);
+                                      }}
+                                    >
+                                      <option value="">{t.subgroupPick}</option>
+                                      {subgroups.map((sg) => (
+                                        <option key={String(sg)} value={String(sg)}>
+                                          {sg}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  )}
+                                  <input
+                                    type="text"
+                                    className="admin-pdf-check-input admin-pdf-check-subgroup-text"
+                                    value={row.subgroup ?? ""}
+                                    title={t.subgroupHint}
+                                    onChange={(e) => {
+                                      const v = e.target.value;
+                                      updateRowField(p.person_key || "unknown", i3, "subgroup", v);
+                                      upsertKnownSubgroup(majorId, v);
+                                    }}
+                                    placeholder={t.subgroupPlaceholder}
+                                    autoComplete="off"
+                                  />
+                                </div>
                               ) : (
-                                <span>{row.subgroup || "-"}</span>
+                                <span>{row.subgroup || ""}</span>
                               )}
                             </td>
                             <td>
                               {isDb ? (
-                                <span className="admin-pdf-check-dash">-</span>
+                                <span className="admin-pdf-check-cell-empty" aria-hidden="true" />
                               ) : (
                                 <div className="admin-pdf-check-row-actions">
-                                  <Button
-                                    type="button"
-                                    onClick={() => toggleEditRow(p.person_key || "unknown", i3, !isEditing)}
-                                    title={t.editRow}
-                                    className={`admin-pdf-check-btn admin-pdf-check-btn-icon ${isEditing ? "is-active" : ""}`}
-                                    variant="ghost"
-                                    size="sm"
-                                  >
-                                    {isEditing ? t.cancelEdit : "✎"}
-                                  </Button>
-                                  {isEditing && (
-                                    <>
-                                      <Button
-                                        type="button"
-                                        disabled={!!rowSaving[key]}
-                                        onClick={() => saveMissingRow(p.person_key || "unknown", i3)}
-                                        className="admin-pdf-check-btn admin-pdf-check-btn-success"
-                                        variant="success"
-                                        size="sm"
-                                      >
-                                        {rowSaving[key] ? t.saving : t.saveRow}
-                                      </Button>
-                                      <Button
-                                        type="button"
-                                        onClick={() => toggleEditRow(p.person_key || "unknown", i3, false)}
-                                        className="admin-pdf-check-btn admin-pdf-check-btn-ghost"
-                                        variant="ghost"
-                                        size="sm"
-                                      >
-                                        {t.cancelEdit}
-                                      </Button>
-                                    </>
+                                  {!isEditing ? (
+                                    <Button
+                                      type="button"
+                                      onClick={() => toggleEditRow(p.person_key || "unknown", i3, true)}
+                                      title={t.editRow}
+                                      className="admin-pdf-check-btn admin-pdf-check-btn-icon"
+                                      variant="ghost"
+                                      size="sm"
+                                    >
+                                      ✎
+                                    </Button>
+                                  ) : (
+                                    <div className="admin-pdf-check-row-actions-edit-wrap">
+                                      <div className="admin-pdf-check-row-actions-edit">
+                                        <Button
+                                          type="button"
+                                          onClick={() => toggleEditRow(p.person_key || "unknown", i3, false)}
+                                          className="admin-pdf-check-btn admin-pdf-check-btn-ghost"
+                                          variant="ghost"
+                                          size="sm"
+                                        >
+                                          {t.cancelEdit}
+                                        </Button>
+                                        {!(chkFound || chkNotFound) && chk?.status !== "loading" && (
+                                          <Button
+                                            type="button"
+                                            onClick={() => checkCourseCodeRow(p.person_key || "unknown", i3)}
+                                            className="admin-pdf-check-btn admin-pdf-check-btn-primary"
+                                            variant="primary"
+                                            size="sm"
+                                          >
+                                            {t.checkRow}
+                                          </Button>
+                                        )}
+                                        {chk?.status === "loading" && (
+                                          <Button
+                                            type="button"
+                                            disabled
+                                            className="admin-pdf-check-btn"
+                                            variant="neutral"
+                                            size="sm"
+                                          >
+                                            {t.checkingRow}
+                                          </Button>
+                                        )}
+                                        {chkNotFound && (
+                                          <>
+                                            <Button
+                                              type="button"
+                                              disabled={!!rowSaving[key]}
+                                              onClick={() => saveMissingRow(p.person_key || "unknown", i3)}
+                                              className="admin-pdf-check-btn admin-pdf-check-btn-success"
+                                              variant="success"
+                                              size="sm"
+                                            >
+                                              {rowSaving[key] ? t.saving : t.saveAfterCheckHint}
+                                            </Button>
+                                            <Button
+                                              type="button"
+                                              onClick={() => clearCourseRowVerify(p.person_key || "unknown", i3)}
+                                              className="admin-pdf-check-btn admin-pdf-check-btn-ghost"
+                                              variant="ghost"
+                                              size="sm"
+                                            >
+                                              {t.checkAgain}
+                                            </Button>
+                                          </>
+                                        )}
+                                        {chkFound && (
+                                          <>
+                                            <Button
+                                              type="button"
+                                              onClick={() => applyDbMatchToRow(p.person_key || "unknown", i3)}
+                                              className="admin-pdf-check-btn admin-pdf-check-btn-warning"
+                                              variant="warning"
+                                              size="sm"
+                                            >
+                                              {t.syncRowFromDb}
+                                            </Button>
+                                            <Button
+                                              type="button"
+                                              onClick={() => clearCourseRowVerify(p.person_key || "unknown", i3)}
+                                              className="admin-pdf-check-btn admin-pdf-check-btn-ghost"
+                                              variant="ghost"
+                                              size="sm"
+                                            >
+                                              {t.checkAgain}
+                                            </Button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
                                   )}
-                                  {isEditing && subgroupLoading[majorId] && <div className="admin-pdf-check-hint">subgroups...</div>}
+                                  {isEditing && subgroupLoading[majorId] && (
+                                    <div className="admin-pdf-check-hint admin-pdf-check-hint--inline">subgroups...</div>
+                                  )}
                                   {rowStatus[key] && (
                                     <div className={`admin-pdf-check-row-status ${getRowStatusClass(rowStatus[key])}`}>
                                       {rowStatus[key]}
@@ -1139,6 +1441,26 @@ export default function AdminProgressPdfCheck() {
                               )}
                             </td>
                           </tr>
+                          {showCheckBannerRow && (
+                            <tr className="admin-pdf-check-verify-banner-tr admin-pdf-check-verify-banner-tr--missing">
+                              <td colSpan={9} className="admin-pdf-check-verify-banner-td">
+                                {chkFound && (
+                                  <div className="admin-pdf-check-verify-banner admin-pdf-check-verify-banner--conflict">
+                                    {mkConflictBannerText()}
+                                  </div>
+                                )}
+                                {chkNotFound && (
+                                  <div className="admin-pdf-check-verify-banner admin-pdf-check-verify-banner--new">
+                                    {t.checkNotFoundHint}
+                                  </div>
+                                )}
+                                {chkErr && (
+                                  <div className="admin-pdf-check-row-status error">{chk.message}</div>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                          </Fragment>
                         )})}
                       </tbody>
                     </table>
@@ -1228,7 +1550,7 @@ export default function AdminProgressPdfCheck() {
       {activeEdit && (
         <div className="admin-pdf-check-sticky-edit">
           <div className="admin-pdf-check-sticky-text">
-            <strong>{t.editingNow}:</strong> {activeEdit.personLabel} - {activeEdit.code || "-"} {activeEdit.name ? `(${activeEdit.name})` : ""}
+            <strong>{t.editingNow}:</strong> {activeEdit.personLabel} - {activeEdit.code || ""} {activeEdit.name ? `(${activeEdit.name})` : ""}
           </div>
           <Button
             type="button"
