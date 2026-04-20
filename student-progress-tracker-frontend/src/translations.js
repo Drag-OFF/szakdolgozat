@@ -266,7 +266,6 @@ export const COURSE_RECOMMENDER_LABELS = {
     optionalLabel: "Szabadon választható",
     estimatedSemester: "Becsült aktuális féléved",
     overdueBadge: "Esedékes",
-    reason: "Ok:",
     requiresLogin: "Jelentkezz be a kurzusajánló használatához!"
   },
   en: {
@@ -304,7 +303,6 @@ export const COURSE_RECOMMENDER_LABELS = {
     optionalLabel: "Optional",
     estimatedSemester: "Estimated current semester",
     overdueBadge: "Due now",
-    reason: "Reason:",
     requiresLogin: "Sign in to use course recommendations!"
   }
 };
@@ -435,6 +433,8 @@ export const PROGRESS_TRACKER_LABELS = {
     uploadFailed: "Hiba történt a feltöltés során!",
     uploadSuccess: "Sikeres feltöltés!",
     noSaved: "Nincs elmentett kurzusod.",
+    noSavedHint:
+      "Tölts fel előrehaladás-fájlt a „Fájl kiválasztása” gombbal, vagy töltsd le a szakos sablont - a kurzusaid ezután itt jelennek meg.",
     requirementsTitle: "Követelmények állapota",
     prev: "Előző",
     page: "Oldal",
@@ -450,6 +450,8 @@ export const PROGRESS_TRACKER_LABELS = {
     uploadFailed: "Upload failed!",
     uploadSuccess: "Upload successful!",
     noSaved: "No saved courses.",
+    noSavedHint:
+      "Upload a progress file with the file picker, or download your major’s template - your courses will appear here.",
     requirementsTitle: "Requirements status",
     prev: "Prev",
     page: "Page",

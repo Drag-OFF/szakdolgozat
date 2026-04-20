@@ -1,0 +1,12 @@
+/* Szinkron: src/styles/Footer.css — verify statikus oldal; változáskor másold újra. */
+.footer {
+  background: var(--app-footer-bg);
+  color: var(--app-footer-text);
+  text-align: center;
+  padding: 1rem 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}

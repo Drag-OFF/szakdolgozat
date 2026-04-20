@@ -78,7 +78,7 @@ export default function CourseRecommender() {
   const recommendedRows = Array.isArray(result?.recommended) ? result.recommended : [];
   const visibleRows = recommendedRows;
 
-  // Backend reason kulcsok lokalizált, felhasználóbarát címkéi.
+  /** Backend reason kulcsok — ismeretlen / belső kulcsot nem mutatunk nyersen */
   const reasonLabel = (reasonKey) => {
     const map = {
       overdue_by_recommended_semester: lang === "en" ? "Recommended semester is due" : "Ajánlott félév alapján esedékes",
@@ -86,7 +86,7 @@ export default function CourseRecommender() {
       category_similarity: lang === "en" ? "Similar category/subgroup" : "Hasonló kategória/alcsoport",
       major_curriculum_candidate: lang === "en" ? "Fits your curriculum" : "Illeszkedik a szakod mintatantervéhez"
     };
-    return map[reasonKey] || reasonKey;
+    return map[reasonKey] ?? "";
   };
 
   const typeLabel = (typeKey) => {
@@ -153,17 +153,25 @@ export default function CourseRecommender() {
           </Button>
         </div>
 
-        {errorMsg && <div style={{ color: "#b00020", fontWeight: 700 }}>{errorMsg}</div>}
+        {errorMsg && <div className="course-rec-error">{errorMsg}</div>}
       </form>
 
       {result && (
         <div className="course-rec-result-card">
           <div className="course-rec-header-row">
             <div style={{ fontWeight: 800 }}>
-            {t.recommendedTitle}{" "}
-            <span style={{ fontWeight: 500, color: "#555" }}>
-              ({result?.semester_parity})
-            </span>
+              {t.recommendedTitle}{" "}
+              <span className="course-rec-parity-note">
+                (
+                {(
+                  {
+                    any: t.anySemester,
+                    even: t.evenSemester,
+                    odd: t.oddSemester
+                  }[result?.semester_parity] ?? result?.semester_parity)
+                }
+                )
+              </span>
             </div>
             <div className="course-rec-estimate">
               {t.estimatedSemester}: {result?.current_semester_estimate ?? "-"}
@@ -174,7 +182,7 @@ export default function CourseRecommender() {
             <div>{t.noRecommendations}</div>
           ) : (
             <div className="course-rec-table-wrap">
-            <table className="progress-table course-rec-table" style={{ marginTop: 8 }}>
+            <table className="progress-table course-rec-table course-rec-table--spaced">
               <thead>
                 <tr>
                   <th>{t.kód}</th>
@@ -204,7 +212,11 @@ export default function CourseRecommender() {
                     <td>{typeLabel(r.normalized_type || r.category)}</td>
                     <td>{r.urgency_score ?? 0}</td>
                     <td className="course-rec-cell-right">{r.similarity_score ?? 0}</td>
-                    <td>{Array.isArray(r.reasons) ? r.reasons.map(reasonLabel).join(", ") : "-"}</td>
+                    <td>
+                      {Array.isArray(r.reasons)
+                        ? r.reasons.map(reasonLabel).filter(Boolean).join(", ") || "-"
+                        : "-"}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -212,11 +224,6 @@ export default function CourseRecommender() {
             </div>
           )}
 
-          {result?.reason && (
-            <div style={{ marginTop: 8, color: "#666" }}>
-              {t.reason} {result.reason}
-            </div>
-          )}
         </div>
       )}
     </div>

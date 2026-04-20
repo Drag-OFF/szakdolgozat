@@ -1909,7 +1909,7 @@ ALTER TABLE `major_requirement_rules`
 -- Megkötések a táblához `progress`
 --
 ALTER TABLE `progress`
-  ADD CONSTRAINT `progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `progress_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `progress_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`);
 COMMIT;
 

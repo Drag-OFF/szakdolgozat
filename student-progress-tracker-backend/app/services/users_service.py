@@ -1,6 +1,9 @@
 """Felhasználó regisztráció, belépés, profil CRUD - ``UsersService``."""
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+
+from app.db.models import Progress
 from app.db.models import User as UserModel
 from app.db.schemas import User, UserCreate, UserUpdate, UserLogin
 from passlib.context import CryptContext
@@ -108,17 +111,28 @@ class UsersService:
         """
         Felhasználó törlése azonosító alapján.
 
+        A ``progress`` tábla FK-ja sok adatbázisban nincs ON DELETE CASCADE-re állítva;
+        előbb töröljük a felhasználó haladás sorait, különben az SQL integritási hiba 500-at okoz.
+
         Paraméterek:
             user_id (int): A törlendő felhasználó azonosítója.
 
         Visszatérés:
             bool: True, ha sikeres volt a törlés, különben False.
+
+        Raises:
+            IntegrityError: Más táblák (pl. chat) FK-ja még mindig blokkolhatja — ritka.
         """
         user = self.db.query(UserModel).filter(UserModel.id == user_id).first()
         if not user:
             return False
-        self.db.delete(user)
-        self.db.commit()
+        try:
+            self.db.query(Progress).filter(Progress.user_id == user_id).delete(synchronize_session=False)
+            self.db.delete(user)
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise
         return True
 
     def login_user(self, login_data: UserLogin) -> Optional[UserModel]:

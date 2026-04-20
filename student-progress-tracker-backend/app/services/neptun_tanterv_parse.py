@@ -438,10 +438,43 @@ def _infer_column_map(soup: BeautifulSoup) -> dict[str, int] | None:
     }
 
 
-def _looks_like_course_code(code: str, _rc: set[str]) -> bool:
+def is_neptun_leaf_course_code(code: str) -> bool:
+    """
+    „Tárgy” sorkód a Neptun táblában: klasszikus kurzuskód (IBK301E), kötőjeles változat,
+    vagy több szegmenses katalógus kód (pl. FRMSZ-BA/BSC1-00001) — nem TT/MK/TE blokk sor.
+    """
     if not code or len(code) < 4:
         return False
-    return bool(_COURSE_CODE_SHAPE_RE.match(code))
+    c = (code or "").strip().upper()
+    if _COURSE_CODE_SHAPE_RE.match(c):
+        return True
+    if _COURSE_CODE_DASH_SHAPE_RE.fullmatch(c):
+        return True
+    for p in (
+        "TT-",
+        "TCS-",
+        "TE-",
+        "KTUDSZ-",
+        "MK-",
+        "SZAKM",
+        "SZV",
+        "SZAKD",
+        "SZAKMGY",
+        "SZGY",
+        "KKV",
+    ):
+        if c.startswith(p):
+            return False
+    if c in _DEFAULT_SKIP_CODES:
+        return False
+    # Többszörös kötőjel/perjel + számjegy (BSZKKZG jellegű Neptun katalógus kódok)
+    if re.search(r"\d", c) and re.fullmatch(r"[A-Z][A-Z0-9]*(?:[-/][A-Za-z0-9]+)+", c):
+        return True
+    return False
+
+
+def _looks_like_course_code(code: str, _rc: set[str]) -> bool:
+    return is_neptun_leaf_course_code(code)
 
 
 def _looks_like_block_header(code: str, rc: set[str]) -> bool:
@@ -597,6 +630,28 @@ def _resolve_course_display_name(cells: list[str], tds, col: dict[str, int], cod
     return code
 
 
+def _hours_columns_indicate_leaf_course(
+    weekly_hours: int,
+    semester_hours: int,
+    *,
+    heti_col_index: int | None,
+    feleves_col_index: int | None,
+) -> bool:
+    """
+    Ütemezett óra a táblában → tipikusan konkrét tárgy sor (nem követelmény-összesítő blokk).
+
+    Elsődleges: heti óraszám > 0. Másodlagos: heti oszlop létezik de 0/üres, viszont féléves óra > 0.
+    Ha nincs külön heti oszlop a mapben, de van féléves és az > 0, az is jel (ritka fejléc).
+    """
+    if heti_col_index is not None and weekly_hours > 0:
+        return True
+    if heti_col_index is not None and weekly_hours == 0 and feleves_col_index is not None and semester_hours > 0:
+        return True
+    if heti_col_index is None and feleves_col_index is not None and semester_hours > 0:
+        return True
+    return False
+
+
 def _is_neptun_spurious_duplicate_course_row(
     code: str,
     raw_name_cell: str,
@@ -604,12 +659,16 @@ def _is_neptun_spurious_duplicate_course_row(
     credit: int,
     *,
     name_td=None,
+    weekly_hours: int = 0,
+    semester_hours: int = 0,
 ) -> bool:
     """
     Folytatás / dupla sor: név cella üres vagy megismétli a kódot; felvétel üres; kredit 0.
     A kód vs. név összevetés ugyanazzal a normalizálással történik, mint a tárgykód cellánál.
     Ha a név csak img title/alt-ban van és nem kódszerű, nem szűrjük ki.
     """
+    if weekly_hours > 0 or semester_hours > 0:
+        return False
     if not _felv_is_emptyish(felv):
         return False
     if credit > 0:
@@ -692,6 +751,10 @@ def parse_tanterv_full(
         depth = _merge_marker_and_padding_depth(depth, code_td, tr)
         rcodes = _effective_codes()
 
+        if not code:
+            skipped += 1
+            continue
+
         if code in effective:
             while category_stack and category_stack[-1][0] >= depth:
                 category_stack.pop()
@@ -734,11 +797,22 @@ def parse_tanterv_full(
             current_category = code
             continue
 
-        if (code in _DEFAULT_SKIP_CODES or not code) and not _looks_like_course_code(code, rcodes):
+        if code in _DEFAULT_SKIP_CODES:
             skipped += 1
             continue
 
-        if not _looks_like_course_code(code, rcodes):
+        hi_idx = col.get("heti_oras")
+        fovi_idx = col.get("feleves_oras")
+        weekly_hours = _parse_hours_cell(cells[hi_idx]) if hi_idx is not None and hi_idx < len(cells) else 0
+        semester_hours = _parse_hours_cell(cells[fovi_idx]) if fovi_idx is not None and fovi_idx < len(cells) else 0
+        hours_hint_course = _hours_columns_indicate_leaf_course(
+            weekly_hours,
+            semester_hours,
+            heti_col_index=hi_idx,
+            feleves_col_index=fovi_idx,
+        )
+
+        if not _looks_like_course_code(code, rcodes) and not hours_hint_course:
             skipped += 1
             continue
 
@@ -755,7 +829,15 @@ def parse_tanterv_full(
         name_td = tds[ni_name] if ni_name is not None and ni_name < len(tds) else None
         cri = col.get("credit")
         credit = _resolve_credit_value(cells, cri)
-        if _is_neptun_spurious_duplicate_course_row(code, raw_name_cell, felv, credit, name_td=name_td):
+        if _is_neptun_spurious_duplicate_course_row(
+            code,
+            raw_name_cell,
+            felv,
+            credit,
+            name_td=name_td,
+            weekly_hours=weekly_hours,
+            semester_hours=semester_hours,
+        ):
             skipped += 1
             continue
 
@@ -776,10 +858,8 @@ def parse_tanterv_full(
 
         ctype, subgroup, mrc = _resolve_course_major_type_from_row_and_rule(felv, kur, rule)
 
-        hi = col.get("heti_oras")
-        fovi = col.get("feleves_oras")
-        weekly_hours = _parse_hours_cell(cells[hi]) if hi is not None and hi < len(cells) else 0
-        semester_hours = _parse_hours_cell(cells[fovi]) if fovi is not None and fovi < len(cells) else 0
+        hi = hi_idx
+        fovi = fovi_idx
         heti_col_present = hi is not None and hi < len(cells)
         parent_rule_code = _parent_rule_code_for_depth(category_stack, depth)
         heuristic_course = _neptun_concrete_course_from_hours(
@@ -854,6 +934,10 @@ def _parse_full_fallback(
         depth = _merge_marker_and_padding_depth(depth, code_td, tr)
         rc = _codes()
 
+        if not code:
+            skipped += 1
+            continue
+
         if code in effective:
             while category_stack and category_stack[-1][0] >= depth:
                 category_stack.pop()
@@ -911,11 +995,22 @@ def _parse_full_fallback(
             current_category = code
             continue
 
-        if (code in _DEFAULT_SKIP_CODES or not code) and not _looks_like_course_code(code, rc):
+        if code in _DEFAULT_SKIP_CODES:
             skipped += 1
             continue
 
-        if not _looks_like_course_code(code, rc):
+        hi_fb = col_code + 5 if col_code + 5 < len(cells) else None
+        fovi_fb = col_code + 6 if col_code + 6 < len(cells) else None
+        weekly_hours = _parse_hours_cell(cells[hi_fb]) if hi_fb is not None else 0
+        semester_hours = _parse_hours_cell(cells[fovi_fb]) if fovi_fb is not None else 0
+        hours_hint_course = _hours_columns_indicate_leaf_course(
+            weekly_hours,
+            semester_hours,
+            heti_col_index=hi_fb,
+            feleves_col_index=fovi_fb,
+        )
+
+        if not _looks_like_course_code(code, rc) and not hours_hint_course:
             skipped += 1
             continue
 
@@ -926,7 +1021,15 @@ def _parse_full_fallback(
         name_td_fb = tds[col_code + 1] if col_code + 1 < len(tds) else None
         cri_fb = col_code + 7 if col_code + 7 < len(cells) else None
         credit = _resolve_credit_value(cells, cri_fb)
-        if _is_neptun_spurious_duplicate_course_row(code, raw_name_cell, felv, credit, name_td=name_td_fb):
+        if _is_neptun_spurious_duplicate_course_row(
+            code,
+            raw_name_cell,
+            felv,
+            credit,
+            name_td=name_td_fb,
+            weekly_hours=weekly_hours,
+            semester_hours=semester_hours,
+        ):
             skipped += 1
             continue
 
@@ -935,10 +1038,6 @@ def _parse_full_fallback(
         if rule is None:
             rule = effective.get(current_category) if current_category else None
         ctype, subgroup, mrc = _resolve_course_major_type_from_row_and_rule(felv, kur, rule)
-        hi_fb = col_code + 5 if col_code + 5 < len(cells) else None
-        fovi_fb = col_code + 6 if col_code + 6 < len(cells) else None
-        weekly_hours = _parse_hours_cell(cells[hi_fb]) if hi_fb is not None else 0
-        semester_hours = _parse_hours_cell(cells[fovi_fb]) if fovi_fb is not None else 0
         heti_col_present = hi_fb is not None
         parent_rule_code = _parent_rule_code_for_depth(category_stack, depth)
         heuristic_course = _neptun_concrete_course_from_hours(

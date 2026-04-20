@@ -23,7 +23,7 @@ from app.db import models
 from app.db import schemas
 from app.services.neptun_import_rollback_service import create_major_import_snapshot
 from app.services.neptun_tanterv_expand_service import get_expanded_tanterv_html
-from app.services.neptun_tanterv_parse import parse_tanterv_full
+from app.services.neptun_tanterv_parse import is_neptun_leaf_course_code, parse_tanterv_full
 
 _ALLOWED_IMPORT_HOST = "oktweb.neptun.u-szeged.hu"
 _TANTERV_APP_PATH_PREFIX = "/tanterv/"
@@ -147,10 +147,11 @@ def _coerce_rule_min_value(v: Any) -> int:
 
 
 def _is_course_like_code(code: str) -> bool:
+    """Egyezik a tanterv-parse „tárgy sor” felismerésével (beleértve FRMSZ-* katalógus kódokat)."""
     c = _normalize_code(code)
     if not c:
         return False
-    return bool(_COURSE_CODE_SHAPE_RE.fullmatch(c) or _COURSE_CODE_DASH_SHAPE_RE.fullmatch(c))
+    return is_neptun_leaf_course_code(c)
 
 
 def parse_kod_from_url(url: str) -> str:

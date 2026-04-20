@@ -106,7 +106,17 @@ export default function Autocomplete({
         onChange={e => onInput(e.target.value)}
         onKeyDown={onKey}
         onFocus={() => { if (input.length >= minChars) doFilter(input); }}
-        style={{ width: "100%", padding: "8px 10px", boxSizing: "border-box", fontSize: 13, minHeight: 36 }}
+        style={{
+          width: "100%",
+          padding: "8px 10px",
+          boxSizing: "border-box",
+          fontSize: 13,
+          minHeight: 36,
+          background: "var(--admin-input-bg, #fff)",
+          color: "var(--admin-table-fg, #0f172a)",
+          border: "1px solid var(--admin-input-border, #cbd5e1)",
+          borderRadius: 4
+        }}
         aria-autocomplete="list"
       />
       {open && filtered.length > 0 && (
@@ -123,10 +133,11 @@ export default function Autocomplete({
             maxHeight: 260,
             overflowY: "auto",
             overflowX: "hidden",
-            background: "#fff",
-            border: "1px solid #ddd",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-            boxSizing: "border-box"
+            background: "var(--panel-bg, #fff)",
+            border: "1px solid var(--panel-border, #ddd)",
+            boxShadow: "0 2px 8px var(--admin-table-shadow, rgba(0,0,0,0.12))",
+            boxSizing: "border-box",
+            color: "var(--admin-table-fg, #0f172a)"
           }}
         >
           {filtered.map((it, idx) => {
@@ -139,7 +150,7 @@ export default function Autocomplete({
                 style={{
                   padding: "6px 8px",
                   cursor: "pointer",
-                  background: idx === active ? "#eef" : "transparent",
+                  background: idx === active ? "var(--admin-row-hover, #eef6ff)" : "transparent",
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -148,11 +159,11 @@ export default function Autocomplete({
                 }}
               >
                 <span style={{ minWidth: 0 }}>{label}</span>
-                {it.__create && isCreating && <span style={{ fontSize: 12, color: "#666" }}>…</span>}
+                {it.__create && isCreating && <span style={{ fontSize: 12, color: "var(--muted, #666)" }}>…</span>}
               </div>
             );
           })}
-          {items.length > maxResults && <div style={{ padding: 8, color: "#666", fontSize: 12 }}>...több találat (limit {maxResults})</div>}
+          {items.length > maxResults && <div style={{ padding: 8, color: "var(--muted, #666)", fontSize: 12 }}>...több találat (limit {maxResults})</div>}
         </div>
       )}
     </div>

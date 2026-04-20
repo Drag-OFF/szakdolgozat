@@ -11,6 +11,7 @@ const emptyForm = {
   code: "",
   label_hu: "",
   label_en: "",
+  parent_rule_code: "",
   requirement_type: "elective",
   subgroupMode: "none",
   subgroupCustom: "",
@@ -93,7 +94,10 @@ export default function MajorRequirementsPanel() {
       specRoot: "Spec. fa gyökér",
       specRootHint: "Kölcsönösen kizáró specializációs ág (hallgatói választó); a kód bármi lehet (MK-S-*, SP-*, …).",
       nullSubgroupDisplay: "-",
-      cols: ["#", "Kód", "Megnevezés", "Típus", "Alcsoport", "Mérték", "Minimum", "Spec"],
+      cols: ["#", "Kód", "Szülő (fa)", "Megnevezés", "Típus", "Alcsoport", "Mérték", "Minimum", "Spec"],
+      parentRule: "Szülő szabály (rollup fa)",
+      hParentRule:
+        "Üres = gyökér (nincs szülő a követelményfában). Ez más, mint az alcsoport: a fa a haladás összesítőben látszik. Törléshez üresen hagyd és ments.",
       hCode: "Egyedi azonosító.",
       hLabelHu: "Megjelenő név magyarul.",
       hLabelEn: "Megjelenő név angolul (ha van).",
@@ -147,7 +151,10 @@ export default function MajorRequirementsPanel() {
       specRoot: "Spec. tree root",
       specRootHint: "Mutually exclusive specialization branch (student picker); code can be any prefix.",
       nullSubgroupDisplay: "No subgroup",
-      cols: ["#", "Code", "Label", "Type", "Subgroup", "Metric", "Min", "Spec"],
+      cols: ["#", "Code", "Parent (tree)", "Label", "Type", "Subgroup", "Metric", "Min", "Spec"],
+      parentRule: "Parent rule (rollup tree)",
+      hParentRule:
+        "Empty = root (no parent in the requirement tree). Not the same as subgroup. Clear the field and save to remove parent.",
       hCode: "Unique identifier.",
       hLabelHu: "Display label in Hungarian.",
       hLabelEn: "Display label in English (optional).",
@@ -183,6 +190,17 @@ export default function MajorRequirementsPanel() {
       ).sort((a, b) => a.localeCompare(b)),
     [items]
   );
+
+  /** Más szabály kódjai szülőválasztáshoz (önmaga kizárva). */
+  const parentRuleSuggestions = useMemo(() => {
+    const self = String(form.code || "")
+      .trim()
+      .toUpperCase();
+    return (items || [])
+      .map((x) => String(x?.code || "").trim().toUpperCase())
+      .filter((c) => c && (!self || c !== self))
+      .sort((a, b) => a.localeCompare(b));
+  }, [items, form.code]);
 
   const loadMajors = async () => {
     const res = await authFetch(`${API_BASE}/api/majors?limit=10000`);
@@ -226,6 +244,7 @@ export default function MajorRequirementsPanel() {
       code: row.code || "",
       label_hu: row.label_hu || "",
       label_en: row.label_en || "",
+      parent_rule_code: row.parent_rule_code ? String(row.parent_rule_code).trim().toUpperCase() : "",
       requirement_type: row.requirement_type || "elective",
       ...subgroupToFormFields(row.subgroup),
       value_type: row.requirement_type === "pe" ? "count" : (row.value_type || "credits"),
@@ -239,6 +258,12 @@ export default function MajorRequirementsPanel() {
   const submit = async (e) => {
     e?.preventDefault();
     if (!selectedMajorId) return alert(t.noMajor);
+    const codeUpper = String(form.code || "").trim().toUpperCase();
+    const parentRaw = String(form.parent_rule_code || "").trim().toUpperCase();
+    if (parentRaw && parentRaw === codeUpper) {
+      alert(lang === "en" ? "Parent rule cannot be the same as the rule code." : "A szülő nem lehet ugyanaz, mint a szabály kódja.");
+      return;
+    }
     const payload = {
       major_id: Number(selectedMajorId),
       code: String(form.code || "").trim(),
@@ -246,6 +271,7 @@ export default function MajorRequirementsPanel() {
       label_en: String(form.label_en || "").trim() || null,
       requirement_type: form.requirement_type,
       subgroup: formFieldsToSubgroup(form.subgroupMode, form.subgroupCustom),
+      parent_rule_code: parentRaw || null,
       value_type: form.requirement_type === "pe" ? "count" : form.value_type,
       min_value: Number(form.min_value || 0),
       include_in_total: !!form.include_in_total,
@@ -349,16 +375,16 @@ export default function MajorRequirementsPanel() {
           <div className="admin-form-hint-spacer" aria-hidden="true">.</div>
         </div>
       </div>
-      <div style={{ marginTop: -4, marginBottom: 10, fontSize: 12, color: "#7c2d12", fontWeight: 600 }}>
+      <div className="major-rules-clear-hint">
         {t.clearAllHint}
       </div>
 
-      <div style={{ marginBottom: 8, color: "#0b4f85", fontWeight: 700 }}>
+      <div className="major-rules-section-title">
         {t.title} {selectedMajor ? `- ${lang === "en" ? (selectedMajor.name_en || selectedMajor.name) : (selectedMajor.name || selectedMajor.name_en)}` : ""}
       </div>
 
       {showForm && (
-        <form onSubmit={submit} className="major-rules-form" style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12, padding: 12, background: "#f6f9fc", borderRadius: 8, border: "1px solid #cfe0f5" }}>
+        <form onSubmit={submit} className="major-rules-form major-rules-form--editor">
           <div className="major-rules-form__grid major-rules-form__grid--codes">
             <div className="admin-form-field admin-form-field--h">
               <div className="admin-form-label-text">{t.code}</div>
@@ -445,8 +471,31 @@ export default function MajorRequirementsPanel() {
               <div className="admin-form-col-hint">{t.hMin}</div>
             </div>
           </div>
-          <fieldset style={{ margin: 0, padding: "10px 12px", border: "1px solid #bcd", borderRadius: 8, background: "#fff" }}>
-            <legend style={{ fontWeight: 600 }}>
+          <div className="admin-form-field admin-form-field--h">
+            <div className="admin-form-label-text">{t.parentRule}</div>
+            <div className="admin-form-control-wrap">
+              <input
+                className="progress-input"
+                list="mrp-parent-suggestions"
+                placeholder={lang === "en" ? "empty = root" : "üres = gyökér"}
+                title={t.hParentRule}
+                value={form.parent_rule_code}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, parent_rule_code: e.target.value.toUpperCase() }))
+                }
+                spellCheck={false}
+                autoComplete="off"
+              />
+              <datalist id="mrp-parent-suggestions">
+                {parentRuleSuggestions.map((c) => (
+                  <option key={c} value={c} />
+                ))}
+              </datalist>
+            </div>
+            <div className="admin-form-col-hint">{t.hParentRule}</div>
+          </div>
+          <fieldset className="major-rules-form__fieldset">
+            <legend className="major-rules-form__fieldset-legend">
               {t.subgroupHelp}
               <span className="admin-form-col-hint" style={{ display: "block", fontWeight: 500, marginTop: 4 }}>{t.hSubgroupBlock}</span>
             </legend>
@@ -479,21 +528,21 @@ export default function MajorRequirementsPanel() {
               )}
             </div>
           </fieldset>
-          <label style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, cursor: "pointer" }}>
+          <label className="major-rules-form__check-label">
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input type="checkbox" checked={!!form.include_in_total} onChange={e => setForm(f => ({ ...f, include_in_total: e.target.checked }))} />
-              <span style={{ fontWeight: 600 }}>{t.includeTotal}</span>
+              <span className="major-rules-form__check-title">{t.includeTotal}</span>
             </span>
             <span className="admin-form-col-hint" style={{ paddingLeft: 28 }}>{t.hInclude}</span>
           </label>
-          <label style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4, cursor: "pointer" }}>
+          <label className="major-rules-form__check-label">
             <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <input
                 type="checkbox"
                 checked={!!form.is_specialization_root}
                 onChange={(e) => setForm((f) => ({ ...f, is_specialization_root: e.target.checked }))}
               />
-              <span style={{ fontWeight: 600 }}>{t.specRoot}</span>
+              <span className="major-rules-form__check-title">{t.specRoot}</span>
             </span>
             <span className="admin-form-col-hint" style={{ paddingLeft: 28 }}>{t.specRootHint}</span>
           </label>
@@ -523,6 +572,7 @@ export default function MajorRequirementsPanel() {
                   <tr key={r.id} className={isSel ? "row-selected" : ""} onClick={() => setSelectedId(isSel ? null : r.id)} style={{ cursor: "pointer" }}>
                     <td>{r.id}</td>
                     <td>{r.code}</td>
+                    <td>{r.parent_rule_code || "—"}</td>
                     <td>{lang === "en" ? (r.label_en || r.label_hu) : r.label_hu}</td>
                     <td>{r.requirement_type}</td>
                     <td>{formatSubgroup(r.subgroup)}</td>

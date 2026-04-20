@@ -1,7 +1,8 @@
 .course-rec-container {
   max-width: 1500px;
   margin: 0 auto;
-  padding: 0 12px 180px;
+  padding: 1.15rem 12px 180px;
+  box-sizing: border-box;
 }
 
 .course-rec-form {
@@ -133,6 +134,70 @@
 
 .course-rec-table {
   min-width: 100%;
+  table-layout: fixed;
+}
+
+.course-rec-table--spaced {
+  margin-top: 8px;
+}
+
+/* Kurzusajánló táblázat oszlopai (eltérnek az Előrehaladás táblázattól) */
+.course-rec-container .progress-table.course-rec-table th:nth-child(1),
+.course-rec-container .progress-table.course-rec-table td:nth-child(1) {
+  width: 7%;
+  max-width: 7.5rem;
+  white-space: nowrap;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(2),
+.course-rec-container .progress-table.course-rec-table td:nth-child(2) {
+  width: 21%;
+  min-width: 8rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(3),
+.course-rec-container .progress-table.course-rec-table td:nth-child(3) {
+  width: 5%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(4),
+.course-rec-container .progress-table.course-rec-table td:nth-child(4) {
+  width: 5%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(5),
+.course-rec-container .progress-table.course-rec-table td:nth-child(5) {
+  width: 10%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(6),
+.course-rec-container .progress-table.course-rec-table td:nth-child(6) {
+  width: 6%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(7),
+.course-rec-container .progress-table.course-rec-table td:nth-child(7) {
+  width: 7%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.course-rec-container .progress-table.course-rec-table th:nth-child(8),
+.course-rec-container .progress-table.course-rec-table td:nth-child(8) {
+  width: 39%;
+  min-width: 14rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .course-rec-cell-center {
@@ -146,8 +211,30 @@
 .course-rec-overdue-badge {
   margin-left: 6px;
   font-size: 11px;
-  background: #ffe5b4;
+  background: #fde68a;
+  color: #78350f;
+  border: 1px solid rgba(180, 83, 9, 0.35);
   border-radius: 10px;
   padding: 2px 6px;
   font-weight: 700;
+}
+
+html[data-theme="dark"] .course-rec-overdue-badge {
+  background: rgba(180, 83, 9, 0.45);
+  color: #fef3c7;
+  border-color: rgba(251, 191, 36, 0.55);
+}
+
+.course-rec-parity-note {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.course-rec-error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+html[data-theme="dark"] .course-rec-error {
+  color: #fca5a5;
 }

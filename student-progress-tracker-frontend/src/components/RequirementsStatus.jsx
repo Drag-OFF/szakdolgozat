@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import CourseList from "./CourseList";
 import { authFetch } from "../utils";
 import "../styles/RequirementsStatus.css";
@@ -105,6 +105,40 @@ function SummaryTable({ data, lang }) {
 function hasNamedSubgroup(sg) {
   const s = String(sg ?? "").trim();
   return s.length > 0 && s !== "__NULL__";
+}
+
+/**
+ * Gyors összegző „fő” hiány: csak kredites, fa-gyökér szabályok;
+ * kivéve kötvál név szerinti alcsoport-blokkot, órát, TN-t, gyerek rule-okat.
+ */
+function isRowMainCreditRuleForGrandTotal(r, byCode) {
+  if (r.include_in_total === false) return false;
+  const vt = String(r.value_type || "credits").toLowerCase();
+  if (vt !== "credits") return false;
+  const bucket = displayBucket(r);
+  if (bucket === "practice") return false;
+  const rt = String(r.requirement_type || "").trim();
+  if (rt === "pe") return false;
+  if (rt === "elective" && hasNamedSubgroup(r.subgroup)) return false;
+  const self = String(r.code || "").trim().toUpperCase();
+  const pc = String(r.parent_rule_code || "").trim().toUpperCase();
+  if (pc && byCode.has(pc) && pc !== self) return false;
+  return true;
+}
+
+function sumMainCreditMissing(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const byCode = new Map();
+  for (const x of list) {
+    const c = String(x.code || "").trim().toUpperCase();
+    if (c) byCode.set(c, x);
+  }
+  let sum = 0;
+  for (const r of list) {
+    if (!isRowMainCreditRuleForGrandTotal(r, byCode)) continue;
+    sum += Number(r.missing ?? 0);
+  }
+  return sum;
 }
 
 function excessForRow(r) {
@@ -291,15 +325,25 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
         missing: "Missing (total)",
         over: "Over (total)",
         noneShort: "Nothing missing",
-        foot: "Per-rule breakdown is in the table below."
+        foot: "Per-rule breakdown is in the table below.",
+        creditSumLabel: "Total missing (credits, main rules)",
+        creditSumHint:
+          "Sum of missing credits for root rules only, credits metric, included in total; excludes elective subgroup blocks, hours, PE, and nested child rules.",
+        creditUnit: "cr"
       }
     : {
         title: "Gyors összesítés - fő kategóriák",
         missing: "Hiány összesen",
         over: "Túlteljesítés összesen",
         noneShort: "Nincs hiány",
-        foot: "Szabályonkénti részletek lent a táblázatban."
+        foot: "Szabályonkénti részletek lent a táblázatban.",
+        creditSumLabel: "Hiány összesen (kredit, főkövetelmények)",
+        creditSumHint:
+          "A hiányzó kreditek összege: csak kredites, a fában gyökér szabályok, az összesítésbe számító sorok; kivéve kötvál alcsoport-blokk, óraszám, testnevelés, valamint szülőhöz tartozó alárendelt szabályok.",
+        creditUnit: "kr"
       };
+
+  const mainCreditMissingTotal = useMemo(() => sumMainCreditMissing(rows), [rows]);
 
   const renderRowNums = (r, unit) => {
     const sumMissing = Number(r.missing ?? 0);
@@ -362,6 +406,21 @@ function DynamicGroupSummaryTotals({ rows, lang }) {
           );
         })}
       </ul>
+      <div className="req-group-totals-credit-sum" role="status" aria-label={t.creditSumLabel}>
+        <div className="req-group-totals-credit-sum-row">
+          <span className="req-group-totals-credit-sum-label">{t.creditSumLabel}</span>
+          <span className="req-group-totals-nums">
+            {mainCreditMissingTotal > 0 ? (
+              <span className="req-group-totals-miss">
+                {t.missing}: {mainCreditMissingTotal} {t.creditUnit}
+              </span>
+            ) : (
+              <span className="req-group-totals-ok">{t.noneShort}</span>
+            )}
+          </span>
+        </div>
+        <p className="req-group-totals-credit-sum-hint">{t.creditSumHint}</p>
+      </div>
       <p className="req-group-totals-foot">{t.foot}</p>
     </div>
   );

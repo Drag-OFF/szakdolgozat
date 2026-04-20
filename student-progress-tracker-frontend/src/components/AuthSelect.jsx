@@ -31,13 +31,13 @@ export default function AuthSelect({
         name={name}
         value={value}
         onChange={onChange}
+        className={`auth-select${error ? " auth-select--error" : ""}`}
         style={{
           width: "100%",
           padding: "0.5rem",
-          border: error ? "2px solid #e53935" : "1px solid #bdbdbd",
-          background: error ? "#fff6f6" : "#fff",
           borderRadius: 4,
-          fontSize: "1rem"
+          fontSize: "1rem",
+          boxSizing: "border-box",
         }}
         {...props}
       >

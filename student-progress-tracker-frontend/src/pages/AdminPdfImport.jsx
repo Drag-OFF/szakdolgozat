@@ -6,6 +6,7 @@ import useAuthFetch from "../hooks/useAuthFetch";
 import { apiUrl } from "../config";
 import { authFetch } from "../utils";
 import Button from "../components/Button";
+import "../styles/AdminPanels.css";
 
 const NEPTUN_MAX_STEPS = 2000;
 
@@ -116,6 +117,8 @@ export default function AdminPdfImport() {
       rulesSeedColLabel: "Megnevezés",
       rulesSeedColParent: "Szülő (üres = gyökér)",
       rulesSeedColMinValue: "Kredit / követelmény",
+      rulesSeedColSpec: "Spec.",
+      rulesSeedColSpecTitle: "Specializációs fa gyökér (kötelezően egy a párhuzamos ágak közül)",
       rulesSeedMinPlaceholder: "üres = Neptun",
       rulesSeedAdvancedJson: "JSON (haladó)",
       rulesSeedAdvancedHint:
@@ -155,6 +158,8 @@ export default function AdminPdfImport() {
       rulesSeedColLabel: "Label",
       rulesSeedColParent: "Parent (empty = root)",
       rulesSeedColMinValue: "Credits (requirement)",
+      rulesSeedColSpec: "Spec.",
+      rulesSeedColSpecTitle: "Mutually exclusive specialization branch root",
       rulesSeedMinPlaceholder: "empty = Neptun",
       rulesSeedAdvancedJson: "JSON (advanced)",
       rulesSeedAdvancedHint:
@@ -379,6 +384,7 @@ export default function AdminPdfImport() {
           const n = Number(r.min_value);
           if (!Number.isNaN(n)) node.min_value = Math.max(0, Math.trunc(n));
         }
+        if (r.is_specialization_root) node.is_specialization_root = true;
         if (ch.length) node.children = ch.map(toNode);
         return node;
       };
@@ -497,30 +503,41 @@ export default function AdminPdfImport() {
   const seedBtnStyle = {
     padding: "6px 10px",
     borderRadius: 6,
-    border: "1px solid #cbd5e1",
-    background: "#fff",
+    border: "1px solid var(--admin-input-border, #cbd5e1)",
+    background: "var(--admin-input-bg, #fff)",
+    color: "var(--admin-table-fg, #0f172a)",
     cursor: "pointer",
     fontWeight: 600,
     fontSize: 13,
   };
 
+  const pdfActionBtnBase = {
+    padding: "10px 14px",
+    borderRadius: 6,
+    fontWeight: 700,
+    fontSize: 14,
+    cursor: "pointer",
+    border: "1px solid transparent",
+    fontFamily: "inherit",
+  };
+
   return (
     <div style={{ padding: 12, marginBottom: 140, maxWidth: 900 }}>
       <div style={{ marginBottom: 16 }}>
-        <Link to="/admin" style={{ fontWeight: 700, color: "#155a9a" }}>
+        <Link to="/admin" style={{ fontWeight: 700, color: "var(--admin-link-blue, #155a9a)" }}>
           ← {t.backToAdmin}
         </Link>
       </div>
       <h1 className="admin-title" style={{ marginTop: 0 }}>
         {t.title}
       </h1>
-      <p style={{ color: "#64748b", marginTop: 0, fontSize: 14 }}>{t.blurb}</p>
+      <p style={{ color: "var(--muted, #64748b)", marginTop: 0, fontSize: 14 }}>{t.blurb}</p>
 
       <div className="admin-card" style={{ marginTop: 16 }}>
-        <div className="admin-card-body" style={{ padding: 16 }}>
+        <div className="admin-card-body admin-panel" style={{ padding: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
-              <label style={{ fontWeight: 700, color: "#0b4f85", display: "block", marginBottom: 4 }}>{t.importUrlLabel}</label>
+              <label style={{ fontWeight: 700, color: "var(--admin-link-blue, #0b4f85)", display: "block", marginBottom: 4 }}>{t.importUrlLabel}</label>
               <input
                 className="progress-input"
                 style={{ width: "100%", maxWidth: 640 }}
@@ -532,7 +549,7 @@ export default function AdminPdfImport() {
               />
             </div>
             <div>
-              <label style={{ fontWeight: 700, color: "#0b4f85", display: "block", marginBottom: 4 }}>{t.majorLabel}</label>
+              <label style={{ fontWeight: 700, color: "var(--admin-link-blue, #0b4f85)", display: "block", marginBottom: 4 }}>{t.majorLabel}</label>
               <select
                 className="progress-input"
                 style={{ maxWidth: 420, padding: "8px 10px" }}
@@ -548,31 +565,44 @@ export default function AdminPdfImport() {
               </select>
             </div>
 
-            <div style={{ padding: 10, borderRadius: 8, border: "1px solid #e2e8f0", background: "#fafafa" }}>
-              <div style={{ fontWeight: 700, marginBottom: 6 }}>{t.rulesSeedTitle}</div>
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#334155", lineHeight: 1.45, fontWeight: 600 }}>
+            <div
+              style={{
+                padding: 10,
+                borderRadius: 8,
+                border: "1px solid var(--panel-border, #e2e8f0)",
+                background: "var(--admin-sub-btn-bg, var(--panel-bg, #fafafa))",
+              }}
+            >
+              <div style={{ fontWeight: 700, marginBottom: 6, color: "var(--admin-table-fg, #0f172a)" }}>{t.rulesSeedTitle}</div>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--admin-table-fg, #334155)", lineHeight: 1.45, fontWeight: 600 }}>
                 {t.rulesSeedRequiredHint}
               </p>
-              <p style={{ margin: "6px 0 0", fontSize: 12, color: "#64748b", lineHeight: 1.45 }}>{t.rulesSeedFootNote}</p>
+              <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--muted, #64748b)", lineHeight: 1.45 }}>{t.rulesSeedFootNote}</p>
                   <datalist id="rules-seed-parent-suggestions">
                     {parentSuggestionCodes.map((c) => (
                       <option key={c} value={c} />
                     ))}
                   </datalist>
                   <div style={{ marginTop: 10, overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, color: "var(--admin-table-fg, #0f172a)" }}>
                       <thead>
-                        <tr style={{ textAlign: "left", color: "#475569" }}>
+                        <tr style={{ textAlign: "left", color: "var(--muted, #475569)" }}>
                           <th style={{ padding: "6px 8px 6px 0", fontWeight: 700 }}>{t.rulesSeedColCode}</th>
                           <th style={{ padding: "6px 8px", fontWeight: 700 }}>{t.rulesSeedColLabel}</th>
                           <th style={{ padding: "6px 8px", fontWeight: 700, minWidth: 140 }}>{t.rulesSeedColParent}</th>
                           <th style={{ padding: "6px 8px", fontWeight: 700, width: 108 }}>{t.rulesSeedColMinValue}</th>
+                          <th
+                            style={{ padding: "6px 8px", fontWeight: 700, width: 52, textAlign: "center" }}
+                            title={t.rulesSeedColSpecTitle}
+                          >
+                            {t.rulesSeedColSpec}
+                          </th>
                           <th style={{ padding: "6px 0 6px 8px", width: 72 }} />
                         </tr>
                       </thead>
                       <tbody>
                         {rulesSeedRows.map((row) => (
-                          <tr key={row.id} style={{ borderTop: "1px solid #e2e8f0" }}>
+                          <tr key={row.id} style={{ borderTop: "1px solid var(--panel-border, #e2e8f0)" }}>
                             <td style={{ padding: "6px 8px 6px 0", verticalAlign: "middle" }}>
                               <input
                                 className="progress-input"
@@ -622,6 +652,14 @@ export default function AdminPdfImport() {
                                 style={{ width: "100%", maxWidth: 96, fontSize: 13 }}
                               />
                             </td>
+                            <td style={{ padding: "6px 8px", verticalAlign: "middle", textAlign: "center" }}>
+                              <input
+                                type="checkbox"
+                                checked={!!row.is_specialization_root}
+                                title={t.rulesSeedColSpecTitle}
+                                onChange={(e) => updateRuleRow(row.id, { is_specialization_root: e.target.checked })}
+                              />
+                            </td>
                             <td style={{ padding: "6px 0 6px 8px", verticalAlign: "middle" }}>
                               <Button
                                 type="button"
@@ -630,8 +668,8 @@ export default function AdminPdfImport() {
                                 style={{
                                   ...seedBtnStyle,
                                   color: "#9f1239",
-                                  borderColor: "#fecaca",
-                                  background: "#fff1f2",
+                                  borderColor: "var(--panel-border, #fecaca)",
+                                  background: "rgba(244, 63, 94, 0.12)",
                                   opacity: rulesSeedRows.length <= 1 ? 0.45 : 1,
                                   cursor: rulesSeedRows.length <= 1 ? "not-allowed" : "pointer",
                                 }}
@@ -666,7 +704,7 @@ export default function AdminPdfImport() {
                       cursor: "pointer",
                       fontSize: 13,
                       marginTop: 12,
-                      color: "#64748b",
+                      color: "var(--muted, #64748b)",
                     }}
                   >
                     <input
@@ -684,7 +722,7 @@ export default function AdminPdfImport() {
                   </label>
                   {rulesSeedShowJson ? (
                     <div style={{ marginTop: 8 }}>
-                      <p style={{ margin: "0 0 6px", fontSize: 12, color: "#64748b" }}>{t.rulesSeedAdvancedHint}</p>
+                      <p style={{ margin: "0 0 6px", fontSize: 12, color: "var(--muted, #64748b)" }}>{t.rulesSeedAdvancedHint}</p>
                       <textarea
                         className="progress-input"
                         value={rulesSeedJsonDraft}
@@ -705,49 +743,58 @@ export default function AdminPdfImport() {
                   ) : null}
             </div>
 
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 14 }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                cursor: "pointer",
+                fontSize: 14,
+                color: "var(--admin-table-fg, #0f172a)",
+              }}
+            >
               <input type="checkbox" checked={createRules} onChange={(e) => setCreateRules(e.target.checked)} />
               {t.createRulesLabel}
             </label>
 
-            {importError && !importLoading ? <div style={{ color: "#b00020", fontWeight: 700 }}>{importError}</div> : null}
+            {importError && !importLoading ? (
+              <div style={{ color: "var(--req-miss-fg, #b00020)", fontWeight: 700 }}>{importError}</div>
+            ) : null}
             {importLoading ? (
-              <div style={{ color: "#0b4f85", fontWeight: 600, fontSize: 13 }}>{t.importing}</div>
+              <div style={{ color: "var(--admin-link-blue, #0b4f85)", fontWeight: 600, fontSize: 13 }}>{t.importing}</div>
             ) : null}
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <Button
+              <button
                 type="button"
                 disabled={importLoading}
                 onClick={() => runNeptunImport(true)}
                 style={{
-                  padding: "10px 14px",
-                  borderRadius: 6,
-                  border: "1px solid #94a3b8",
-                  background: "#f8fafc",
-                  fontWeight: 700,
-                  cursor: "pointer",
+                  ...pdfActionBtnBase,
+                  borderColor: "var(--admin-input-border, #94a3b8)",
+                  background: "var(--admin-btn-bg, #f8fafc)",
+                  color: "var(--admin-btn-fg, var(--admin-table-fg, #0f172a))",
+                  opacity: importLoading ? 0.65 : 1,
+                  cursor: importLoading ? "not-allowed" : "pointer",
                 }}
               >
                 {importLoading ? t.importing : t.previewBtn}
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
                 disabled={importLoading || !hasRulesSeedPayload}
                 onClick={() => createEditorPlan()}
                 style={{
-                  padding: "10px 14px",
-                  borderRadius: 6,
-                  border: "1px solid #0f766e",
-                  background: "#0f766e",
-                  color: "#fff",
-                  fontWeight: 700,
-                  cursor: importLoading || !hasRulesSeedPayload ? "not-allowed" : "pointer",
+                  ...pdfActionBtnBase,
+                  borderColor: "var(--admin-nav-active-bg, #1e6fbf)",
+                  background: "var(--admin-nav-active-bg, #1e6fbf)",
+                  color: "var(--admin-nav-active-fg, #ffffff)",
                   opacity: importLoading || !hasRulesSeedPayload ? 0.55 : 1,
+                  cursor: importLoading || !hasRulesSeedPayload ? "not-allowed" : "pointer",
                 }}
               >
                 {importLoading ? t.importing : t.saveBtn}
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -759,13 +806,14 @@ export default function AdminPdfImport() {
             {Array.isArray(importResult.warnings) && importResult.warnings.length > 0 ? (
               <div
                 style={{
-                  color: "#b45309",
+                  color: "var(--admin-yellow-row-text, #b45309)",
                   fontWeight: 600,
                   marginBottom: 10,
                   fontSize: 13,
                   padding: 8,
-                  background: "#fffbeb",
+                  background: "var(--admin-yellow-row, #fffbeb)",
                   borderRadius: 6,
+                  border: "1px solid var(--admin-toolbar-border, #fde68a)",
                 }}
               >
                 {importResult.warnings.map((w, i) => (
@@ -774,8 +822,20 @@ export default function AdminPdfImport() {
               </div>
             ) : null}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
-              <span style={{ fontWeight: 800, color: "#0b4f85" }}>{t.importResult}</span>
-              <Button type="button" onClick={() => copyImportJson()} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #cbd5e1" }} variant="ghost" size="sm">
+              <span style={{ fontWeight: 800, color: "var(--admin-link-blue, #0b4f85)" }}>{t.importResult}</span>
+              <Button
+                type="button"
+                onClick={() => copyImportJson()}
+                style={{
+                  padding: "6px 10px",
+                  borderRadius: 6,
+                  border: "1px solid var(--admin-input-border, #cbd5e1)",
+                  background: "var(--admin-input-bg, #fff)",
+                  color: "var(--admin-table-fg, #0f172a)",
+                }}
+                variant="ghost"
+                size="sm"
+              >
                 {importJsonCopied ? t.copied : t.copyJson}
               </Button>
               {importResult?.import_snapshot_id ? (
@@ -783,7 +843,13 @@ export default function AdminPdfImport() {
                   type="button"
                   onClick={() => revertLastImport()}
                   disabled={revertLoading || importLoading}
-                  style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #fecaca", background: "#fff1f2", color: "#9f1239" }}
+                  style={{
+                    padding: "6px 10px",
+                    borderRadius: 6,
+                    border: "1px solid var(--req-miss-fg, #fecaca)",
+                    background: "rgba(248, 113, 113, 0.12)",
+                    color: "var(--req-miss-fg, #9f1239)",
+                  }}
                   variant="danger"
                   size="sm"
                 >
@@ -793,13 +859,14 @@ export default function AdminPdfImport() {
             </div>
             <pre
               style={{
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
+                background: "var(--admin-sub-btn-bg, #f8fafc)",
+                border: "1px solid var(--panel-border, #e2e8f0)",
                 borderRadius: 8,
                 padding: 12,
                 overflow: "auto",
                 maxHeight: 280,
                 fontSize: 11,
+                color: "var(--admin-table-fg, #0f172a)",
               }}
             >
               {JSON.stringify(importResult, null, 2)}

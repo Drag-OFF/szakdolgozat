@@ -39,19 +39,23 @@
   color: var(--admin-table-fg);
 }
 
-/* Progress search/filter input design */
+/* Progress search/filter: csak a belső .progress-input ovális; külső „doboz” nélkül */
 .progress-input-container {
-  width: 210px;
-  height: 50px;
+  width: auto;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(to bottom, rgb(227, 213, 255), rgb(255, 231, 231));
-  border-radius: 30px;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.075);
+  justify-content: stretch;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  cursor: text;
+  box-shadow: none;
   margin-bottom: 0;
+  padding: 0;
 }
 
 .progress-input {
@@ -158,6 +162,50 @@
 
 .progress-courses-pagination-total {
   margin-left: auto;
+}
+
+/* Nincs még kurzus: üres állapot a táblázat helyén */
+.progress-empty-state {
+  margin-top: 18px;
+  padding: 28px 22px 26px;
+  text-align: center;
+  border-radius: 10px;
+  border: 1px dashed var(--admin-input-border);
+  background: var(--admin-sub-btn-bg);
+  color: var(--admin-table-fg);
+  box-sizing: border-box;
+}
+
+.progress-empty-state__icon {
+  font-size: 2.25rem;
+  line-height: 1;
+  margin: 0 0 14px 0;
+  opacity: 0.88;
+  filter: grayscale(0.15);
+}
+
+.progress-empty-state__title {
+  margin: 0 0 10px 0;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--admin-section-title-fg);
+  line-height: 1.35;
+}
+
+.progress-empty-state__hint {
+  margin: 0 auto;
+  max-width: 28rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+@media (max-width: 520px) {
+  .progress-empty-state {
+    padding: 22px 16px 20px;
+    margin-top: 14px;
+  }
 }
 
 /* oszlopok szélessége (procent alapú, finomhangolható) */
@@ -338,6 +386,12 @@
 
 .progress-toolbar-group--search {
   flex: 0 1 auto;
+  /* Csak a .progress-input-wrap ovális maradjon; ne legyen külső téglalap keret */
+  padding: 0;
+  gap: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .progress-toolbar-group--files {
@@ -411,6 +465,12 @@ html[data-theme="dark"] .progress-toolbar-group {
   background: rgba(15, 23, 42, 0.65);
   border-color: rgba(148, 163, 184, 0.2);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] .progress-toolbar-group--search {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 /* fájl feltöltő wrapper */
@@ -508,10 +568,10 @@ html[data-theme="dark"] .progress-toolbar-group {
   }
 }
 
-/* Régi „világos” kereső-doboz: sötét témában illeszkedjen */
+/* Konténer maradjon láthatatlan; a pill maga a .progress-input / wrap */
 html[data-theme="dark"] .progress-input-container {
-  background: var(--admin-input-bg);
-  border: 1px solid var(--admin-input-border);
+  background: transparent;
+  border: none;
   box-shadow: none;
 }
 

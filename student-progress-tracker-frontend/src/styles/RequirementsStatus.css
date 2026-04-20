@@ -430,6 +430,38 @@
   color: var(--req-foot-fg);
 }
 
+.req-group-totals-credit-sum {
+  margin: 12px 0 0 0;
+  padding: 10px 12px;
+  background: var(--req-summary-section-bg);
+  border: 1px solid var(--req-summary-section-border);
+  border-radius: 8px;
+  color: var(--req-summary-section-fg);
+}
+
+.req-group-totals-credit-sum-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.req-group-totals-credit-sum-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.req-group-totals-credit-sum-hint {
+  margin: 8px 0 0 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--req-foot-fg);
+}
+
 @media (max-width: 720px) {
   .req-group-totals-item {
     flex-direction: column;

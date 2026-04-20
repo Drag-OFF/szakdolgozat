@@ -9,6 +9,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from mailjet_rest import Client
 
 from app.db import models, schemas
@@ -227,7 +228,16 @@ def delete_user(user_id: int, db: Session = Depends(get_db), admin=Depends(admin
     Csak admin jogosultsággal hívható.
     """
     users_service = UsersService(db)
-    success = users_service.delete_user(user_id)
+    try:
+        success = users_service.delete_user(user_id)
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "A felhasználó nem törölhető: az adatbázis idegen kulcs miatt elutasította "
+                "(pl. chat vagy más tábla hivatkozik rá). Részletek a szerver naplóban."
+            ),
+        ) from e
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted successfully"}

@@ -194,6 +194,7 @@ def _rule_editor_data_thread(major_id: int):
                     "parent_rule_code": getattr(r, "parent_rule_code", None),
                     "min_value": int(r.min_value or 0),
                     "value_type": getattr(r, "value_type", None) or "credits",
+                    "is_specialization_root": bool(getattr(r, "is_specialization_root", False)),
                 }
                 for r in rules
             ],

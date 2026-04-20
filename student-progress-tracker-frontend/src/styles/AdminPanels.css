@@ -42,6 +42,18 @@
   min-height: 36px;
 }
 
+/* Natív select: a globális .progress-input fehér háttere felülírása; optionök a témához (Firefox; böngészőfüggő) */
+.admin-panel select.progress-input {
+  appearance: auto;
+  -webkit-appearance: menulist;
+  border-radius: 6px;
+}
+
+.admin-panel select option {
+  background: var(--admin-input-bg);
+  color: var(--admin-table-fg);
+}
+
 /* Előrehaladás / kurzuslista: ovális kereső - ne legyen belső téglalap (admin input szabály felülírása) */
 .admin-panel .progress-input-wrap .progress-input {
   border: none;
@@ -497,6 +509,67 @@ h1.admin-title {
   overflow: visible;
 }
 
+/* Új szabály + szerkesztés: ugyanaz a lap — téma szerinti háttér (ne fix #f6f9fc darkban) */
+.major-rules-form--editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: var(--admin-sub-btn-bg, var(--panel-bg));
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  color: var(--admin-table-fg);
+}
+
+.major-rules-form__fieldset {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-input-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+}
+
+.major-rules-form__fieldset-legend {
+  font-weight: 600;
+  color: var(--admin-link-blue);
+  padding: 0 6px;
+}
+
+.major-rules-form__check-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--admin-table-fg);
+}
+
+.major-rules-form__check-title {
+  font-weight: 600;
+}
+
+.major-rules-clear-hint {
+  margin-top: -4px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+html[data-theme="light"] .major-rules-clear-hint {
+  color: #9a3412;
+}
+
+html[data-theme="dark"] .major-rules-clear-hint {
+  color: #fdba74;
+}
+
+.major-rules-section-title {
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--admin-link-blue);
+}
+
 /* Dinamikus szabályok: rács, egyenlő oszlopok - ne zsugorodjon össze a 3. mező */
 .major-rules-form__grid {
   display: grid;
@@ -570,7 +643,7 @@ h1.admin-title {
 }
 .major-rules-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 820px;
 }
 .major-rules-table th,
 .major-rules-table td {
@@ -628,4 +701,92 @@ h1.admin-title {
   .users-edit-form {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- Tanterv plan editor (AdminTantervPlanEditor): táblák + sticky sáv, téma: app-theme --- */
+.admin-tanterv-plan-editor {
+  color: var(--admin-table-fg);
+}
+
+.admin-tanterv-plan-editor .admin-tpv-muted {
+  color: var(--muted);
+}
+
+.admin-tanterv-plan-editor .admin-tpv-table-wrap {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: var(--panel-bg);
+}
+
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-11 {
+  font-size: 11px;
+}
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-11 th,
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-11 td {
+  padding: 6px;
+}
+
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-12 {
+  font-size: 12px;
+}
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-12 th,
+.admin-tanterv-plan-editor .progress-table.admin-tpv-font-12 td {
+  padding: 6px;
+}
+
+.admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-rule-root > td {
+  background: var(--row-alt) !important;
+}
+
+/* Kurzus sor kiemelések: light */
+html[data-theme="light"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--new > td {
+  background: #fef9c3 !important;
+  color: #0f172a;
+}
+html[data-theme="light"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--suspicious > td {
+  background: #fff7ed !important;
+  color: #0f172a;
+}
+html[data-theme="light"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--badhours > td {
+  background: #eff6ff !important;
+  color: #0f172a;
+}
+
+/* Kurzus sor kiemelések: dark (olvasható szöveg) */
+html[data-theme="dark"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--new > td {
+  background: var(--admin-yellow-row) !important;
+  color: var(--admin-yellow-row-text);
+}
+html[data-theme="dark"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--suspicious > td {
+  background: rgba(251, 146, 60, 0.22) !important;
+  color: var(--admin-table-fg);
+}
+html[data-theme="dark"] .admin-tanterv-plan-editor .progress-table tbody tr.admin-tpv-row--badhours > td {
+  background: rgba(59, 130, 246, 0.28) !important;
+  color: var(--admin-table-fg);
+}
+
+/* „Csak fő” tábla fejléc: halvány zöld — mindkét témában */
+.admin-tanterv-plan-editor .progress-table thead.admin-tpv-thead-mint th {
+  background: rgba(16, 185, 129, 0.14);
+  color: var(--admin-thead-fg);
+}
+html[data-theme="light"] .admin-tanterv-plan-editor .progress-table thead.admin-tpv-thead-mint th {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.admin-tanterv-plan-editor .admin-tpv-sticky-bar {
+  background: var(--admin-toolbar-bg);
+  border-top: 1px solid var(--panel-border);
+  box-shadow: 0 -8px 24px var(--admin-table-shadow);
+  color: var(--admin-table-fg);
+}
+
+.admin-tanterv-plan-editor details summary.admin-tpv-details-summary {
+  color: var(--admin-table-fg);
+}
+
+.admin-tanterv-plan-editor .admin-tpv-footer-sep {
+  border-top: 1px solid var(--panel-border);
 }

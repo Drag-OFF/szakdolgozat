@@ -109,6 +109,65 @@
   background: #b71c1c;
 }
 
+/* Sötét téma – ne maradjon fehér panel / fehér szöveg a mezőkben */
+html[data-theme="dark"] .profile-panel {
+  background: var(--panel-bg);
+  color: var(--admin-table-fg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--admin-card-outer-shadow, 0 4px 20px rgba(0, 0, 0, 0.35));
+}
+
+html[data-theme="dark"] .profile-panel h2,
+html[data-theme="dark"] .profile-panel h3 {
+  color: var(--accent-dark);
+}
+
+html[data-theme="dark"] .profile-panel .info-row {
+  color: var(--admin-table-fg);
+}
+
+html[data-theme="dark"] .profile-panel .info-row b {
+  color: var(--accent-dark);
+}
+
+html[data-theme="dark"] .profile-panel input[type="text"],
+html[data-theme="dark"] .profile-panel input[type="email"],
+html[data-theme="dark"] .profile-panel input[type="password"],
+html[data-theme="dark"] .profile-panel textarea {
+  background: var(--admin-input-bg);
+  color: var(--admin-table-fg);
+  border-color: var(--admin-input-border);
+}
+
+html[data-theme="dark"] .profile-panel input::placeholder,
+html[data-theme="dark"] .profile-panel textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+html[data-theme="dark"] .profile-panel .status-ok {
+  color: #86efac;
+}
+
+html[data-theme="dark"] .profile-panel .status-err {
+  color: #fca5a5;
+}
+
+html[data-theme="dark"] .profile-delete-card {
+  background: rgba(127, 29, 29, 0.25);
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+html[data-theme="dark"] .profile-delete-warning {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.35);
+  border-color: rgba(248, 113, 113, 0.4);
+}
+
+html[data-theme="dark"] .profile-delete-check {
+  color: #fecaca;
+}
+
 /* kis képernyőn érthetően legyen */
 @media (max-width: 720px) {
   .profile-panel { padding: 12px; }

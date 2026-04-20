@@ -4,6 +4,7 @@ import useAuthFetch from "../hooks/useAuthFetch";
 import { apiUrl } from "../config";
 import { getAccessToken } from "../authStorage";
 import Button from "../components/Button";
+import "../styles/AdminPanels.css";
 
 /** JWT role kinyerése admin route védelemhez. */
 function getRoleFromToken() {
@@ -368,15 +369,15 @@ export default function AdminTantervPlanEditor() {
       return (
         <React.Fragment key={r.id || r.code}>
           <tr
+            className={level === 0 ? "admin-tpv-rule-root" : undefined}
             style={{
-              background: level === 0 ? "#f8fafc" : undefined,
               opacity: r.enabled === false ? 0.55 : 1,
             }}
           >
-            <td style={{ padding: 6, textAlign: "center", color: "#64748b", fontSize: 11 }} title="◼ mélység (Neptun)">
+            <td className="admin-tpv-muted" style={{ padding: 6, textAlign: "center", fontSize: 11 }} title="◼ mélység (Neptun)">
               {r.depth != null ? Number(r.depth) : "-"}
             </td>
-            <td style={{ padding: 6, fontSize: 11, color: "#64748b", whiteSpace: "nowrap" }} title="Szülő a Neptun szerint">
+            <td className="admin-tpv-muted" style={{ padding: 6, fontSize: 11, whiteSpace: "nowrap" }} title="Szülő a Neptun szerint">
               {r.parent_code || "-"}
             </td>
             <td style={{ padding: 6 }}>
@@ -508,18 +509,21 @@ export default function AdminTantervPlanEditor() {
   };
 
   return (
-    <div style={{ padding: 12, marginBottom: loading || !plan ? 120 : 100, maxWidth: 1250, paddingBottom: loading || !plan ? 12 : 88 }}>
+    <div
+      className="admin-panel admin-tanterv-plan-editor"
+      style={{ padding: 12, marginBottom: loading || !plan ? 120 : 100, maxWidth: 1250, paddingBottom: loading || !plan ? 12 : 88 }}
+    >
       <div style={{ marginBottom: 12 }}>
-        <Link to="/admin/pdf-import" style={{ fontWeight: 700, color: "#155a9a" }}>
+        <Link to="/admin/pdf-import" style={{ fontWeight: 700, color: "var(--admin-link-blue, #155a9a)" }}>
           ← Vissza az import oldalra
         </Link>
       </div>
       <h1 className="admin-title" style={{ marginTop: 0 }}>
         Tanterv szerkesztő (import előtt)
       </h1>
-      {error ? <div style={{ color: "#b00020", fontWeight: 700, marginBottom: 10 }}>{error}</div> : null}
+      {error ? <div style={{ color: "var(--req-miss-fg, #b00020)", fontWeight: 700, marginBottom: 10 }}>{error}</div> : null}
       {loading ? (
-        <div style={{ color: "#0b4f85", fontWeight: 700 }}>Betöltés…</div>
+        <div style={{ color: "var(--accent-dark, #0b4f85)", fontWeight: 700 }}>Betöltés…</div>
       ) : (
         <>
           <div className="admin-card" style={{ marginBottom: 12 }}>
@@ -556,9 +560,9 @@ export default function AdminTantervPlanEditor() {
                     style={{
                       padding: "8px 12px",
                       borderRadius: 6,
-                      border: "1px solid #155a9a",
-                      background: "#f0f7ff",
-                      color: "#0b4f85",
+                      border: "1px solid var(--admin-input-border)",
+                      background: "var(--admin-input-bg)",
+                      color: "var(--accent-dark)",
                       fontWeight: 700,
                       cursor: "pointer",
                       fontSize: 13,
@@ -571,10 +575,10 @@ export default function AdminTantervPlanEditor() {
                   </Button>
                 </div>
               </div>
-              <div style={{ fontSize: 13, color: "#475569" }}>
+              <div className="admin-tpv-muted" style={{ fontSize: 13 }}>
                 parsed: {plan?.parse?.parsed_count} | rule: {(plan?.rules || []).length}
                 {plan?.parse?.rules_source ? (
-                  <span style={{ color: plan.parse.rules_source === "user_seed" ? "#0f766e" : "#64748b" }}>
+                  <span style={{ color: plan.parse.rules_source === "user_seed" ? "var(--req-over-fg, #0f766e)" : "var(--muted)" }}>
                     {" "}
                     · forrás: {plan.parse.rules_source === "user_seed" ? "felhasználói lista (rules_seed)" : "Neptun auto"}
                   </span>
@@ -589,10 +593,10 @@ export default function AdminTantervPlanEditor() {
                 )}
                 tárgy sorok: {(plan?.rows || []).length}
                 {plan?.parse?.has_heti_hours_column === false ? (
-                  <span style={{ color: "#b45309" }}> · heti óra adata nem ismert (óra alapú becslés kikapcsolva)</span>
+                  <span style={{ color: "var(--req-miss-fg, #b45309)" }}> · heti óra adata nem ismert (óra alapú becslés kikapcsolva)</span>
                 ) : null}
               </div>
-              <p style={{ fontSize: 12, color: "#475569", marginTop: 8, marginBottom: 0, lineHeight: 1.4 }}>
+              <p className="admin-tpv-muted" style={{ fontSize: 12, marginTop: 8, marginBottom: 0, lineHeight: 1.4 }}>
                 ◼ = behúzás; a „szülő” mező mutatja a láncolatot. A szabályfa alapból összecsukva indul.
               </p>
             </div>
@@ -602,11 +606,11 @@ export default function AdminTantervPlanEditor() {
             <div className="admin-card-body" style={{ padding: "10px 12px" }}>
               <details>
                 <summary
+                  className="admin-tpv-details-summary"
                   style={{
                     cursor: "pointer",
                     fontWeight: 700,
                     fontSize: 15,
-                    color: "#0f172a",
                     listStyle: "none",
                   }}
                 >
@@ -614,7 +618,7 @@ export default function AdminTantervPlanEditor() {
                   {primaryRulesFlat.length} (kattints a megnyitáshoz)
                 </summary>
                 <div style={{ marginTop: 10 }}>
-              <p style={{ fontSize: 12, color: "#334155", lineHeight: 1.45, marginBottom: 10 }}>
+              <p className="admin-tpv-muted" style={{ fontSize: 12, lineHeight: 1.45, marginBottom: 10 }}>
                 A listában a fő követelményblokkok láthatók. A részletes adatok az exportban továbbra is elérhetők.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", marginBottom: 10 }}>
@@ -639,7 +643,7 @@ export default function AdminTantervPlanEditor() {
                 </label>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
-                <label style={{ fontSize: 12, color: "#475569" }}>
+                <label className="admin-tpv-muted" style={{ fontSize: 12 }}>
                   Keresés:
                   <input
                     className="progress-input"
@@ -649,43 +653,42 @@ export default function AdminTantervPlanEditor() {
                     style={{ marginLeft: 8, minWidth: 180 }}
                   />
                 </label>
-                <Button type="button" onClick={downloadPlanJson} style={{ fontSize: 12, color: "#155a9a" }} variant="ghost" size="sm">
+                <Button type="button" onClick={downloadPlanJson} style={{ fontSize: 12, color: "var(--accent-dark)" }} variant="ghost" size="sm">
                   JSON export
                 </Button>
               </div>
               {ruleSearch.trim() ? (
-                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8 }}>
+                <div className="admin-tpv-muted" style={{ fontSize: 11, marginBottom: 8 }}>
                   Szűkített lista ({filteredRulesFlat.length} találat).
                 </div>
               ) : null}
               {ruleSearch.trim() && filteredRulesFlat.length ? (
                 <div
+                  className="admin-tpv-table-wrap"
                   style={{
                     overflow: "auto",
                     maxHeight: 140,
-                    border: "1px solid #e2e8f0",
-                    borderRadius: 8,
                     marginBottom: 10,
                   }}
                 >
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                  <table className="progress-table admin-tpv-font-11">
                     <thead>
-                      <tr style={{ background: "#f1f5f9" }}>
-                        <th style={{ padding: 6 }}>◼</th>
-                        <th style={{ padding: 6 }}>szülő</th>
-                        <th style={{ padding: 6 }}>code</th>
-                        <th style={{ padding: 6 }}>label</th>
-                        <th style={{ padding: 6 }}>type</th>
+                      <tr>
+                        <th>◼</th>
+                        <th>szülő</th>
+                        <th>code</th>
+                        <th>label</th>
+                        <th>type</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredRulesFlat.map((r) => (
                         <tr key={r.code}>
-                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
-                          <td style={{ padding: 6, fontSize: 11 }}>{r.parent_code || "-"}</td>
-                          <td style={{ padding: 6, whiteSpace: "nowrap" }}>{r.code}</td>
-                          <td style={{ padding: 6 }}>{r.label_hu}</td>
-                          <td style={{ padding: 6 }}>{r.requirement_type}</td>
+                          <td style={{ textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
+                          <td style={{ fontSize: 11 }}>{r.parent_code || "-"}</td>
+                          <td style={{ whiteSpace: "nowrap" }}>{r.code}</td>
+                          <td>{r.label_hu}</td>
+                          <td>{r.requirement_type}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -696,38 +699,42 @@ export default function AdminTantervPlanEditor() {
                 + root rule
               </Button>
               {ruleViewMode === "primary_only" ? (
-                <div style={{ overflow: "auto", maxHeight: 360, border: "1px solid #e2e8f0", borderRadius: 8 }}>
-                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
-                    <thead>
-                      <tr style={{ background: "#ecfdf5" }}>
-                        <th style={{ padding: 6 }}>code</th>
-                        <th style={{ padding: 6 }}>label</th>
-                        <th style={{ padding: 6 }}>szülő</th>
-                        <th style={{ padding: 6 }}>◼</th>
-                        <th style={{ padding: 6 }}>type</th>
+                <div className="admin-tpv-table-wrap" style={{ overflow: "auto", maxHeight: 360 }}>
+                  <table className="progress-table admin-tpv-font-11">
+                    <thead className="admin-tpv-thead-mint">
+                      <tr>
+                        <th>code</th>
+                        <th>label</th>
+                        <th>szülő</th>
+                        <th>◼</th>
+                        <th>type</th>
                       </tr>
                     </thead>
                     <tbody>
                       {primaryRulesFlat.map((r) => (
                         <tr key={r.code}>
-                          <td style={{ padding: 6, fontWeight: 700, whiteSpace: "nowrap" }}>{r.code}</td>
-                          <td style={{ padding: 6 }}>{r.label_hu}</td>
-                          <td style={{ padding: 6, fontSize: 11, color: "#64748b" }}>{r.parent_code || "-"}</td>
-                          <td style={{ padding: 6, textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
-                          <td style={{ padding: 6 }}>{r.requirement_type}</td>
+                          <td style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{r.code}</td>
+                          <td>{r.label_hu}</td>
+                          <td className="admin-tpv-muted" style={{ fontSize: 11 }}>
+                            {r.parent_code || "-"}
+                          </td>
+                          <td style={{ textAlign: "center" }}>{r.depth != null ? r.depth : "-"}</td>
+                          <td>{r.requirement_type}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                   {primaryRulesFlat.length === 0 ? (
-                    <div style={{ padding: 12, color: "#64748b", fontSize: 12 }}>Egyik sor sincs „fő”-nak jelölve - pipázz a Teljes fa nézetben.</div>
+                    <div className="admin-tpv-muted" style={{ padding: 12, fontSize: 12 }}>
+                      Egyik sor sincs „fő”-nak jelölve - pipázz a Teljes fa nézetben.
+                    </div>
                   ) : null}
                 </div>
               ) : (
-              <div style={{ overflow: "auto", maxHeight: 320, border: "1px solid #e2e8f0", borderRadius: 8 }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+              <div className="admin-tpv-table-wrap" style={{ overflow: "auto", maxHeight: 320 }}>
+                <table className="progress-table admin-tpv-font-11">
                   <thead>
-                    <tr style={{ background: "#f1f5f9" }}>
+                    <tr>
                       <th style={{ padding: 4 }} title="Behúzás mélysége (◼ darab)">
                         ◼
                       </th>
@@ -759,13 +766,13 @@ export default function AdminTantervPlanEditor() {
 
           <div className="admin-card" style={{ marginBottom: 12 }}>
             <div className="admin-card-body" style={{ padding: 12 }}>
-              <h3 style={{ marginTop: 0 }}>Tárgyak (kurzus import)</h3>
-              <div style={{ fontSize: 12, color: "#475569", marginBottom: 8 }}>
+              <h3 style={{ marginTop: 0, color: "var(--admin-table-fg)" }}>Tárgyak (kurzus import)</h3>
+              <div className="admin-tpv-muted" style={{ fontSize: 12, marginBottom: 8 }}>
                 Sárga = új kurzus. Halvány narancs = szokatlan tárgykód alak. Halvány kék = heti/féléves óra 0
                 (nem ajánlott import). A csoportosító sorok nem valódi tárgykódok.
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", marginBottom: 8 }}>
-                <label style={{ fontSize: 13, color: "#475569" }}>
+                <label className="admin-tpv-muted" style={{ fontSize: 13 }}>
                   Keresés:
                   <input
                     className="progress-input"
@@ -775,7 +782,7 @@ export default function AdminTantervPlanEditor() {
                     style={{ marginLeft: 8, minWidth: 200 }}
                   />
                 </label>
-                <label style={{ fontSize: 13, color: "#475569", display: "flex", alignItems: "center", gap: 6 }}>
+                <label className="admin-tpv-muted" style={{ fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
                   <input
                     type="checkbox"
                     checked={rowSuspiciousOnly}
@@ -790,7 +797,7 @@ export default function AdminTantervPlanEditor() {
                   Látható sorok: import KI
                 </Button>
               </div>
-              <div style={{ fontSize: 12, color: "#64748b", marginBottom: 6 }}>
+              <div className="admin-tpv-muted" style={{ fontSize: 12, marginBottom: 6 }}>
                 Szűrt sorok: {filteredRows.length} / összes {(plan?.rows || []).length}
                 {filteredRows.length > rowPageSize ? (
                   <span>
@@ -822,43 +829,38 @@ export default function AdminTantervPlanEditor() {
                   >
                     Következő {rowPageSize} →
                   </Button>
-                  <span style={{ fontSize: 12, color: "#64748b" }}>
+                  <span className="admin-tpv-muted" style={{ fontSize: 12 }}>
                     sorok {rowPageSafe * rowPageSize + 1}–
                     {Math.min(filteredRows.length, (rowPageSafe + 1) * rowPageSize)}
                   </span>
                 </div>
               ) : null}
-              <div style={{ overflow: "auto", maxHeight: 420, border: "1px solid #e2e8f0", borderRadius: 8 }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+              <div className="admin-tpv-table-wrap" style={{ overflow: "auto", maxHeight: 420 }}>
+                <table className="progress-table admin-tpv-font-12">
                   <thead>
-                    <tr style={{ background: "#f1f5f9" }}>
-                      <th style={{ padding: 6 }}>import</th>
-                      <th style={{ padding: 6 }} title="Behúzás (◼)">
-                        ◼
-                      </th>
-                      <th style={{ padding: 6 }}>szülő rule</th>
-                      <th style={{ padding: 6 }}>heti</th>
-                      <th style={{ padding: 6 }}>fél.óra</th>
-                      <th style={{ padding: 6 }}>code</th>
-                      <th style={{ padding: 6 }}>name</th>
-                      <th style={{ padding: 6 }}>type</th>
-                      <th style={{ padding: 6 }}>rule</th>
+                    <tr>
+                      <th>import</th>
+                      <th title="Behúzás (◼)">◼</th>
+                      <th>szülő rule</th>
+                      <th>heti</th>
+                      <th>fél.óra</th>
+                      <th>code</th>
+                      <th>name</th>
+                      <th>type</th>
+                      <th>rule</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pagedRows.map((row, idx) => {
                       const suspicious = row.code_shape_course === false;
                       const badHours = row.heuristic_neptun_concrete_course === false;
-                      let bg;
-                      if (row.is_new_course) bg = "#fef9c3";
-                      else if (suspicious) bg = "#fff7ed";
-                      else if (badHours) bg = "#eff6ff";
+                      let rowClass = "";
+                      if (row.is_new_course) rowClass = "admin-tpv-row--new";
+                      else if (suspicious) rowClass = "admin-tpv-row--suspicious";
+                      else if (badHours) rowClass = "admin-tpv-row--badhours";
                       return (
-                        <tr
-                          key={`${row.course_code}-${rowPageSafe * rowPageSize + idx}`}
-                          style={bg ? { background: bg } : undefined}
-                        >
-                          <td style={{ padding: 6, textAlign: "center" }}>
+                        <tr key={`${row.course_code}-${rowPageSafe * rowPageSize + idx}`} className={rowClass || undefined}>
+                          <td style={{ textAlign: "center" }}>
                             <input
                               type="checkbox"
                               checked={row.import_as_course !== false}
@@ -866,11 +868,11 @@ export default function AdminTantervPlanEditor() {
                               title="Ha ki van kapcsolva, ez a sor nem kerül kurzusként az adatbázisba"
                             />
                           </td>
-                          <td style={{ padding: 6, textAlign: "center", color: "#64748b", fontSize: 11 }}>
+                          <td className="admin-tpv-muted" style={{ textAlign: "center", fontSize: 11 }}>
                             {row.block_depth != null ? row.block_depth : "-"}
                           </td>
                           <td
-                            style={{ padding: 6, fontSize: 11, color: "#334155", whiteSpace: "nowrap" }}
+                            style={{ fontSize: 11, whiteSpace: "nowrap" }}
                             title={
                               row.parent_rule_is_neptun_group
                                 ? "Csoportosító sor: nem tárgykód."
@@ -879,31 +881,33 @@ export default function AdminTantervPlanEditor() {
                           >
                             {row.parent_rule_code || "-"}
                             {row.parent_rule_is_neptun_group ? (
-                              <span style={{ color: "#64748b", fontWeight: 600, marginLeft: 4 }}>(csoport)</span>
+                              <span className="admin-tpv-muted" style={{ fontWeight: 600, marginLeft: 4 }}>
+                                (csoport)
+                              </span>
                             ) : null}
                           </td>
-                          <td style={{ padding: 6, textAlign: "right", fontSize: 11 }}>
+                          <td style={{ textAlign: "right", fontSize: 11 }}>
                             {row.weekly_hours != null ? row.weekly_hours : "-"}
                           </td>
-                          <td style={{ padding: 6, textAlign: "right", fontSize: 11 }}>
+                          <td style={{ textAlign: "right", fontSize: 11 }}>
                             {row.semester_hours != null ? row.semester_hours : "-"}
                           </td>
-                          <td style={{ padding: 6, whiteSpace: "nowrap" }}>
+                          <td style={{ whiteSpace: "nowrap" }}>
                             {row.course_code}
                             {suspicious ? (
-                              <span style={{ color: "#c2410c", fontWeight: 700, marginLeft: 6 }} title="Nem AB123XY alakú">
+                              <span style={{ color: "var(--req-miss-fg, #c2410c)", fontWeight: 700, marginLeft: 6 }} title="Nem AB123XY alakú">
                                 ?
                               </span>
                             ) : null}
                             {badHours ? (
-                              <span style={{ color: "#1d4ed8", fontWeight: 700, marginLeft: 6 }} title="0 heti/féléves óra">
+                              <span style={{ color: "var(--accent, #1d4ed8)", fontWeight: 700, marginLeft: 6 }} title="0 heti/féléves óra">
                                 ○
                               </span>
                             ) : null}
                           </td>
-                          <td style={{ padding: 6 }}>{row.name}</td>
-                          <td style={{ padding: 6, whiteSpace: "nowrap" }}>{row.type}</td>
-                          <td style={{ padding: 6 }}>
+                          <td>{row.name}</td>
+                          <td style={{ whiteSpace: "nowrap" }}>{row.type}</td>
+                          <td>
                             <select
                               className="progress-input"
                               value={row.subgroup || ""}
@@ -927,7 +931,7 @@ export default function AdminTantervPlanEditor() {
             </div>
           </div>
 
-          <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid #e2e8f0" }}>
+          <div className="admin-tpv-footer-sep" style={{ marginTop: 16, paddingTop: 12 }}>
             <Button
               type="button"
               onClick={() => applyPlan()}
@@ -942,7 +946,7 @@ export default function AdminTantervPlanEditor() {
             >
               {saving ? "Import folyamatban…" : "Import az adatbázisba (jóváhagyás)"}
             </Button>
-            <p style={{ margin: "8px 0 0", fontSize: 12, color: "#64748b" }}>
+            <p className="admin-tpv-muted" style={{ margin: "8px 0 0", fontSize: 12 }}>
               Ugyanaz a művelet, mint felül a kártyában és lent a rögzített sávban - a terv íródik az adatbázisba.
             </p>
           </div>
@@ -950,6 +954,7 @@ export default function AdminTantervPlanEditor() {
           <div
             role="region"
             aria-label="Import az adatbázisba"
+            className="admin-tpv-sticky-bar"
             style={{
               position: "fixed",
               bottom: 0,
@@ -957,9 +962,6 @@ export default function AdminTantervPlanEditor() {
               right: 0,
               zIndex: 100,
               padding: "12px 16px",
-              background: "rgba(255, 255, 255, 0.97)",
-              borderTop: "1px solid #cbd5e1",
-              boxShadow: "0 -8px 24px rgba(15, 23, 42, 0.12)",
               display: "flex",
               flexWrap: "wrap",
               gap: 12,
@@ -967,7 +969,7 @@ export default function AdminTantervPlanEditor() {
               justifyContent: "center",
             }}
           >
-            <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>
               {plan?.kod} · {(plan?.rows || []).length} tárgy sor · {(plan?.rules || []).length} rule
             </span>
             <Button

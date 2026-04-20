@@ -177,7 +177,7 @@ class Progress(Base):
     __tablename__ = "progress"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     completed_semester = Column(Integer)
     status = Column(Enum('completed', 'in_progress', 'pending'), nullable=False)

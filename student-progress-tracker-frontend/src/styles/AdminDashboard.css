@@ -59,3 +59,33 @@ html[data-theme="dark"] .admin-quick-link--blue {
 .admin-footer-spacer {
   height: 64px;
 }
+
+/* Lenyíló szekciók fejléce: egy teljes sáv, belső „pill” / keskeny ovális keret nélkül (dark + light) */
+.admin-dashboard .admin-card-body header.panel-header-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 12px 0;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: var(--admin-accordion-bg);
+  color: var(--admin-accordion-fg);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.admin-dashboard .admin-card-body header.panel-header-inline .toggle-icon {
+  color: inherit;
+  opacity: 0.88;
+  flex-shrink: 0;
+}
+
+/* Kurzusok alatti beágyazott lenyílók ugyanígy, a behúzás nem hagy „ovális” belső keretet */
+.admin-dashboard .admin-courses-nested header.panel-header-inline {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}

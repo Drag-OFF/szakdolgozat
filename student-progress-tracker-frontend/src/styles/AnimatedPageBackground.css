@@ -1,0 +1,19 @@
+/* Lassú, „lebegő” gradient – auth és hasonló teljes oldalas hátterekhez */
+
+@keyframes spt-bg-drift {
+  0% {
+    background-position: 0% 45%;
+  }
+  50% {
+    background-position: 100% 55%;
+  }
+  100% {
+    background-position: 0% 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page {
+    animation: none !important;
+  }
+}

@@ -2,20 +2,62 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <title>Verifikáció</title>
+  <title>E-mail megerősítés · ElőreHaladás</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Éles környezetben állítsd a backend origin-t (Vite .env-ből ez a fájl nem kapja meg automatikusan). -->
-  <meta name="enaplo-api-base" content="http://localhost:8000">
-  <link rel="stylesheet" href="verify.css">
+  <link rel="icon" type="image/png" href="/book.png" />
+  <!-- Ugyanaz a téma, mint a SPA (localStorage: spt-theme) -->
   <script>
+    (function () {
+      try {
+        var v = localStorage.getItem("spt-theme");
+        document.documentElement.setAttribute("data-theme", v === "light" ? "light" : "dark");
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+  <!-- Üres = automatikus. Élesben: meta vagy window.__ENAPLO_API_BASE__ -->
+  <meta name="enaplo-api-base" content="">
+  <link rel="stylesheet" href="/verify-navbar.css?v=3">
+  <link rel="stylesheet" href="/verify-footer.css?v=1">
+  <link rel="stylesheet" href="/verify.css?v=5">
+  <script>
+    /**
+     * API gyökér: ne legyen fix localhost, különben a DDNS-ről nyitott verify.html
+     * a felhasználó gépére küldi a kérést (hibás / failed to fetch).
+     */
     function enaploApiBase() {
-      if (window.__ENAPLO_API_BASE__) {
+      if (window.__ENAPLO_API_BASE__ != null && String(window.__ENAPLO_API_BASE__).trim() !== "") {
         return String(window.__ENAPLO_API_BASE__).replace(/\/+$/, "");
       }
       var m = document.querySelector('meta[name="enaplo-api-base"]');
-      if (m && m.content) return String(m.content).replace(/\/+$/, "");
-      return "http://localhost:8000";
+      if (m && m.content && String(m.content).trim() !== "") {
+        return String(m.content).trim().replace(/\/+$/, "");
+      }
+      var loc = window.location;
+      if (loc.port === "8000") {
+        return "";
+      }
+      if (loc.hostname === "localhost" || loc.hostname === "127.0.0.1") {
+        return loc.protocol + "//" + loc.hostname + ":8000";
+      }
+      if (loc.protocol === "http:" && (!loc.port || loc.port === "80")) {
+        return "http://" + loc.hostname + ":8000";
+      }
+      if (loc.protocol === "https:" && (!loc.port || loc.port === "443")) {
+        return loc.origin;
+      }
+      return loc.protocol + "//" + loc.hostname + ":8000";
     }
+    function verifyEndpointUrl(token) {
+      var base = enaploApiBase();
+      var path = "/api/users/verify?token=" + encodeURIComponent(token);
+      return base ? base + path : path;
+    }
+    var ICON_SUN =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+    var ICON_MOON =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     /**
      * Verifikációs oldal logika.
      * Ha az URL-ben van msg paraméter, azt írja ki, majd visszaszámolás után főoldalra irányít.
@@ -48,11 +90,27 @@
         return;
       }
       try {
-        const resp = await fetch(enaploApiBase() + "/api/users/verify?token=" + encodeURIComponent(token));
-        const result = await resp.json();
-        msgDiv.innerText = result.detail || "Ismeretlen hiba történt.";
-      } catch {
-        msgDiv.innerText = "Hiba történt a verifikáció során.";
+        const resp = await fetch(verifyEndpointUrl(token), { method: "GET", credentials: "omit" });
+        var text = await resp.text();
+        var result = {};
+        try {
+          result = text ? JSON.parse(text) : {};
+        } catch (parseErr) {
+          msgDiv.innerText = "A szerver nem JSON választ adott (" + resp.status + "). Ellenőrizd az API címet (enaplo-api-base).";
+          countdownDiv.innerText = "";
+          return;
+        }
+        var detail = result.detail;
+        if (detail == null && result.message) detail = result.message;
+        if (Array.isArray(detail)) {
+          msgDiv.innerText = detail.map(function (d) { return (d && d.msg) ? d.msg : JSON.stringify(d); }).join(" ");
+        } else if (typeof detail === "string") {
+          msgDiv.innerText = detail;
+        } else {
+          msgDiv.innerText = resp.ok ? "Kész." : ("A megerősítés sikertelen (HTTP " + resp.status + ").");
+        }
+      } catch (err) {
+        msgDiv.innerText = "Hálózati hiba: nem érhető el az API. Ha nem localhostról nyitod: állítsd a meta enaplo-api-base értékét a backend URL-re (pl. http://HOST:8000), vagy proxizzd az /api útvonalat.";
       }
       countdownDiv.innerText = `Visszairányítás a főoldalra: ${countdown} másodperc`;
       const interval = setInterval(() => {
@@ -66,28 +124,61 @@
         }
       }, 1000);
     }
-    window.onload = verify;
+    function setupThemeToggle() {
+      var btn = document.getElementById("themeToggle");
+      if (!btn) return;
+      function syncIcon() {
+        var isLight = document.documentElement.getAttribute("data-theme") === "light";
+        btn.innerHTML = isLight ? ICON_MOON : ICON_SUN;
+        btn.setAttribute("aria-label", isLight ? "Sötét téma" : "Világos téma");
+        btn.title = isLight ? "Sötét téma" : "Világos téma";
+      }
+      syncIcon();
+      btn.addEventListener("click", function () {
+        var next = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light";
+        try {
+          localStorage.setItem("spt-theme", next);
+        } catch (e) {}
+        document.documentElement.setAttribute("data-theme", next);
+        syncIcon();
+      });
+    }
+    window.onload = function () {
+      setupThemeToggle();
+      verify();
+    };
   </script>
 </head>
-<body>
-  <nav class="navbar">
-    <span class="navbar-logo">
-      <img src="https://u-szeged.hu/site/upload/2020/12/felveteli_weboldal_nyito_1520x864_0000s_0000_ttik2.jpg" alt="SZTE" />
-      <span>Hallgatói előrehaladás-követő</span>
-    </span>
-    <span class="navbar-links">
-      <a href="/">Főoldal</a>
-    </span>
-  </nav>
-  <div class="verify-centerbox">
-    <div class="verify-card">
-      <div class="verify-title">Felhasználó verifikáció</div>
-      <div id="msg">Ellenőrzés folyamatban...</div>
-      <div id="countdown"></div>
+<body class="verify-page">
+  <header class="app-nav" role="banner">
+    <div class="app-nav__bar">
+      <a href="/" class="app-nav__brand">
+        <span class="app-nav__title">Hallgatói előrehaladás-követő</span>
+      </a>
+
+      <nav class="app-nav__desktop" aria-label="Fő navigáció">
+        <div class="app-nav__links">
+          <a href="/" class="app-nav__link app-nav__link--cta">Főoldal</a>
+        </div>
+        <div class="app-nav__tools">
+          <button type="button" class="app-nav__theme-btn" id="themeToggle" aria-label="Téma"></button>
+        </div>
+      </nav>
     </div>
-  </div>
+  </header>
+
+  <main class="verify-main">
+    <div class="verify-centerbox">
+      <div class="verify-card">
+        <h1 class="verify-title">E-mail megerősítés</h1>
+        <p class="verify-msg" id="msg">Ellenőrzés folyamatban…</p>
+        <p class="verify-countdown" id="countdown"></p>
+      </div>
+    </div>
+  </main>
+
   <footer class="footer">
-    &copy; 2025 Hallgatói előrehaladás-követő | Készítette: <b>Harkai Dominik</b>
+    © 2026 Hallgatói előrehaladás-követő · Készítette: <b>Harkai Dominik</b>
   </footer>
 </body>
 </html>

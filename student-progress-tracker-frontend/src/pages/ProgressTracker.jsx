@@ -156,7 +156,13 @@ export default function ProgressTracker() {
             </div>
           </div>
           {filtered.length === 0 ? (
-            <div>{t.noSaved}</div>
+            <div className="progress-empty-state" role="status">
+              <div className="progress-empty-state__icon" aria-hidden="true">
+                📚
+              </div>
+              <p className="progress-empty-state__title">{t.noSaved}</p>
+              <p className="progress-empty-state__hint">{t.noSavedHint}</p>
+            </div>
           ) : (
             <>
               <div className="progress-table-wrapper">
