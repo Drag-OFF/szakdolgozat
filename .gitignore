@@ -9,3 +9,6 @@ start-dev-servers.bat
 
 # Backend futás közbeni ideiglenes állományok
 student-progress-tracker-backend/runtime/
+
+# Szakdolgozati dokumentáció és generált anyagok
+dokumentáció/

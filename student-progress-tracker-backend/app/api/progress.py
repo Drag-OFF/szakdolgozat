@@ -54,7 +54,11 @@ def _can_access_progress_for_user_id(current_user, user_id: int) -> bool:
         return False
 
 @router.post("/", response_model=schemas.Progress, dependencies=[Depends(get_current_user)])
-def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_db)):
+def create_progress(
+    progress: schemas.ProgressCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     """
     Haladás létrehozása.
 
@@ -68,6 +72,8 @@ def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_
     Raises:
         HTTPException: Ha a haladás nem hozható létre.
     """
+    if not _can_access_progress_for_user_id(current_user, int(progress.user_id)):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó progresséhez.")
     progress_service = ProgressService(db)
     try:
         return progress_service.create_progress(progress)
@@ -75,7 +81,12 @@ def create_progress(progress: schemas.ProgressCreate, db: Session = Depends(get_
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/", response_model=list[schemas.Progress], dependencies=[Depends(get_current_user)])
-def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def get_progress(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    _admin=Depends(admin_required),
+):
     """
     Haladások lekérése.
 
@@ -91,7 +102,11 @@ def get_progress(skip: int = 0, limit: int = 100, db: Session = Depends(get_db))
     return progress_service.get_progress(skip=skip, limit=limit)
 
 @router.get("/{user_id}", response_model=list[schemas.Progress])
-def get_user_progress(user_id: int, db: Session = Depends(get_db)):
+def get_user_progress(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     """
     Egy adott felhasználó haladásának lekérése.
 
@@ -105,6 +120,8 @@ def get_user_progress(user_id: int, db: Session = Depends(get_db)):
     Raises:
         HTTPException: Ha a felhasználó haladása nem található.
     """
+    if not _can_access_progress_for_user_id(current_user, user_id):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod ehhez a progress nézethez.")
     progress_service = ProgressService(db)
     user_progress = progress_service.get_user_progress(user_id)
     if user_progress is None:
@@ -112,7 +129,12 @@ def get_user_progress(user_id: int, db: Session = Depends(get_db)):
     return user_progress
 
 @router.put("/{progress_id}", response_model=schemas.Progress)
-def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Session = Depends(get_db)):
+def update_progress(
+    progress_id: int,
+    progress: schemas.ProgressUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     """
     Haladás frissítése.
 
@@ -127,6 +149,11 @@ def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Sess
     Raises:
         HTTPException: Ha a haladás nem található vagy nem frissíthető.
     """
+    existing = db.query(models.Progress).filter(models.Progress.id == progress_id).first()
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Progress not found")
+    if not _can_access_progress_for_user_id(current_user, int(existing.user_id)):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó progressének módosításához.")
     progress_service = ProgressService(db)
     updated_progress = progress_service.update_progress(progress_id, progress)
     if updated_progress is None:
@@ -134,7 +161,11 @@ def update_progress(progress_id: int, progress: schemas.ProgressUpdate, db: Sess
     return updated_progress
 
 @router.delete("/{progress_id}", response_model=dict)
-def delete_progress(progress_id: int, db: Session = Depends(get_db)):
+def delete_progress(
+    progress_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
     """
     Haladás törlése.
 
@@ -148,6 +179,11 @@ def delete_progress(progress_id: int, db: Session = Depends(get_db)):
     Raises:
         HTTPException: Ha a haladás nem található vagy nem törölhető.
     """
+    existing = db.query(models.Progress).filter(models.Progress.id == progress_id).first()
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Progress not found")
+    if not _can_access_progress_for_user_id(current_user, int(existing.user_id)):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó progressének törléséhez.")
     progress_service = ProgressService(db)
     success = progress_service.delete_progress(progress_id)
     if not success:
@@ -306,10 +342,13 @@ def export_xlsx(
 async def import_progress(
     user_id: int,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
     """
     Felhasználó előrehaladásának importálása XLSX-ből.
     """
+    if not _can_access_progress_for_user_id(current_user, user_id):
+        raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó importjához.")
     import_service = ProgressImportService(db)
     return await import_service.import_progress(user_id, file)

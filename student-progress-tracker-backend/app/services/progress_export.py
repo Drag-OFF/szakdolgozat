@@ -7,6 +7,7 @@ lapvédelem opcionális jelszóval. Exportnál a fájlnév tartalmazza a NEPTUN 
 
 import openpyxl
 import io
+from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -145,13 +146,18 @@ def export_progress_xlsx(user_id: int, lang: str, db: Session, current_user: dic
     """
     A felhasználó előrehaladásának exportja Excel (XLSX) formátumban.
     """
-    if current_user["user_id"] != user_id:
-        from fastapi import HTTPException
+    role_val = current_user.get("role") or current_user.get("roles")
+    is_admin = False
+    if isinstance(role_val, (list, tuple, set)):
+        is_admin = any("admin" in str(x).lower() for x in role_val)
+    elif role_val is not None:
+        is_admin = "admin" in str(role_val).lower()
+
+    if not is_admin and int(current_user.get("user_id", -1)) != int(user_id):
         raise HTTPException(status_code=403, detail="Nincs jogosultságod más felhasználó adatainak letöltéséhez.")
 
     user_row = db.execute(text("SELECT uid FROM users WHERE id = :uid"), {"uid": user_id}).fetchone()
     if not user_row:
-        from fastapi import HTTPException
         raise HTTPException(status_code=404, detail="Felhasználó nem található.")
     neptun = user_row.uid
 
