@@ -1,0 +1,103 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Oldal-1" id="9yKL17SbjMpQ8TrNZG5R">
+    <mxGraphModel dx="1414" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="doEwzzDTd-quxkT42v3I-1" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-3" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-2" connectable="0" parent="doEwzzDTd-quxkT42v3I-1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="API kérés" vertex="1">
+          <mxGeometry relative="1" x="0.1467" y="-1" as="geometry">
+            <mxPoint x="-6" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Frontend&lt;br&gt;(React + Vite)" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-4" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="doEwzzDTd-quxkT42v3I-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Felhasználó" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-6" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-10" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-7" connectable="0" parent="doEwzzDTd-quxkT42v3I-6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="HTTP válasz" vertex="1">
+          <mxGeometry relative="1" x="-0.0726" y="-3" as="geometry">
+            <mxPoint y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-8" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-9" connectable="0" parent="doEwzzDTd-quxkT42v3I-8" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="Validáció" vertex="1">
+          <mxGeometry relative="1" x="-0.0406" as="geometry">
+            <mxPoint x="-30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="API végpontok&lt;br&gt;(FastAPI routerek)" vertex="1">
+          <mxGeometry height="60" width="120" x="240" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-11" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="JWT ellenőrzés és&lt;br&gt;jogosultságkezelés&lt;br&gt;(API része)" vertex="1">
+          <mxGeometry height="60" width="120" x="240" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-13" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-18" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-14" connectable="0" parent="doEwzzDTd-quxkT42v3I-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="Lekérdezés / írás" vertex="1">
+          <mxGeometry relative="1" x="0.4872" y="1" as="geometry">
+            <mxPoint x="-29" y="-23" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-15" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-16" connectable="0" parent="doEwzzDTd-quxkT42v3I-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="Adat átadás" vertex="1">
+          <mxGeometry relative="1" x="0.15" as="geometry">
+            <mxPoint x="-40" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-17" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="440" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Service réteg" vertex="1">
+          <mxGeometry height="60" width="121" x="390" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-19" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-21" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="590" y="250" as="sourcePoint" />
+            <mxPoint x="470" y="355" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-20" connectable="0" parent="doEwzzDTd-quxkT42v3I-19" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="Eredmény" vertex="1">
+          <mxGeometry relative="1" x="-0.4783" y="1" as="geometry">
+            <mxPoint x="-4" y="21" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Adatbázis&lt;br&gt;(MySQL + SQLAlchemy)" vertex="1">
+          <mxGeometry height="60" width="120" x="610" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-22" edge="1" parent="1" source="doEwzzDTd-quxkT42v3I-24" style="rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;" target="doEwzzDTd-quxkT42v3I-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-23" connectable="0" parent="doEwzzDTd-quxkT42v3I-22" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;" value="Eredmény" vertex="1">
+          <mxGeometry relative="1" x="-0.1969" y="2" as="geometry">
+            <mxPoint x="32" y="13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="doEwzzDTd-quxkT42v3I-24" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Import/Export&lt;br&gt;(XLSX, PDF)" vertex="1">
+          <mxGeometry height="60" width="120" x="610" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
